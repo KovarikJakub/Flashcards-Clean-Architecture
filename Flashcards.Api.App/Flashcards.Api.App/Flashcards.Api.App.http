@@ -1,0 +1,6 @@
+@Flashcards.Api.App_HostAddress = http://localhost:5269
+
+GET {{Flashcards.Api.App_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
