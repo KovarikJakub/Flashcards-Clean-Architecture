@@ -19,7 +19,7 @@ namespace Flashcards.Api.BL.Facades
             this._repository = repository;
         }
 
-        public Guid UserCreate(UserDetailModel user)
+        public Guid Create(UserDetailModel user)
         {
             var userEntity = _mapper.ToEntity(user);
             _repository.Insert(userEntity);
@@ -29,11 +29,11 @@ namespace Flashcards.Api.BL.Facades
         public Guid CreateOrUpdate(UserDetailModel user)
         {
             return _repository.Exists(user.Id)
-                ? UserUpdate(user)!.Value                // ! -> can not be null
-                : UserCreate(user);
+                ? Update(user)!.Value                // ! -> can not be null
+                : Create(user);
         }
 
-        public void DeleteUser(UserDetailModel user)
+        public void Delete(UserDetailModel user)
         {
             _repository.Remove(user.Id);
         }
@@ -51,7 +51,7 @@ namespace Flashcards.Api.BL.Facades
             return _mapper.ToDetailModel((userEntity));
         }
 
-        public Guid? UserUpdate(UserDetailModel user)
+        public Guid? Update(UserDetailModel user)
         {
             var userEntity = _mapper.ToEntity(user);
             return _repository.Update(userEntity);
