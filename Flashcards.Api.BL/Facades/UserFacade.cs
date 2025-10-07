@@ -8,15 +8,15 @@ using Flashcards.Common.Models.User;
 namespace Flashcards.Api.BL.Facades
 {
 
-    public class UserFacade : IUserfacade
+    public class UserFacade : IUserFacade
     {
         private readonly UserMapper _mapper;
         private readonly IUserRepository _repository;
 
         public UserFacade(UserMapper mapper, IUserRepository repository)
         {
-            this._mapper = mapper;
-            this._repository = repository;
+            _mapper = mapper;
+            _repository = repository;
         }
 
         public Guid Create(UserDetailModel user)
@@ -33,9 +33,9 @@ namespace Flashcards.Api.BL.Facades
                 : Create(user);
         }
 
-        public void Delete(UserDetailModel user)
+        public void Delete(Guid id)
         {
-            _repository.Remove(user.Id);
+            _repository.Remove(id);
         }
 
         public List<UserListModel> GetAll()

@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Common.Enums;
 
@@ -7,12 +8,14 @@ namespace Flashcards.Api.DAL.Memory
     public class Storage
     {
         public IList<CardEntity> Cards { get; } = new List<CardEntity>();
+        public IList<UserEntity> Users { get; } = new List<UserEntity>();
 
         public Storage(bool createWithDummyData = true) 
         {
             if (createWithDummyData)
             {
                 SeedCards();
+                SeedUsers();
                 // TODO: Seed other entities here
             }
         }
@@ -50,6 +53,33 @@ namespace Flashcards.Api.DAL.Memory
                 AnswerContent = "William Shakespeare",
                 DateCreated = DateTime.UtcNow,
                 Description = "A literature question."
+            });
+        }
+
+        private void SeedUsers()
+        {
+            Users.Add(new UserEntity
+            {
+                Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
+                Name = "Filip", 
+                PhotographyUrl = String.Empty,
+                Role = RoleType.Administrator
+            });
+            
+            Users.Add(new UserEntity
+            {
+                Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
+                Name = "Prokop", 
+                PhotographyUrl = String.Empty,
+                Role = RoleType.User
+            });
+            
+            Users.Add(new UserEntity
+            {
+                Id = new Guid("241e43ef-e4ac-4dd6-8176-fb0ba2de4669"),
+                Name = "Petr", 
+                PhotographyUrl = String.Empty,
+                Role = RoleType.User
             });
         }
     }

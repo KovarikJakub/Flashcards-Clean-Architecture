@@ -4,6 +4,7 @@ using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Models.Card;
+using Flashcards.Common.Models.User;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,12 @@ builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<Storage>();
 builder.Services.AddTransient<ICardRepository, CardRepository>();
 builder.Services.AddScoped<ICardFacade, CardFacade>();
+
+builder.Services.AddSingleton<UserMapper>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IUserFacade, UserFacade>();
+
 
 var app = builder.Build();
 
@@ -37,6 +44,7 @@ void UseEndpoints(WebApplication app)
     var endpointsBase = app.MapGroup("api").WithOpenApi();
 
     UseCardsEndpoints(endpointsBase);
+    UseUserEndpoints(endpointsBase);
     // TODO: use other endpoints here
 }
 
@@ -55,4 +63,21 @@ void UseCardsEndpoints(RouteGroupBuilder routeGroupBuilder)
     cardEndpoints.MapPut("", (CardDetailModel card, ICardFacade cardFacade) => cardFacade.Update(card));
     cardEndpoints.MapPost("upsert", (CardDetailModel card, ICardFacade cardFacade) => cardFacade.CreateOrUpdate(card));
     cardEndpoints.MapDelete("{id:guid}", (Guid id, ICardFacade cardFacade) => cardFacade.Delete(id));
+}
+
+void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
+{
+    var userEndpoints = routeGroupBuilder.MapGroup(("user")).WithTags("user");
+
+    userEndpoints.MapGet("", (IUserFacade userFacade) => userFacade.GetAll());
+
+    userEndpoints.MapGet("{id:guid}",Results<Ok<UserDetailModel>, NotFound<string>> (Guid id, IUserFacade userFacade)
+            => userFacade.GetById(id) is { } user
+                ? TypedResults.Ok(user)
+                : TypedResults.NotFound("This user was not found!"));
+
+    userEndpoints.MapPost("", (UserDetailModel user, IUserFacade userFacade) => userFacade.Create(user));
+    userEndpoints.MapPut("", (UserDetailModel user, IUserFacade userFacade) => userFacade.Update(user));
+    userEndpoints.MapPost("upsert", (UserDetailModel user, IUserFacade userFacade) => userFacade.CreateOrUpdate(user));
+    userEndpoints.MapDelete("{id:guid}", (Guid id, IUserFacade userFacade) => userFacade.Delete(id));
 }
