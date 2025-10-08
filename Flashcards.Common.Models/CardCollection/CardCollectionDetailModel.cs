@@ -1,6 +1,7 @@
 ﻿using Flashcards.Common.Enums;
+using Flashcards.Common.Models.Card;
 
-namespace Flashcards.Common.Models.Card
+namespace Flashcards.Common.Models.CardCollection
 {
     public class CardCollectionDetailModel : IWithGuid
     {
@@ -9,6 +10,6 @@ namespace Flashcards.Common.Models.Card
         public required DateTime AnswerStart { get; set; }
         public required DateTime AnswerEnd { get; set; }
 
-        public IList<CardListModel> Cards { get; set; } = new List<CardListModel>();
+        public IList<CardDetailModel> Cards { get; set; } = new List<CardDetailModel>();
     }
 }
