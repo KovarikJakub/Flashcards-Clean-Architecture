@@ -5,6 +5,7 @@ using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Models.Card;
 using Flashcards.Common.Models.User;
+using Flashcards.Common.Models.CardCollection;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,11 @@ builder.Services.AddSingleton<UserMapper>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IUserFacade, UserFacade>();
+
+builder.Services.AddSingleton<CardCollectionMapper>();
+builder.Services.AddTransient<ICardCollectionRepository, CardCollectionRepository>();
+
+builder.Services.AddScoped<ICardCollectionFacade, CardCollectionFacade>();
 
 
 var app = builder.Build();
@@ -45,6 +51,7 @@ void UseEndpoints(WebApplication app)
 
     UseCardsEndpoints(endpointsBase);
     UseUserEndpoints(endpointsBase);
+    UseCardCollectionEndpoints(endpointsBase);
     // TODO: use other endpoints here
 }
 
@@ -80,4 +87,21 @@ void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
     userEndpoints.MapPut("", (UserDetailModel user, IUserFacade userFacade) => userFacade.Update(user));
     userEndpoints.MapPost("upsert", (UserDetailModel user, IUserFacade userFacade) => userFacade.CreateOrUpdate(user));
     userEndpoints.MapDelete("{id:guid}", (Guid id, IUserFacade userFacade) => userFacade.Delete(id));
+}
+
+void UseCardCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
+{
+    var cardCollectionEndpoints = routeGroupBuilder.MapGroup("cardCollection").WithTags("cardCollection");
+
+    cardCollectionEndpoints.MapGet("", (ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.GetAll());
+
+    cardCollectionEndpoints.MapGet("{id:guid}", Results<Ok<CardCollectionDetailModel>, NotFound<string>> (Guid id, ICardCollectionFacade cardCollectionFacade)
+        => cardCollectionFacade.GetById(id) is { } cardCollection
+            ? TypedResults.Ok(cardCollection)
+            : TypedResults.NotFound("This card collection was not found!"));
+
+    cardCollectionEndpoints.MapPost("", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.Create(cardCollection));
+    cardCollectionEndpoints.MapPut("", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.Update(cardCollection));
+    cardCollectionEndpoints.MapPost("upsert", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.CreateOrUpdate(cardCollection));
+    cardCollectionEndpoints.MapDelete("{id:guid}", (Guid id, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.Delete(id));
 }
