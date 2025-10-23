@@ -6,7 +6,9 @@ using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Models.Card;
 using Flashcards.Common.Models.User;
 using Flashcards.Common.Models.CardCollection;
+using Flashcards.Common.Models.Lesson;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,10 @@ builder.Services.AddSingleton<CardCollectionMapper>();
 builder.Services.AddTransient<ICardCollectionRepository, CardCollectionRepository>();
 
 builder.Services.AddScoped<ICardCollectionFacade, CardCollectionFacade>();
+
+builder.Services.AddSingleton<LessonMapper>();
+builder.Services.AddScoped<ILessonFacade, LessonFacade>();
+builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 
 
 var app = builder.Build();
@@ -52,7 +58,7 @@ void UseEndpoints(WebApplication app)
     UseCardsEndpoints(endpointsBase);
     UseUserEndpoints(endpointsBase);
     UseCardCollectionEndpoints(endpointsBase);
-    // TODO: use other endpoints here
+    UseLessonEndpoints(endpointsBase);
 }
 
 void UseCardsEndpoints(RouteGroupBuilder routeGroupBuilder)
@@ -104,4 +110,27 @@ void UseCardCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
     cardCollectionEndpoints.MapPut("", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.Update(cardCollection));
     cardCollectionEndpoints.MapPost("upsert", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.CreateOrUpdate(cardCollection));
     cardCollectionEndpoints.MapDelete("{id:guid}", (Guid id, ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.Delete(id));
+}
+
+void UseLessonEndpoints(RouteGroupBuilder routeGroupBuilder)
+{
+    var lessonEndpoints = routeGroupBuilder.MapGroup("lesson").WithTags("lesson");
+
+    lessonEndpoints.MapGet("all", (ILessonFacade lessonFacade) => lessonFacade.GetAll());
+    
+    lessonEndpoints.MapGet("", (
+        ILessonFacade lessonFacade,
+        [AsParameters] LessonQueryModel query) =>
+    {
+        var result = lessonFacade.GetByQuery(query);
+        return TypedResults.Ok(result);
+    });
+
+    lessonEndpoints.MapGet("{id:guid}", Results<Ok<LessonDetailModel>, NotFound<string>> (Guid id, ILessonFacade lessonFacade)
+        => lessonFacade.GetById(id) is { } lesson
+            ? TypedResults.Ok(lesson)
+            : TypedResults.NotFound("This lesson was not found!"));
+
+    lessonEndpoints.MapPost("", (LessonDetailModel lesson, ILessonFacade lessonFacade) => lessonFacade.Create(lesson));
+    lessonEndpoints.MapDelete("{id:guid}", (Guid id, ILessonFacade lessonFacade) => lessonFacade.Delete(id));
 }

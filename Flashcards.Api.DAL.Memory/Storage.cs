@@ -11,6 +11,8 @@ namespace Flashcards.Api.DAL.Memory
         public IList<UserEntity> Users { get; } = new List<UserEntity>();
         public IList<CardCollectionEntity> Collections { get; } = new List<CardCollectionEntity>();
 
+        public IList<LessonEntity> Lessons { get; } = new List<LessonEntity>();
+
         public Storage(bool createWithDummyData = true) 
         {
             if (createWithDummyData)
@@ -18,7 +20,7 @@ namespace Flashcards.Api.DAL.Memory
                 SeedCards();
                 SeedUsers();
                 SeedCollections();
-                
+                SeedLessons();
             }
         }
 
@@ -96,6 +98,20 @@ namespace Flashcards.Api.DAL.Memory
             });
 
            
+        }
+
+        private void SeedLessons()
+        {
+            Lessons.Add(new LessonEntity
+            {
+                User = Users[0],
+                CardCollection = Collections[0],
+                Id = new ("536adfc4-8284-404d-a00e-b4a007413a44"),
+                Start = DateTime.UtcNow,
+                Seen = 1,
+                Correct = 1,
+                Wrong = 0
+            });
         }
     }
 }
