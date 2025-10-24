@@ -21,17 +21,40 @@ namespace Flashcards.Api.DAL.IntegrationTests
         {
             return new CardRepository(inMemoryStorage);
         }
-
+        
         public CardEntity GetCardById(Guid id)
         {
             return inMemoryStorage.Cards.Single(card => card.Id == id);
         }
-
+        
         public IList<Guid> CardGuids { get; } = new List<Guid>
         {
             new("3b07c916-a86e-4992-a58b-0158d3232335"),
             new("3807e412-bf2b-4825-b361-039215cb4eaa"),
             new("803a24c3-2c93-4fc8-b96d-4c8f5ee63ecf")
+        };
+        
+        public IUserRepository GetUserRepository()
+        {
+            return new UserRepository(inMemoryStorage);
+        }
+
+        public UserEntity? GetUserById(Guid id)
+        {
+            return inMemoryStorage.Users.SingleOrDefault(user => user.Id == id);
+        }
+
+        public IList<UserEntity> GetAll()
+        {
+            return inMemoryStorage.Users.ToList();
+        }
+        
+        public IList<Guid> UserGuids { get; } = new List<Guid>
+        {
+            new("f98b43b3-2c65-4e84-9538-094e7dd08a3d"),
+            new("6a2cabfb-b818-4fac-a6b3-1b865536d8a6"),
+            new("bd4422e9-f4b3-43d7-a8ce-165aa8a021ff"),
+            new("5b6574e9-037b-422e-8c5c-f421e4f2c82b")
         };
 
         private void SeedStorage()
@@ -67,6 +90,38 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 AnswerContent = "Rust",
                 DateCreated = new DateTime(2025, 2, 3, 9, 0, 0, 0),
                 Description = "A programming question"
+            });
+            
+            inMemoryStorage.Users.Add(new UserEntity
+            {
+                Id = UserGuids[0],
+                Name = "Pavel",
+                PhotographyUrl = null,
+                Role = RoleType.User
+            });
+            
+            inMemoryStorage.Users.Add(new UserEntity
+            {
+                Id = UserGuids[1],
+                Name = "Oliver",
+                PhotographyUrl = null,
+                Role = RoleType.User
+            });
+            
+            inMemoryStorage.Users.Add(new UserEntity
+            {
+                Id = UserGuids[2],
+                Name = "Vit",
+                PhotographyUrl = null,
+                Role = RoleType.User
+            });
+            
+            inMemoryStorage.Users.Add(new UserEntity
+            {
+                Id = UserGuids[3],
+                Name = "Adam",
+                PhotographyUrl = null,
+                Role = RoleType.Administrator
             });
         }
     }
