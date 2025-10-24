@@ -2,13 +2,14 @@
 using Flashcards.Api.DAL.Common.Repositories;
 using System.Linq;
 using System.Linq.Expressions;
+using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
     public class LessonRepository : ILessonRepository
     {
-        private readonly Storage storage;
-        public LessonRepository(Storage storage)
+        private readonly IStorage storage;
+        public LessonRepository(IStorage storage)
         {
             this.storage = storage;
         }

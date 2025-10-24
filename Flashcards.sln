@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Api.DAL.Integrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Api.BL.UnitTests", "Flashcards.Api.BL.UnitTests\Flashcards.Api.BL.UnitTests.csproj", "{EA698103-100B-466C-8EAA-13FA5423E83D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Api.App.EndpointTests", "Flashcards.Api.App.EndpointTests\Flashcards.Api.App.EndpointTests.csproj", "{7295C9A7-0606-473E-99EB-D102FAC1CB5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{EA698103-100B-466C-8EAA-13FA5423E83D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA698103-100B-466C-8EAA-13FA5423E83D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA698103-100B-466C-8EAA-13FA5423E83D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7295C9A7-0606-473E-99EB-D102FAC1CB5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7295C9A7-0606-473E-99EB-D102FAC1CB5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7295C9A7-0606-473E-99EB-D102FAC1CB5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7295C9A7-0606-473E-99EB-D102FAC1CB5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{1F22A31F-6EC2-4C6B-B9F4-7B6B7EA7C8BC} = {A37D03AA-FB77-48FC-B6CD-B15B5AB3BF55}
 		{305C8830-6F99-4E8E-A9A4-E52E3A825092} = {A37D03AA-FB77-48FC-B6CD-B15B5AB3BF55}
 		{EA698103-100B-466C-8EAA-13FA5423E83D} = {53A79AAE-0BB7-4BAD-BE7D-6B838D50B55B}
+		{7295C9A7-0606-473E-99EB-D102FAC1CB5F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D57E7CE4-B6BD-4357-A3B1-D035A7AFBE98}

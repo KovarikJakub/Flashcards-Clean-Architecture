@@ -1,27 +1,39 @@
-﻿
-using System.ComponentModel;
-using Flashcards.Api.DAL.Common.Entities;
+﻿using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Common.Enums;
 
 namespace Flashcards.Api.DAL.Memory
 {
-    public class Storage
+    public class Storage : IStorage
     {
         public IList<CardEntity> Cards { get; } = new List<CardEntity>();
         public IList<UserEntity> Users { get; } = new List<UserEntity>();
         public IList<CardCollectionEntity> Collections { get; } = new List<CardCollectionEntity>();
-
         public IList<LessonEntity> Lessons { get; } = new List<LessonEntity>();
 
         public Storage(bool createWithDummyData = true) 
         {
             if (createWithDummyData)
             {
-                SeedCards();
-                SeedUsers();
-                SeedCollections();
-                SeedLessons();
+                Seed();
             }
+        }
+
+        public void Seed()
+        {
+            Clear();
+            SeedCards();
+            SeedUsers();
+            SeedCollections();
+            SeedLessons();
+        }
+
+        public void Clear()
+        {
+            Cards.Clear();
+            Users.Clear();
+            Collections.Clear();
+            Lessons.Clear();
         }
 
         private void SeedCards()

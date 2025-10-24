@@ -1,13 +1,14 @@
 ﻿using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using System.Linq.Expressions;
+using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
     public class CardCollectionRepository : ICardCollectionRepository
     {
-        private readonly Storage storage;
-        public CardCollectionRepository(Storage storage)
+        private readonly IStorage storage;
+        public CardCollectionRepository(IStorage storage)
         {
             this.storage = storage;
         }

@@ -1,14 +1,13 @@
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
-using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Models.Card;
 using Flashcards.Common.Models.User;
 using Flashcards.Common.Models.CardCollection;
 using Flashcards.Common.Models.Lesson;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +16,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
 
 builder.Services.AddSingleton<CardMapper>();
-builder.Services.AddSingleton<Storage>();
+builder.Services.AddSingleton<IStorage>();
 builder.Services.AddTransient<ICardRepository, CardRepository>();
 builder.Services.AddScoped<ICardFacade, CardFacade>();
 
@@ -134,3 +133,5 @@ void UseLessonEndpoints(RouteGroupBuilder routeGroupBuilder)
     lessonEndpoints.MapPost("", (LessonDetailModel lesson, ILessonFacade lessonFacade) => lessonFacade.Create(lesson));
     lessonEndpoints.MapDelete("{id:guid}", (Guid id, ILessonFacade lessonFacade) => lessonFacade.Delete(id));
 }
+
+public partial class Program { }

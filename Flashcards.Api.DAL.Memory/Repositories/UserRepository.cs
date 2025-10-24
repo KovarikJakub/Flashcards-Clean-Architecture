@@ -1,14 +1,15 @@
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using System.Linq.Expressions;
+using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly Storage _storage;
+        private readonly IStorage _storage;
 
-        public UserRepository(Storage storage)
+        public UserRepository(IStorage storage)
         {
             _storage = storage;
         }
