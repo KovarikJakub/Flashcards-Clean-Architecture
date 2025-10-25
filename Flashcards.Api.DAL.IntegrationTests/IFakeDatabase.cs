@@ -19,5 +19,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
         CardCollectionEntity? GetCardCollectionById(Guid id);
 
         IList<Guid> CardCollectionGuids { get; }
+
+        ILessonRepository GetLessonRepository();
+
+        LessonEntity GetLessonById(Guid id);
+        IList<Guid> LessonGuids { get; }
     }
 }

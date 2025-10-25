@@ -24,7 +24,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
         
         public CardEntity GetCardById(Guid id)
         {
-            return inMemoryStorage.Cards.Single(card => card.Id == id);
+            return inMemoryStorage.Cards.SingleOrDefault(card => card.Id == id);
         }
         
         public IList<Guid> CardGuids { get; } = new List<Guid>
@@ -72,6 +72,24 @@ namespace Flashcards.Api.DAL.IntegrationTests
             new("a6b56d25-89e0-41f5-b785-5c1a44a5c54d"),
             new("e1f4b0f7-9db1-4877-812f-1cc1e4fbc7d8"),
             new("c74d2e0c-5989-4f6b-a83c-fb0a3c514f6d")
+
+        };
+
+        public ILessonRepository GetLessonRepository()
+        {
+            return new LessonRepository(inMemoryStorage);
+        }
+
+        public LessonEntity GetLessonById(Guid id)
+        {
+            return inMemoryStorage.Lessons.SingleOrDefault(lesson => lesson.Id == id);
+        }
+
+        public IList<Guid> LessonGuids { get; } = new List<Guid>
+        {
+            new("a1f3c9d2-4b7e-4e9a-8c5f-2d1b6a9f8e11"),
+            new("b2d4e1f3-7c8a-45b2-9f6d-3c2a7e0b9d22"),
+            new("c3e5f2a4-1d9b-46c3-8a7e-4d3b8f1c0e33")
 
         };
 
@@ -167,6 +185,39 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 AnswerStart = new DateTime(2025, 2, 12, 8, 30, 0, 0),
                 AnswerEnd = new DateTime(2025, 2, 12, 9, 30, 0, 0),
                 Cards = new List<CardEntity> { inMemoryStorage.Cards[1] }
+            });
+
+            inMemoryStorage.Lessons.Add(new LessonEntity
+            {
+                Id = LessonGuids[0],
+                User = inMemoryStorage.Users[0],
+                CardCollection = inMemoryStorage.Collections[0],
+                Start = new DateTime(2025, 2, 15, 10, 0, 0),
+                Seen = 3,
+                Correct = 2,
+                Wrong = 1
+            });
+
+            inMemoryStorage.Lessons.Add(new LessonEntity
+            {
+                Id = LessonGuids[1],
+                User = inMemoryStorage.Users[1],
+                CardCollection = inMemoryStorage.Collections[1],
+                Start = new DateTime(2025, 2, 16, 11, 0, 0),
+                Seen = 5,
+                Correct = 4,
+                Wrong = 1
+            });
+
+            inMemoryStorage.Lessons.Add(new LessonEntity
+            {
+                Id = LessonGuids[2],
+                User = inMemoryStorage.Users[2],
+                CardCollection = inMemoryStorage.Collections[2],
+                Start = new DateTime(2025, 2, 17, 9, 30, 0),
+                Seen = 2,
+                Correct = 2,
+                Wrong = 0
             });
         }
     }
