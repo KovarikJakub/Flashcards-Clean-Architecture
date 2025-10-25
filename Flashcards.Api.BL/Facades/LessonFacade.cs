@@ -22,7 +22,9 @@ namespace Flashcards.Api.BL.Facades
 
         public LessonDetailModel? GetById(Guid id)
         {
-            return _mapper.ToDetailModel(_repository.GetById(id));
+            var result = _repository.GetById(id);
+            if (result == null) return null;
+            return _mapper.ToDetailModel(result);
         }
 
         public List<LessonListModel> GetAll()
