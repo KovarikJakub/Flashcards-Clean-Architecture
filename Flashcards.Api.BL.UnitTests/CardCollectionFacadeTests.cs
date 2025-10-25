@@ -154,8 +154,8 @@ namespace Flashcards.Api.BL.UnitTests
             // Assert
             _fakeRepo.Received(1).GetAll();
             Assert.Equal(2, result.Count());
-            Assert.Contains(result, c => c.Id == col1.Id && c.Title == "History Deck");
-            Assert.Contains(result, c => c.Id == col2.Id && c.Title == "Geography Deck");
+            Assert.Contains(result, c => c.Id == col1.Id && c.Title == col1.Title);
+            Assert.Contains(result, c => c.Id == col2.Id && c.Title == col2.Title);
         }
 
         [Fact]
