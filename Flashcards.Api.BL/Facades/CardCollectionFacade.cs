@@ -43,7 +43,8 @@ namespace Flashcards.Api.BL.Facades
         {
            
             var CardCollectionEntity = mapper.ToEntity(CardCollectionModel);
-            return cardCollectionRepository.Insert(CardCollectionEntity);
+            cardCollectionRepository.Insert(CardCollectionEntity);
+            return CardCollectionEntity.Id;
         }
 
         public Guid? Update(CardCollectionDetailModel cardCollectionModel)

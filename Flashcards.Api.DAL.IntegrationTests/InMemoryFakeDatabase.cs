@@ -57,6 +57,24 @@ namespace Flashcards.Api.DAL.IntegrationTests
             new("5b6574e9-037b-422e-8c5c-f421e4f2c82b")
         };
 
+        public ICardCollectionRepository GetCardCollectionRepository()
+        {
+            return new CardCollectionRepository(inMemoryStorage);
+        }
+
+        public CardCollectionEntity GetCardCollectionById(Guid id)
+        {
+            return inMemoryStorage.Collections.SingleOrDefault(collection => collection.Id == id);
+        }
+
+        public IList<Guid> CardCollectionGuids { get; } = new List<Guid>
+        {
+            new("a6b56d25-89e0-41f5-b785-5c1a44a5c54d"),
+            new("e1f4b0f7-9db1-4877-812f-1cc1e4fbc7d8"),
+            new("c74d2e0c-5989-4f6b-a83c-fb0a3c514f6d")
+
+        };
+
         private void SeedStorage()
         {
             inMemoryStorage.Cards.Add(new CardEntity
@@ -122,6 +140,33 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Name = "Adam",
                 PhotographyUrl = null,
                 Role = RoleType.Administrator
+            });
+
+            inMemoryStorage.Collections.Add(new CardCollectionEntity
+            {
+                Id = CardCollectionGuids[0],
+                Title = "General Knowledge",
+                AnswerStart = new DateTime(2025, 2, 10, 8, 0, 0, 0),
+                AnswerEnd = new DateTime(2025, 2, 10, 10, 0, 0, 0),
+                Cards = new List<CardEntity> { inMemoryStorage.Cards[0], inMemoryStorage.Cards[1] }
+            });
+
+            inMemoryStorage.Collections.Add(new CardCollectionEntity
+            {
+                Id = CardCollectionGuids[1],
+                Title = "Programming Trivia",
+                AnswerStart = new DateTime(2025, 2, 11, 9, 0, 0, 0),
+                AnswerEnd = new DateTime(2025, 2, 11, 11, 0, 0, 0),
+                Cards = new List<CardEntity> { inMemoryStorage.Cards[2] }
+            });
+
+            inMemoryStorage.Collections.Add(new CardCollectionEntity
+            {
+                Id = CardCollectionGuids[2],
+                Title = "Random Fun Facts",
+                AnswerStart = new DateTime(2025, 2, 12, 8, 30, 0, 0),
+                AnswerEnd = new DateTime(2025, 2, 12, 9, 30, 0, 0),
+                Cards = new List<CardEntity> { inMemoryStorage.Cards[1] }
             });
         }
     }
