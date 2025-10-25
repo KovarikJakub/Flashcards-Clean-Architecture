@@ -1,18 +1,21 @@
 using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
 
 namespace Flashcards.Api.DAL.IntegrationTests
 {
     public class UserRepositoryTests
     {
-        private readonly IFakeDatabase fakeDb;
-
+        private readonly IFakeDatabase _fakeDb;
+        private readonly IUserRepository _repo;
+        
         public  UserRepositoryTests()
         {
-            fakeDb = new InMemoryFakeDatabase();
+            _fakeDb = new InMemoryFakeDatabase();
+            _repo = _fakeDb.GetUserRepository();
         }
 
-        public bool AreUserEqual(UserEntity user1, UserEntity user2)
+        private bool AreUserEqual(UserEntity user1, UserEntity user2)
         {
             return user1.Id == user2.Id &&
                    user1.Name == user2.Name &&
@@ -23,18 +26,16 @@ namespace Flashcards.Api.DAL.IntegrationTests
         [Fact]
         public void GetById_Existing_User()
         {
-            // Arrange
-            var repo = fakeDb.GetUserRepository();
-            
             // Act
-            var requestedId = fakeDb.UserGuids[0];
-            var user = repo.GetById(requestedId);
+            var requestedId = _fakeDb.UserGuids[0];
+            var user = _repo.GetById(requestedId);
 
             // Assert
             Assert.NotNull(user);
             Assert.Equal(user.Id, requestedId);
             
-            var expectedUser = fakeDb.GetUserById(requestedId);
+            var expectedUser = _fakeDb.GetUserById(requestedId);
+            Assert.NotNull(expectedUser);
             Assert.True(AreUserEqual(user, expectedUser));
         }
 
@@ -42,11 +43,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void GetById_Non_Existing_User()
         {
             // Arrange
-            var repo = fakeDb.GetUserRepository();
             var nonExistingId = Guid.NewGuid();
             
             // Act
-            var user = repo.GetById(nonExistingId);
+            var user = _repo.GetById(nonExistingId);
             
             // Assert
             Assert.Null(user);
@@ -56,22 +56,20 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Delete_Existing_User()
         {
             // Arrange
-            var repo = fakeDb.GetUserRepository();
-            var idToRemove = fakeDb.UserGuids[0];
+            var idToRemove = _fakeDb.UserGuids[0];
             
             // Act
-            repo.Remove(idToRemove);
+            _repo.Remove(idToRemove);
             
             // Assert
-            Assert.Null(fakeDb.GetUserById(idToRemove));
+            Assert.Null(_fakeDb.GetUserById(idToRemove));
         }
 
         [Fact]
         public void Insert_New_User()
         {
             // Arrange
-            var repo = fakeDb.GetUserRepository();
-            var new_user = new UserEntity
+            var newUser = new UserEntity
             {
                 Id = Guid.NewGuid(),
                 Name = "Kuba",
@@ -81,27 +79,27 @@ namespace Flashcards.Api.DAL.IntegrationTests
             };
 
             // Act
-            var new_id = repo.Insert(new_user);
+            var newId = _repo.Insert(newUser);
 
             // Assert
-            Assert.NotNull(fakeDb.GetUserById(new_id));
+            Assert.NotNull(_fakeDb.GetUserById(newId));
         }
 
         [Fact]
         public void Update_Existing_User()
         {
             // Arrange
-            var repo = fakeDb.GetUserRepository();
-
-            var userId = fakeDb.UserGuids[0];
-            var user = repo.GetById(userId);
-            user.Name = "Ondra";
+            var userId = _fakeDb.UserGuids[0];
+            var user = _repo.GetById(userId);
+            user!.Name = "Ondra";
             
             // Act
-            repo.Update(user);
+            var result = _repo.Update(user);
             
             // Assert
-            var expectedUser = fakeDb.GetUserById(userId);
+            var expectedUser = _fakeDb.GetUserById(userId);
+            Assert.NotNull(result);
+            Assert.NotNull(expectedUser);
             Assert.Equal(user.Name, expectedUser.Name);
         }
     }

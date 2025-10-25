@@ -15,6 +15,17 @@ namespace Flashcards.Api.BL.UnitTests
 {
     public class LessonFacadeTests
     {
+        private readonly ILessonRepository _fakeRepo;
+        private readonly LessonMapper _mapper;
+        private readonly LessonFacade _facade;
+
+        public LessonFacadeTests()
+        {
+            _fakeRepo = Substitute.For<ILessonRepository>();
+            _mapper = new LessonMapper(new UserMapper(), new CardCollectionMapper());
+            _facade = new LessonFacade(_mapper, _fakeRepo);
+        }
+        
         private LessonDetailModel CreateNewLessonDetailModel()
         {
             var newUser = new UserDetailModel
@@ -72,50 +83,33 @@ namespace Flashcards.Api.BL.UnitTests
 
             return newLesson;
         }
-
-        private LessonFacade CreateLessonFacade(ILessonRepository repository)
-        {
-            var userMapper = new UserMapper();
-            var cardCollectionMapper = new CardCollectionMapper();
-            var lessonMapper = new LessonMapper(userMapper, cardCollectionMapper);
-            var facade = new LessonFacade(lessonMapper, repository);
-            return facade;
-        }
-        
         
         [Fact]
         public void Create_New_Lesson()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
             
             // Act
-            facade.Create(newLesson);
+            _facade.Create(newLesson);
             
             // Assert
-            fakeRepo.Received(1).Insert(Arg.Is<LessonEntity>(lesson => lesson.Id == newLesson.Id));
+            _fakeRepo.Received(1).Insert(Arg.Is<LessonEntity>(lesson => lesson.Id == newLesson.Id));
         }
 
         [Fact]
         public void GetById_Existing_Lesson()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
-
-            var mapper = new LessonMapper(new UserMapper(), new CardCollectionMapper());
-            var lessonEntity = mapper.ToEntity(newLesson);
-            
-            fakeRepo.GetById(Arg.Any<Guid>()).Returns(lessonEntity);
+            var lessonEntity = _mapper.ToEntity(newLesson);
+            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(lessonEntity);
             
             // Act
-            var result = facade.GetById(newLesson.Id);
+            var result = _facade.GetById(newLesson.Id);
 
             // Assert
-            fakeRepo.Received(1).GetById(lessonEntity.Id);
+            _fakeRepo.Received(1).GetById(lessonEntity.Id);
             Assert.NotNull(result);
             Assert.Equal(result.Id, lessonEntity.Id);
         }
@@ -124,16 +118,14 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetById_Non_Existing_Lesson()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var nonExistingId = Guid.NewGuid();
-            fakeRepo.GetById(Arg.Any<Guid>()).Returns((LessonEntity?)null);
+            _fakeRepo.GetById(Arg.Any<Guid>()).Returns((LessonEntity?)null);
 
             // Act
-            var result = facade.GetById(nonExistingId);
+            var result = _facade.GetById(nonExistingId);
 
             // Assert
-            fakeRepo.Received(1).GetById(nonExistingId); 
+            _fakeRepo.Received(1).GetById(nonExistingId); 
             Assert.Null(result);
         }
 
@@ -141,51 +133,41 @@ namespace Flashcards.Api.BL.UnitTests
         public void Remove_Existing_Lesson()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
             
             // Act
-            facade.Delete(newLesson.Id);
+            _facade.Delete(newLesson.Id);
             
             // Assert
-            fakeRepo.Received(1).Remove(newLesson.Id);
+            _fakeRepo.Received(1).Remove(newLesson.Id);
         }
         
         [Fact]
         public void Try_To_Remove_Non_Existing_Lesson_And_Dont_Crash()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var nonExistingId = Guid.NewGuid();
             
             // Act
-            facade.Delete(nonExistingId);
+            _facade.Delete(nonExistingId);
             
             // Assert
-            fakeRepo.Received(1).Remove(nonExistingId);
+            _fakeRepo.Received(1).Remove(nonExistingId);
         }
 
         [Fact]
         public void GetAll_On_Existing_List()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
-
-            var mapper = new LessonMapper(new UserMapper(), new CardCollectionMapper());
-            var entity = mapper.ToEntity(newLesson);
-            var entities = new List<LessonEntity> { entity };
-
-            fakeRepo.GetAll().Returns(entities);
+            var entities = new List<LessonEntity> { _mapper.ToEntity(newLesson) };
+            _fakeRepo.GetAll().Returns(entities);
             
             // Act
-            var list  = facade.GetAll();
+            var list  = _facade.GetAll();
             
             // Assert
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
             Assert.NotEmpty(list);
             Assert.NotNull(list);
         }
@@ -194,16 +176,13 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetAll_On_Non_Existing_List()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
-            
-            fakeRepo.GetAll().Returns(new List<LessonEntity>());
+            _fakeRepo.GetAll().Returns(new List<LessonEntity>());
             
             // Act
-            var list  = facade.GetAll();
+            var list  = _facade.GetAll();
             
             // Assert
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
             Assert.Empty(list);
             Assert.NotNull(list);
         }
@@ -212,23 +191,16 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetByQuery_By_User()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
-
-            var mapper = new LessonMapper(new UserMapper(), new CardCollectionMapper());
-            var entity = mapper.ToEntity(newLesson);
-            var entities = new List<LessonEntity> { entity };
-
-            fakeRepo.GetAll().Returns(entities);
-
+            var entities = new List<LessonEntity> { _mapper.ToEntity(newLesson) };
+            _fakeRepo.GetAll().Returns(entities);
             var query = new LessonQueryModel{UserId = entities[0].User.Id};
 
             // Act
-            var result = facade.GetByQuery(query);
+            var result = _facade.GetByQuery(query);
             
             // Assert
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
             Assert.NotNull(result);
             Assert.Single(result);
         }
@@ -237,23 +209,16 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetByQuery_By_Card()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
-
-            var mapper = new LessonMapper(new UserMapper(), new CardCollectionMapper());
-            var entity = mapper.ToEntity(newLesson);
-            var entities = new List<LessonEntity> { entity };
-
-            fakeRepo.GetAll().Returns(entities);
-
+            var entities = new List<LessonEntity> { _mapper.ToEntity(newLesson) };
+            _fakeRepo.GetAll().Returns(entities);
             var query = new LessonQueryModel{CardCollectionId = entities[0].CardCollection.Id};
 
             // Act
-            var result = facade.GetByQuery(query);
+            var result = _facade.GetByQuery(query);
             
             // Assert
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
             Assert.NotNull(result);
             Assert.Single(result);
         }
@@ -262,23 +227,16 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetByQuery_With_No_Filter()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ILessonRepository>();
-            var facade = CreateLessonFacade(fakeRepo);
             var newLesson = CreateNewLessonDetailModel();
-
-            var mapper = new LessonMapper(new UserMapper(), new CardCollectionMapper());
-            var entity = mapper.ToEntity(newLesson);
-            var entities = new List<LessonEntity> { entity };
-
-            fakeRepo.GetAll().Returns(entities);
-
+            var entities = new List<LessonEntity> { _mapper.ToEntity(newLesson) };
+            _fakeRepo.GetAll().Returns(entities);
             var query = new LessonQueryModel{Page = 1, PageSize = 10};
 
             // Act
-            var result = facade.GetByQuery(query);
+            var result = _facade.GetByQuery(query);
             
             // Assert
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
             Assert.NotNull(result);
             Assert.Equal(entities.Count, result.Count);
         }
