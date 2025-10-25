@@ -10,43 +10,57 @@ namespace Flashcards.Api.BL.UnitTests
 {
     public class CardCollectionFacadeTests
     {
+        private readonly ICardCollectionRepository _fakeRepo;
+        private readonly CardCollectionMapper _mapper;
+        private readonly CardCollectionFacade _facade;
+
+        public CardCollectionFacadeTests()
+        {
+            _fakeRepo = Substitute.For<ICardCollectionRepository>();
+            _mapper = new CardCollectionMapper();
+            _facade = new CardCollectionFacade(_fakeRepo, _mapper);
+        }
+
+        private CardCollectionDetailModel CreateCardCollectionDetailModel(Guid id)
+        {
+            var newCardCollection = new CardCollectionDetailModel
+            {
+                Id = id,
+                Title = "Science Deck",
+                AnswerStart = DateTime.UtcNow,
+                AnswerEnd = DateTime.UtcNow.AddMinutes(15),
+                Cards = new List<CardDetailModel>()
+            };
+
+            return newCardCollection;
+        }
+        
+        
+        
         [Fact]
         public void Delete_Calls_Correct_Method_On_Repository()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
             var collectionId = Guid.NewGuid();
 
             // Act
-            facade.Delete(collectionId);
+            _facade.Delete(collectionId);
 
             // Assert
-            fakeRepo.Received(1).Remove(collectionId);
+            _fakeRepo.Received(1).Remove(collectionId);
         }
 
         [Fact]
         public void Create_New_Collection()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
-            var newCollection = new CardCollectionDetailModel
-            {
-                Id = Guid.NewGuid(),
-                Title = "Geography Facts",
-                AnswerStart = DateTime.UtcNow.AddMinutes(-5),
-                AnswerEnd = DateTime.UtcNow.AddMinutes(5),
-                Cards = new List<CardDetailModel>()
-            };
-
+            var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
+            
             // Act
-            var id = facade.Create(newCollection);
+            var id = _facade.Create(newCollection);
 
             // Assert
-            fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
+            _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
                 c.Id == newCollection.Id &&
                 c.Title == newCollection.Title &&
                 c.AnswerStart == newCollection.AnswerStart &&
@@ -59,23 +73,13 @@ namespace Flashcards.Api.BL.UnitTests
         public void CreateOrUpdate_On_New_Collection()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
-            var newCollection = new CardCollectionDetailModel
-            {
-                Id = Guid.NewGuid(),
-                Title = "History Deck",
-                AnswerStart = DateTime.UtcNow.AddHours(-1),
-                AnswerEnd = DateTime.UtcNow.AddHours(1),
-                Cards = new List<CardDetailModel>()
-            };
-
+            var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
+            
             // Act
-            var id = facade.CreateOrUpdate(newCollection);
+            var id = _facade.CreateOrUpdate(newCollection);
 
             // Assert
-            fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
+            _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
                 c.Id == newCollection.Id &&
                 c.Title == newCollection.Title));
 
@@ -86,29 +90,17 @@ namespace Flashcards.Api.BL.UnitTests
         public void CreateOrUpdate_On_Existing_Collection()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
-            fakeRepo.Update(Arg.Any<CardCollectionEntity>()).Returns(Guid.NewGuid());
+            _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
+            _fakeRepo.Update(Arg.Any<CardCollectionEntity>()).Returns(Guid.NewGuid());
 
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
-
-            var existing = new CardCollectionDetailModel
-            {
-                Id = Guid.NewGuid(),
-                Title = "Science Deck",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddMinutes(15),
-                Cards = new List<CardDetailModel>()
-            };
-
+            var existing = CreateCardCollectionDetailModel(Guid.NewGuid());
             existing.Title = "Updated Science Deck";
 
             // Act
-            facade.CreateOrUpdate(existing);
+           _facade.CreateOrUpdate(existing);
 
             // Assert
-            fakeRepo.Received(1).Update(Arg.Is<CardCollectionEntity>(c =>
+            _fakeRepo.Received(1).Update(Arg.Is<CardCollectionEntity>(c =>
                 c.Id == existing.Id &&
                 c.Title == "Updated Science Deck"));
         }
@@ -117,17 +109,14 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetById_NonExisting_Returns_Null()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            fakeRepo.GetById(Arg.Any<Guid>()).Returns((CardCollectionEntity?)null);
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
+            _fakeRepo.GetById(Arg.Any<Guid>()).Returns((CardCollectionEntity?)null);
             var id = Guid.NewGuid();
 
             // Act
-            var result = facade.GetById(id);
+            var result = _facade.GetById(id);
 
             // Assert
-            fakeRepo.Received(1).GetById(id);
+            _fakeRepo.Received(1).GetById(id);
             Assert.Null(result);
         }
 
@@ -135,24 +124,14 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetById_Existing_Returns_Model()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            var existing = new CardCollectionEntity
-            {
-                Id = Guid.NewGuid(),
-                Title = "Math Deck",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddMinutes(30)
-            };
-            fakeRepo.GetById(existing.Id).Returns(existing);
-
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
-
+            var existing = CreateCardCollectionDetailModel(Guid.NewGuid());
+            _fakeRepo.GetById(existing.Id).Returns(_mapper.ToEntity(existing));
+            
             // Act
-            var result = facade.GetById(existing.Id);
+            var result = _facade.GetById(existing.Id);
 
             // Assert
-            fakeRepo.Received(1).GetById(existing.Id);
+            _fakeRepo.Received(1).GetById(existing.Id);
             Assert.NotNull(result);
             Assert.Equal(existing.Id, result!.Id);
             Assert.Equal(existing.Title, result.Title);
@@ -162,33 +141,18 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetAll_On_Existing_Collections()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
 
-            var col1 = new CardCollectionEntity
-            {
-                Id = Guid.NewGuid(),
-                Title = "History Deck",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddMinutes(5)
-            };
-            var col2 = new CardCollectionEntity
-            {
-                Id = Guid.NewGuid(),
-                Title = "Geography Deck",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddMinutes(5)
-            };
-
-            var list = new List<CardCollectionEntity> { col1, col2 };
-            fakeRepo.GetAll().Returns(list);
+            var col1 = CreateCardCollectionDetailModel(Guid.NewGuid());
+            var col2 = CreateCardCollectionDetailModel(Guid.NewGuid());
+            
+            var list = new List<CardCollectionEntity> { _mapper.ToEntity(col1), _mapper.ToEntity(col2) };
+            _fakeRepo.GetAll().Returns(list);
 
             // Act
-            var result = facade.GetAll();
+            var result = _facade.GetAll();
 
             // Assert
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
             Assert.Equal(2, result.Count());
             Assert.Contains(result, c => c.Id == col1.Id && c.Title == "History Deck");
             Assert.Contains(result, c => c.Id == col2.Id && c.Title == "Geography Deck");
@@ -198,19 +162,15 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetAll_On_Empty_Repo()
         {
             // Arrange
-            var fakeRepo = Substitute.For<ICardCollectionRepository>();
-            fakeRepo.GetAll().Returns(new List<CardCollectionEntity>());
-
-            var mapper = new CardCollectionMapper();
-            var facade = new CardCollectionFacade(fakeRepo, mapper);
-
+            _fakeRepo.GetAll().Returns(new List<CardCollectionEntity>());
+            
             // Act
-            var result = facade.GetAll();
+            var result = _facade.GetAll();
 
             // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
-            fakeRepo.Received(1).GetAll();
+            _fakeRepo.Received(1).GetAll();
         }
     }
 }

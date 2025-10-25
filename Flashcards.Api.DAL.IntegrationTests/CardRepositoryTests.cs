@@ -1,15 +1,18 @@
 ﻿using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
 
 namespace Flashcards.Api.DAL.IntegrationTests
 {
     public class CardRepositoryTests
     {
-        private readonly IFakeDatabase fakeDb;
-
-        public CardRepositoryTests()
+        private readonly IFakeDatabase _fakeDb;
+        private readonly ICardRepository _repo;
+        
+        public  CardRepositoryTests()
         {
-            fakeDb = new InMemoryFakeDatabase();
+            _fakeDb = new InMemoryFakeDatabase();
+            _repo = _fakeDb.GetCardRepository();
         }
 
         public bool AreCardsEqual(CardEntity card1, CardEntity card2)
@@ -27,18 +30,15 @@ namespace Flashcards.Api.DAL.IntegrationTests
         [Fact]
         public void GetById_Existing_Card()
         {
-            // Arrange
-            var repo = fakeDb.GetCardRepository();
-
             // Act
-            var requestedId = fakeDb.CardGuids[0];
-            var card = repo.GetById(requestedId);
+            var requestedId = _fakeDb.CardGuids[0];
+            var card = _repo.GetById(requestedId);
 
             // Assert
             Assert.NotNull(card);
             Assert.Equal(requestedId, card.Id);
 
-            var expectedCard = fakeDb.GetCardById(requestedId);
+            var expectedCard = _fakeDb.GetCardById(requestedId);
             Assert.True(AreCardsEqual(card, expectedCard));
         }
 
@@ -46,11 +46,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void GetById_NonExisting_Card()
         {
             // Arrange
-            var repo = fakeDb.GetCardRepository();
             var nonExistingId = Guid.NewGuid();
 
             // Act
-            var card = repo.GetById(nonExistingId);
+            var card = _repo.GetById(nonExistingId);
 
             // Assert
             Assert.Null(card);
@@ -60,21 +59,19 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Delete_Existing_Card()
         {
             // Arrange
-            var repo = fakeDb.GetCardRepository();
-            var idToRemove = fakeDb.CardGuids[0];
+            var idToRemove = _fakeDb.CardGuids[0];
 
             // Act
-            repo.Remove(idToRemove);
+            _repo.Remove(idToRemove);
 
             // Assert
-            Assert.Null(fakeDb.GetCardById(idToRemove));
+            Assert.Null(_fakeDb.GetCardById(idToRemove));
         }
 
         [Fact]
         public void Insert_New_Card()
         {
             // Arrange
-            var repo = fakeDb.GetCardRepository();
             var newCard = new CardEntity
             {
                 Id = Guid.NewGuid(),
@@ -87,10 +84,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
             };
 
             // Act
-            var newId = repo.Insert(newCard);
+            var newId = _repo.Insert(newCard);
 
             // Assert
-            var inserted = fakeDb.GetCardById(newId);
+            var inserted = _fakeDb.GetCardById(newId);
             Assert.NotNull(inserted);
             Assert.True(AreCardsEqual(inserted, newCard));
         }
@@ -99,16 +96,15 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Update_Existing_Card()
         {
             // Arrange
-            var repo = fakeDb.GetCardRepository();
-            var cardId = fakeDb.CardGuids[0];
-            var card = repo.GetById(cardId);
+            var cardId = _fakeDb.CardGuids[0];
+            var card = _repo.GetById(cardId);
             card.QuestionContent = "Updated Question";
 
             // Act
-            repo.Update(card);
+            _repo.Update(card);
 
             // Assert
-            var updated = fakeDb.GetCardById(cardId);
+            var updated = _fakeDb.GetCardById(cardId);
             Assert.Equal("Updated Question", updated.QuestionContent);
         }
     }

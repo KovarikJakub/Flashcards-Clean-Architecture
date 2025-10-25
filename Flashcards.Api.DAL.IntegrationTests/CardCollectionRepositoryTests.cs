@@ -1,15 +1,19 @@
 ﻿using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Repositories;
+using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Enums;
 
 namespace Flashcards.Api.DAL.IntegrationTests
 {
     public class CardCollectionRepositoryTests
     {
-        private readonly IFakeDatabase fakeDb;
+        private readonly IFakeDatabase _fakeDb;
+        private readonly ICardCollectionRepository _repo;
 
         public CardCollectionRepositoryTests()
         {
-            fakeDb = new InMemoryFakeDatabase();
+            _fakeDb = new InMemoryFakeDatabase();
+            _repo = _fakeDb.GetCardCollectionRepository();
         }
 
         private bool AreCollectionsEqual(CardCollectionEntity c1, CardCollectionEntity c2)
@@ -19,25 +23,21 @@ namespace Flashcards.Api.DAL.IntegrationTests
                    c1.AnswerStart == c2.AnswerStart &&
                    c1.Cards == c2.Cards &&
                    c1.AnswerEnd == c2.AnswerEnd;
-
-            
         }
 
         [Fact]
         public void GetById_Existing_Collection()
         {
-            // Arrange
-            var repo = fakeDb.GetCardCollectionRepository();
-
             // Act
-            var requestedId = fakeDb.CardCollectionGuids[0];
-            var collection = repo.GetById(requestedId);
+            var requestedId = _fakeDb.CardCollectionGuids[0];
+            var collection = _repo.GetById(requestedId);
 
             // Assert
             Assert.NotNull(collection);
             Assert.Equal(collection.Id, requestedId);
 
-            var expectedCollection = fakeDb.GetCardCollectionById(requestedId);
+            var expectedCollection = _fakeDb.GetCardCollectionById(requestedId);
+            Assert.NotNull(expectedCollection);
             Assert.True(AreCollectionsEqual(collection, expectedCollection));
         }
 
@@ -45,11 +45,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void GetById_Non_Existing_Collection()
         {
             // Arrange
-            var repo = fakeDb.GetCardCollectionRepository();
             var nonExistingId = Guid.NewGuid();
 
             // Act
-            var collection = repo.GetById(nonExistingId);
+            var collection = _repo.GetById(nonExistingId);
 
             // Assert
             Assert.Null(collection);
@@ -59,21 +58,19 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Delete_Existing_Collection()
         {
             // Arrange
-            var repo = fakeDb.GetCardCollectionRepository();
-            var idToRemove = fakeDb.CardCollectionGuids[0];
+            var idToRemove = _fakeDb.CardCollectionGuids[0];
 
             // Act
-            repo.Remove(idToRemove);
+            _repo.Remove(idToRemove);
 
             // Assert
-            Assert.Null(fakeDb.GetCardCollectionById(idToRemove));
+            Assert.Null(_fakeDb.GetCardCollectionById(idToRemove));
         }
 
         [Fact]
         public void Insert_New_Collection()
         {
             // Arrange
-            var repo = fakeDb.GetCardCollectionRepository();
             var newCollection = new CardCollectionEntity
             {
                 Id = Guid.NewGuid(),
@@ -84,27 +81,26 @@ namespace Flashcards.Api.DAL.IntegrationTests
             };
 
             // Act
-            var newId = repo.Insert(newCollection);
+            var newId = _repo.Insert(newCollection);
 
             // Assert
-            Assert.NotNull(fakeDb.GetCardCollectionById(newId));
+            Assert.NotNull(_fakeDb.GetCardCollectionById(newId));
         }
 
         [Fact]
         public void Update_Existing_Collection()
         {
             // Arrange
-            var repo = fakeDb.GetCardCollectionRepository();
-
-            var collectionId = fakeDb.CardCollectionGuids[0];
-            var collection = repo.GetById(collectionId);
+            var collectionId = _fakeDb.CardCollectionGuids[0];
+            var collection = _repo.GetById(collectionId);
             collection.Title = "Updated Collection Title";
 
             // Act
-            repo.Update(collection);
+            _repo.Update(collection);
 
             // Assert
-            var expectedCollection = fakeDb.GetCardCollectionById(collectionId);
+            var expectedCollection = _fakeDb.GetCardCollectionById(collectionId);
+            Assert.NotNull(expectedCollection);
             Assert.Equal(collection.Title, expectedCollection.Title);
         }
     }

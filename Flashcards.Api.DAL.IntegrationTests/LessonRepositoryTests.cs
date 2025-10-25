@@ -1,14 +1,17 @@
 ﻿using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Repositories;
 
 namespace Flashcards.Api.DAL.IntegrationTests
 {
     public class LessonRepositoryTests
     {
-        private readonly IFakeDatabase fakeDb;
-
-        public LessonRepositoryTests()
+        private readonly IFakeDatabase _fakeDb;
+        private readonly ILessonRepository _repo;
+        
+        public  LessonRepositoryTests()
         {
-            fakeDb = new InMemoryFakeDatabase();
+            _fakeDb = new InMemoryFakeDatabase();
+            _repo = _fakeDb.GetLessonRepository();
         }
 
         private bool AreLessonsEqual(LessonEntity left, LessonEntity right)
@@ -26,17 +29,16 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void GetById_Existing_Lesson()
         {
             // Arrange
-            var repo = fakeDb.GetLessonRepository();
-            var requestedId = fakeDb.LessonGuids[0];
+            var requestedId = _fakeDb.LessonGuids[0];
 
             // Act
-            var lesson = repo.GetById(requestedId);
+            var lesson = _repo.GetById(requestedId);
 
             // Assert
             Assert.NotNull(lesson);
             Assert.Equal(requestedId, lesson.Id);
 
-            var expectedLesson = fakeDb.GetLessonById(requestedId);
+            var expectedLesson = _fakeDb.GetLessonById(requestedId);
             Assert.True(AreLessonsEqual(lesson, expectedLesson));
         }
 
@@ -44,11 +46,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void GetById_NonExisting_Lesson()
         {
             // Arrange
-            var repo = fakeDb.GetLessonRepository();
             var nonExistingId = Guid.NewGuid();
 
             // Act
-            var lesson = repo.GetById(nonExistingId);
+            var lesson = _repo.GetById(nonExistingId);
 
             // Assert
             Assert.Null(lesson);
@@ -57,17 +58,14 @@ namespace Flashcards.Api.DAL.IntegrationTests
         [Fact]
         public void GetAll_Returns_All_Lessons()
         {
-            // Arrange
-            var repo = fakeDb.GetLessonRepository();
-
             // Act
-            var lessons = repo.GetAll();
+            var lessons = _repo.GetAll();
 
             // Assert
-            Assert.Equal(fakeDb.LessonGuids.Count, lessons.Count);
+            Assert.Equal(_fakeDb.LessonGuids.Count, lessons.Count);
             foreach (var l in lessons)
             {
-                var expected = fakeDb.GetLessonById(l.Id);
+                var expected = _fakeDb.GetLessonById(l.Id);
                 Assert.True(AreLessonsEqual(l, expected));
             }
         }
@@ -76,12 +74,11 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Insert_New_Lesson()
         {
             // Arrange
-            var repo = fakeDb.GetLessonRepository();
             var newLesson = new LessonEntity
             {
                 Id = Guid.NewGuid(),
-                User = fakeDb.GetUserById(fakeDb.UserGuids[0]),
-                CardCollection = fakeDb.GetCardCollectionById(fakeDb.CardCollectionGuids[0]),
+                User = _fakeDb.GetUserById(_fakeDb.UserGuids[0]),
+                CardCollection = _fakeDb.GetCardCollectionById(_fakeDb.CardCollectionGuids[0]),
                 Start = new DateTime(2025, 3, 1, 10, 0, 0),
                 Seen = 1,
                 Correct = 1,
@@ -89,10 +86,10 @@ namespace Flashcards.Api.DAL.IntegrationTests
             };
 
             // Act
-            var newId = repo.Insert(newLesson);
+            var newId = _repo.Insert(newLesson);
 
             // Assert
-            var inserted = fakeDb.GetLessonById(newId);
+            var inserted = _fakeDb.GetLessonById(newId);
             Assert.NotNull(inserted);
             Assert.True(AreLessonsEqual(inserted, newLesson));
         }
@@ -101,17 +98,16 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Update_Existing_Lesson()
         {
             // Arrange
-            var repo = fakeDb.GetLessonRepository();
-            var lessonId = fakeDb.LessonGuids[0];
-            var lesson = repo.GetById(lessonId);
+            var lessonId = _fakeDb.LessonGuids[0];
+            var lesson = _repo.GetById(lessonId);
             lesson.Seen = 10;
             lesson.Correct = 8;
 
             // Act
-            repo.Update(lesson);
+            _repo.Update(lesson);
 
             // Assert
-            var updated = fakeDb.GetLessonById(lessonId);
+            var updated = _fakeDb.GetLessonById(lessonId);
             Assert.Equal(10u, updated.Seen);
             Assert.Equal(8u, updated.Correct);
         }
@@ -120,14 +116,13 @@ namespace Flashcards.Api.DAL.IntegrationTests
         public void Delete_Existing_Lesson()
         {
             // Arrange
-            var repo = fakeDb.GetLessonRepository();
-            var idToRemove = fakeDb.LessonGuids[0];
+            var idToRemove = _fakeDb.LessonGuids[0];
 
             // Act
-            repo.Remove(idToRemove);
+            _repo.Remove(idToRemove);
 
             // Assert
-            Assert.Null(fakeDb.GetLessonById(idToRemove));
+            Assert.Null(_fakeDb.GetLessonById(idToRemove));
         }
     }
 }
