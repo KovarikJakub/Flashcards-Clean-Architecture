@@ -2,6 +2,7 @@ using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
+using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Models.Card;
 using Flashcards.Common.Models.User;
@@ -16,7 +17,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
 
 builder.Services.AddSingleton<CardMapper>();
-builder.Services.AddSingleton<IStorage>();
+builder.Services.AddSingleton<IStorage, Storage>();
 builder.Services.AddTransient<ICardRepository, CardRepository>();
 builder.Services.AddScoped<ICardFacade, CardFacade>();
 
