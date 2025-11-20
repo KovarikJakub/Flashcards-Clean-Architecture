@@ -1,7 +1,5 @@
-﻿using Flashcards.Common.Models.CardCollection;
-using Flashcards.Common.Models.User;
-
-namespace Flashcards.Common.Models.Lesson
+﻿
+namespace Flashcards.Common.Models
 {
     public class LessonDetailModel : IWithGuid
     {

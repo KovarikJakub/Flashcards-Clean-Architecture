@@ -1,7 +1,6 @@
 ﻿using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
-using Flashcards.Common.Models.Card;
-using Flashcards.Common.Models.CardCollection;
+using Flashcards.Common.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Flashcards.Api.App.EndpointTests.Tests

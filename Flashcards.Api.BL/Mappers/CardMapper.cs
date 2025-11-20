@@ -1,6 +1,6 @@
 namespace Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
-using Flashcards.Common.Models.Card;
+using Flashcards.Common.Models;
 
 public class CardMapper
 {

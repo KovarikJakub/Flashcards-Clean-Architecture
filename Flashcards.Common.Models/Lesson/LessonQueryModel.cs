@@ -1,5 +1,5 @@
 ﻿
-namespace Flashcards.Common.Models.Lesson
+namespace Flashcards.Common.Models
 {
     public class LessonQueryModel : BaseQueryModel
     {

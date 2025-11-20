@@ -1,7 +1,6 @@
 ﻿using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Entities.Interfaces;
-using Flashcards.Common.Models.Card;
-using Flashcards.Common.Models.CardCollection;
+using Flashcards.Common.Models;
 using System.Reflection;
 
 namespace Flashcards.Api.BL.Mappers;
