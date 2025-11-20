@@ -1,0 +1,36 @@
+﻿@page "/collections"
+@namespace Flashcards.Web.App.Pages
+@layout ListLayout
+@inherits PageBase
+<h3>CardCollectionListPage</h3>
+
+<div class="row">
+    <div class="col-md">
+        <div class="bg-sec h-100 rounded">
+            @if (CardCollections.Count != 0)
+            {
+                <table class="table border table-striped">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="row">ID</th>
+                            <th scope="row">Nazev kolekce karet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var collection in CardCollections)
+                    {
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                @collection.Id
+                            </td>
+                            <td style="vertical-align: middle;">
+                                @collection.Title
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
