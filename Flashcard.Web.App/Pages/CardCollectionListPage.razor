@@ -6,30 +6,15 @@
 
 <div class="row">
     <div class="col-md">
-        <div class="bg-sec h-100 rounded">
+        <div class="bg-sec h-100 rounded p-3">
             @if (CardCollections.Count != 0)
             {
-                <table class="table border table-striped">
-                    <thead class="thead-light">
-                        <tr>
-                            <th scope="row">ID</th>
-                            <th scope="row">Nazev kolekce karet</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="card-grid">
                     @foreach (var collection in CardCollections)
                     {
-                        <tr>
-                            <td style="vertical-align: middle;">
-                                @collection.Id
-                            </td>
-                            <td style="vertical-align: middle;">
-                                @collection.Title
-                            </td>
-                        </tr>
+                        <CardCollectionCard Collection="collection" OnEdit="@(()=>OnEditCollection(collection))" OnDelete="@(()=>OnDeleteCollection(collection))" />
                     }
-                    </tbody>
-                </table>
+                </div>
             }
         </div>
     </div>

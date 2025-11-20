@@ -18,5 +18,28 @@ namespace Flashcards.Web.BL.Facades
             return cardCollections.ToList();
         }
 
+        public async Task DeleteAsync(Guid id)
+        {
+            await apiClient.CardCollectionDeleteAsync(id);
+        }
+
+        public async Task<CardCollectionDetailModel?> GetByIdAsync(Guid id)
+        {
+            try
+            {
+                var result = await apiClient.CardCollectionGetAsync(id);
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<Guid> UpsertAsync(CardCollectionDetailModel model)
+        {
+            var id = await apiClient.UpsertAsync(model);
+            return id;
+        }
     }
 }

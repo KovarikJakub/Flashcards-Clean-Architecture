@@ -9,6 +9,8 @@ namespace Flashcards.Web.App.Pages
     {
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = null!;
 
         private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
         protected override async Task OnInitializedAsync()
@@ -21,6 +23,26 @@ namespace Flashcards.Web.App.Pages
         private async Task LoadData()
         {
             CardCollections = await CardCollectionFacade.GetAllAsync();
+        }
+
+        private Task OnEditCollection(CardCollectionListModel collection)
+        {
+            NavigationManager.NavigateTo($"collections/edit/{collection.Id}");
+            return Task.CompletedTask;
+        }
+
+        private async Task OnDeleteCollection(CardCollectionListModel collection)
+        {
+            // Example: call facade to delete and reload list
+            try
+            {
+                await CardCollectionFacade.DeleteAsync(collection.Id);
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to delete collection: {ex.Message}");
+            }
         }
     }
 }

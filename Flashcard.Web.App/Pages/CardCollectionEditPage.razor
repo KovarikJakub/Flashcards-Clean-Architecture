@@ -1,0 +1,37 @@
+@page "/collections/edit/{Id:guid}"
+@page "/collections/create"
+@namespace Flashcards.Web.App.Pages
+@layout EditLayout
+@inherits PageBase
+
+<h3>@(IsCreate ? "Create collection" : "Edit collection")</h3>
+
+<div class="card p-3">
+    <div class="mb-2">
+        <label class="form-label">Title</label>
+        <input class="form-control" @bind="Model.Title" />
+    </div>
+    <div class="mb-2 d-flex gap-2">
+        <div>
+            <label class="form-label">Answer start</label>
+            <input type="datetime-local" class="form-control" @bind="AnswerStartLocal" />
+        </div>
+        <div>
+            <label class="form-label">Answer end</label>
+            <input type="datetime-local" class="form-control" @bind="AnswerEndLocal" />
+        </div>
+    </div>
+
+    <h5>Cards</h5>
+    <div>
+        @foreach (var card in Cards)
+        {
+            <CardForm Card="card" OnRemove="@((c) => RemoveCard(c))" />
+        }
+    </div>
+
+    <div class="mt-2">
+        <button class="btn btn-sm btn-outline-primary" @onclick="AddCard">Add card</button>
+        <button class="btn btn-sm btn-primary ms-2" @onclick="Save">Save</button>
+    </div>
+</div>

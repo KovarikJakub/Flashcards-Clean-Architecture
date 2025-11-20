@@ -1,0 +1,45 @@
+@namespace Flashcards.Web.App.Components
+
+<div class="collection-card card h-100">
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title">@Collection.Title</h5>
+        <p class="card-text text-muted mb-2"><small>@Collection.Id</small></p>
+
+        <div class="mt-auto">
+            <p class="mb-1"><strong>Answer window</strong></p>
+            <p class="mb-0 small">@Collection.AnswerStart:G - @Collection.AnswerEnd:G</p>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary" @onclick="EditClicked">Edit</button>
+            <button class="btn btn-sms btn-outline-danger" @onclick="DeleteClicked">Delete</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public CardCollectionListModel Collection { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<CardCollectionListModel> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<CardCollectionListModel> OnDelete { get; set; }
+
+    private async Task EditClicked()
+    {
+        if (OnEdit.HasDelegate)
+        {
+            await OnEdit.InvokeAsync(Collection);
+        }
+    }
+
+    private async Task DeleteClicked()
+    {
+        if (OnDelete.HasDelegate)
+        {
+            await OnDelete.InvokeAsync(Collection);
+        }
+    }
+}
