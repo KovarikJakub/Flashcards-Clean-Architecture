@@ -4,10 +4,7 @@ using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
-using Flashcards.Common.Models.Card;
-using Flashcards.Common.Models.User;
-using Flashcards.Common.Models.CardCollection;
-using Flashcards.Common.Models.Lesson;
+using Flashcards.Common.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +32,16 @@ builder.Services.AddSingleton<LessonMapper>();
 builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -45,6 +52,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 
 UseEndpoints(app);
@@ -53,7 +61,10 @@ app.Run();
 
 void UseEndpoints(WebApplication app)
 {
-    var endpointsBase = app.MapGroup("api").WithOpenApi();
+    var endpointsBase = app
+        .MapGroup("api")
+        .RequireCors()
+        .WithOpenApi();
 
     UseCardsEndpoints(endpointsBase);
     UseUserEndpoints(endpointsBase);

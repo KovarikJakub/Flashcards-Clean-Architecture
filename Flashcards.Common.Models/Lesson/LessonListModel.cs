@@ -1,6 +1,4 @@
-﻿using Flashcards.Common.Models.CardCollection;
-
-namespace Flashcards.Common.Models.Lesson
+﻿namespace Flashcards.Common.Models
 {
     public class LessonListModel : IWithGuid
     {

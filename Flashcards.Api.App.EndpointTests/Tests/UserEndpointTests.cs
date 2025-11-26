@@ -1,5 +1,5 @@
 using Flashcards.Api.BL.Mappers;
-using Flashcards.Common.Models.User;
+using Flashcards.Common.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Common.Enums;

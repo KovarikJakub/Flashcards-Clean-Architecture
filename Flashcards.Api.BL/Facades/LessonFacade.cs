@@ -1,7 +1,7 @@
 ﻿
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Repositories;
-using Flashcards.Common.Models.Lesson;
+using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {

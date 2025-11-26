@@ -1,4 +1,4 @@
-﻿namespace Flashcards.Common.Models.CardCollection
+﻿namespace Flashcards.Common.Models
 {
     public class CardCollectionListModel : IWithGuid
     {

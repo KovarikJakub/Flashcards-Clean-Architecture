@@ -3,7 +3,7 @@ using System.Data;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
-using Flashcards.Common.Models.User;
+using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {

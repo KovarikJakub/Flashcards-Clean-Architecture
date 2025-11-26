@@ -1,7 +1,6 @@
-
 using Flashcards.Common.Enums;
 
-namespace Flashcards.Common.Models.User
+namespace Flashcards.Common.Models
 {
     public class UserDetailModel : IWithGuid
     {

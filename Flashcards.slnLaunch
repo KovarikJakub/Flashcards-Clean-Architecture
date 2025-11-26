@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "API + Web UI",
+    "Projects": [
+      {
+        "Path": "Flashcards.Api.App\\Flashcards.Api.App.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Flashcard.Web.App\\Flashcards.Web.App.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  }
+]

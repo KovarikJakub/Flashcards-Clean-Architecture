@@ -3,7 +3,7 @@ using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
-using Flashcards.Common.Models.User;
+using Flashcards.Common.Models;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
 

@@ -1,5 +1,5 @@
 ﻿using Flashcards.Common.BL.Facades;
-using Flashcards.Common.Models.Lesson;
+using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {

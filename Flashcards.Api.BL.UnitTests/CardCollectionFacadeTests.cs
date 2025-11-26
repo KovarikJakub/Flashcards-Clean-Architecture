@@ -2,8 +2,7 @@
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
-using Flashcards.Common.Models.Card;
-using Flashcards.Common.Models.CardCollection;
+using Flashcards.Common.Models;
 using NSubstitute;
 
 namespace Flashcards.Api.BL.UnitTests

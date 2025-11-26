@@ -1,5 +1,5 @@
 using Flashcards.Api.DAL.Common.Entities;
-using Flashcards.Common.Models.User;
+using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Mappers
 {
