@@ -5,12 +5,12 @@
       {
         "Path": "Flashcards.Api.App\\Flashcards.Api.App.csproj",
         "Action": "Start",
-        "DebugTarget": "https"
+        "DebugTarget": "Flashcards.Api"
       },
       {
         "Path": "Flashcard.Web.App\\Flashcards.Web.App.csproj",
         "Action": "Start",
-        "DebugTarget": "https"
+        "DebugTarget": "Flashcards.Web.App"
       }
     ]
   }
