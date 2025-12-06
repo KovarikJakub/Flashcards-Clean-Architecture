@@ -4,18 +4,16 @@
 @inherits PageBase
 <h3>CardCollectionListPage</h3>
 
-<div class="row">
-    <div class="col-md">
-        <div class="bg-sec h-100 rounded p-3">
-            @if (CardCollections.Count != 0)
-            {
-                <div class="card-grid">
-                    @foreach (var collection in CardCollections)
-                    {
-                        <CardCollectionCard Collection="collection" OnEdit="@(()=>OnEditCollection(collection))" OnDelete="@(()=>OnDeleteCollection(collection))" />
-                    }
-                </div>
-            }
-        </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-gray-100 h-full rounded p-4">
+        @if (CardCollections.Count != 0)
+        {
+            <div class="grid gap-4">
+                @foreach (var collection in CardCollections)
+                {
+                    <CardCollectionCard Collection="collection" OnEdit="@(()=>OnEditCollection(collection))" OnDelete="@(()=>OnDeleteCollection(collection))" />
+                }
+            </div>
+        }
     </div>
 </div>

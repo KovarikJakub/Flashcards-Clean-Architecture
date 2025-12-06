@@ -15,6 +15,7 @@ namespace Flashcards.Web.App.Pages
         private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
         protected override async Task OnInitializedAsync()
         {
+            
             await LoadData();
 
             await base.OnInitializedAsync();

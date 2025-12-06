@@ -6,23 +6,23 @@
 
 <h3>@(IsCreate ? "Create collection" : "Edit collection")</h3>
 
-<div class="card p-3">
-    <div class="mb-2">
-        <label class="form-label">Title</label>
-        <input class="form-control" @bind="Model.Title" />
+<div class="border rounded p-4 shadow">
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Title</label>
+        <input class="w-full p-2 border rounded text-sm" @bind="Model.Title" />
     </div>
-    <div class="mb-2 d-flex gap-2">
+    <div class="mb-4 flex gap-4">
         <div>
-            <label class="form-label">Answer start</label>
-            <input type="datetime-local" class="form-control" @bind="AnswerStartLocal" />
+            <label class="block text-sm font-medium text-gray-700">Answer start</label>
+            <input type="datetime-local" class="w-full p-2 border rounded text-sm" @bind="AnswerStartLocal" />
         </div>
         <div>
-            <label class="form-label">Answer end</label>
-            <input type="datetime-local" class="form-control" @bind="AnswerEndLocal" />
+            <label class="block text-sm font-medium text-gray-700">Answer end</label>
+            <input type="datetime-local" class="w-full p-2 border rounded text-sm" @bind="AnswerEndLocal" />
         </div>
     </div>
 
-    <h5>Cards</h5>
+    <h5 class="text-lg font-semibold">Cards</h5>
     <div>
         @foreach (var card in Cards)
         {
@@ -30,8 +30,8 @@
         }
     </div>
 
-    <div class="mt-2">
-        <button class="btn btn-sm btn-outline-primary" @onclick="AddCard">Add card</button>
-        <button class="btn btn-sm btn-primary ms-2" @onclick="Save">Save</button>
+    <div class="mt-4 flex gap-4">
+        <button class="px-4 py-2 text-sm text-blue-500 border border-blue-500 rounded hover:bg-blue-500 hover:text-white" @onclick="AddCard">Add card</button>
+        <button class="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600" @onclick="Save">Save</button>
     </div>
 </div>

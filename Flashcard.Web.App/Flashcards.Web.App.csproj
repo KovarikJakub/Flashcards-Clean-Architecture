@@ -15,4 +15,13 @@
     <ProjectReference Include="..\Flashcards.Web.BL\Flashcards.Web.BL.csproj" />
   </ItemGroup>
 
+  <Target Name="TailwindBuild" BeforeTargets="Build">
+      <Exec Command="npm ci" WorkingDirectory="$(ProjectDir)" Condition="!Exists('node_modules')" />
+      <Exec Command="npm run build:css" WorkingDirectory="$(ProjectDir)" />
+  </Target>
+
+  <Target Name="TailwindPublish" BeforeTargets="Publish">
+      <Exec Command="npm run build:css" WorkingDirectory="$(ProjectDir)" />
+  </Target>
+
 </Project>
