@@ -1,5 +1,6 @@
 ﻿using Flashcards.Common.Models;
 using Flashcards.Web.BL.Api;
+using Flashcards.Web.BL.Models;
 
 namespace Flashcards.Web.BL.Facades
 {
@@ -12,23 +13,28 @@ namespace Flashcards.Web.BL.Facades
             this.apiClient = apiClient;
         }
 
+        /*
         public async Task<List<CardCollectionListModel>> GetAllAsync()
         {
             var cardCollections = await apiClient.CardCollectionGetAsync();
             return cardCollections.ToList();
+            
+            return Task.FromResult(TestCollections.ToList());
         }
-
+*/
         public async Task DeleteAsync(Guid id)
         {
             await apiClient.CardCollectionDeleteAsync(id);
         }
 
-        public async Task<CardCollectionDetailModel?> GetByIdAsync(Guid id)
+        // Return a web wrapper so UI can see OwnerId (temporary)
+        public async Task<CardCollectionWebModel?> GetByIdAsync(Guid id)
         {
             try
             {
                 var result = await apiClient.CardCollectionGetAsync(id);
-                return result;
+                // OwnerId left null here — can be set from current user claims in future
+                return new CardCollectionWebModel(result, ownerId: null);
             }
             catch
             {
@@ -36,10 +42,58 @@ namespace Flashcards.Web.BL.Facades
             }
         }
 
+        // Backwards-compatible helper for code that expects CardCollectionDetailModel
+        public async Task<CardCollectionDetailModel?> GetByIdModelAsync(Guid id)
+        {
+            var wrapper = await GetByIdAsync(id);
+            return wrapper?.ApiModel;
+        }
+
+        // Accept the web wrapper, but send only the ApiModel to backend
+        public async Task<Guid> UpsertAsync(CardCollectionWebModel webModel)
+        {
+            var id = await apiClient.UpsertAsync(webModel.ApiModel);
+            return id;
+        }
+
+        // Backwards-compatible overload
         public async Task<Guid> UpsertAsync(CardCollectionDetailModel model)
         {
             var id = await apiClient.UpsertAsync(model);
             return id;
         }
+        
+        // temporary test data method
+        public Task<List<CardCollectionListModel>> GetAllAsync()
+        {
+            return Task.FromResult(TestCollections.ToList());
+        }
+        
+        private static readonly List<CardCollectionListModel> TestCollections = new()
+        {
+            new CardCollectionListModel
+            {
+                Id = Guid.Parse((ReadOnlySpan<char>)"b72b5434-9f35-4e3f-96a8-3fdcbbbc09ee"),
+                Title = "title 1",
+                AnswerStart = DateTime.UtcNow,
+                AnswerEnd = DateTime.UtcNow
+            },
+            new CardCollectionListModel
+            {
+                Id = Guid.Parse((ReadOnlySpan<char>)"b72b54c8-9f35-4e3f-96a8-3fdcbbbc09ee"),
+                Title = "Ishdiahdhiad",
+                AnswerStart = DateTime.UtcNow,
+                AnswerEnd = DateTime.UtcNow
+            },
+            new CardCollectionListModel
+            {
+                Id = Guid.Parse((ReadOnlySpan<char>)"b72b54c4-9f35-4e3f-96a8-3fdcbbbc09ee"),
+                Title = "placeholder",
+                AnswerStart = DateTime.UtcNow,
+                AnswerEnd = DateTime.UtcNow
+            }
+        };
+        
+        
     }
 }
