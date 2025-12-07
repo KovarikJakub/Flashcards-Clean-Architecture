@@ -15,13 +15,19 @@
     <ProjectReference Include="..\Flashcards.Web.BL\Flashcards.Web.BL.csproj" />
   </ItemGroup>
 
-  <Target Name="TailwindBuild" BeforeTargets="Build">
-      <Exec Command="npm ci" WorkingDirectory="$(ProjectDir)" Condition="!Exists('node_modules')" />
-      <Exec Command="npm run build:css" WorkingDirectory="$(ProjectDir)" />
+  <ItemGroup>
+    <Watch Include="./Styles/tailwind.css" />
+  </ItemGroup>
+
+  <Target Name="TailwindDebug" BeforeTargets="Compile" Condition="'$(Configuration)' == 'Debug'">
+    <Exec WorkingDirectory="$(ProjectDir)"
+          Command="npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/tailwind.css" />
   </Target>
 
-  <Target Name="TailwindPublish" BeforeTargets="Publish">
-      <Exec Command="npm run build:css" WorkingDirectory="$(ProjectDir)" />
+  <Target Name="TailwindRelease" BeforeTargets="Compile" Condition="'$(Configuration)' == 'Release'">
+    <Exec WorkingDirectory="$(ProjectDir)"
+          EnvironmentVariables="NODE_ENV=production"
+          Command="npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/tailwind.css --minify" />
   </Target>
 
 </Project>
