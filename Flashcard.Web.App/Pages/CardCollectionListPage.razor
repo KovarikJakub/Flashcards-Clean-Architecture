@@ -71,7 +71,7 @@
             {
                 Console.WriteLine("Attempting to load JS module...");
                 _module = await JS.InvokeAsync<IJSObjectReference>(
-                    "import", "Pages/CardCollectionListPage.razor.js");
+                    "import", "/js/Scroll.js");
                 Console.WriteLine("JS module loaded successfully.");
             }
             catch (Exception ex)

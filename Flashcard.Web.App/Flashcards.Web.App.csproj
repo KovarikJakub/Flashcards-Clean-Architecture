@@ -20,7 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Pages\CardCollectionListPage.razor.js" CopyToOutputDirectory="PreserveNewest" />
+    <Content Update="wwwroot\js\Scroll.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 
