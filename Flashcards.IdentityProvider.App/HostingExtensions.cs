@@ -1,3 +1,4 @@
+using Flashcards.IdentityProvider.App.Endpoints;
 using Serilog;
 using Serilog.Filters;
 using System.Globalization;
@@ -63,15 +64,14 @@ namespace Flashcards.IdentityProvider.App
                 app.UseDeveloperExceptionPage();
             }
 
-            // uncomment if you want to add a UI
             app.UseStaticFiles();
             app.UseRouting();
 
             app.UseIdentityServer();
 
-            // uncomment if you want to add a UI
             app.UseAuthorization();
             app.MapRazorPages().RequireAuthorization();
+            app.UseUserEndpoints();
 
             return app;
         }

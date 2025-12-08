@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System.Globalization;
 using System.Text;
+using Flashcards.IdentityProvider.App.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -38,6 +39,10 @@ try
             Console.Write(Summary(usage));
         });
     }
+
+    app.MapGroup("api")
+        .AllowAnonymous()
+        .UseUserEndpoints();
 
     app.Run();
 }
