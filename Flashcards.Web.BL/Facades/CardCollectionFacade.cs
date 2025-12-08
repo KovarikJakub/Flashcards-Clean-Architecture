@@ -50,12 +50,13 @@ namespace Flashcards.Web.BL.Facades
         }
 
         // Accept the web wrapper, but send only the ApiModel to backend
+        
         public async Task<Guid> UpsertAsync(CardCollectionWebModel webModel)
         {
             var id = await apiClient.UpsertAsync(webModel.ApiModel);
             return id;
         }
-
+        
         // Backwards-compatible overload
         public async Task<Guid> UpsertAsync(CardCollectionDetailModel model)
         {
@@ -74,24 +75,38 @@ namespace Flashcards.Web.BL.Facades
             new CardCollectionListModel
             {
                 Id = Guid.Parse((ReadOnlySpan<char>)"b72b5434-9f35-4e3f-96a8-3fdcbbbc09ee"),
-                Title = "title 1",
+                Title = "title NENAVIDIM IMS",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow
             },
             new CardCollectionListModel
             {
                 Id = Guid.Parse((ReadOnlySpan<char>)"b72b54c8-9f35-4e3f-96a8-3fdcbbbc09ee"),
-                Title = "Ishdiahdhiad",
+                Title = "IMS JE SRACKA",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow
             },
             new CardCollectionListModel
             {
                 Id = Guid.Parse((ReadOnlySpan<char>)"b72b54c4-9f35-4e3f-96a8-3fdcbbbc09ee"),
-                Title = "placeholder",
+                Title = "PROC EXISTUJE IMS",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow
-            }
+            },
+            new CardCollectionListModel
+            {
+            Id = Guid.Parse((ReadOnlySpan<char>)"b72b54c4-9f35-4e3f-96a8-3fdcbbbc09ee"),
+            Title = "title ahoj",
+            AnswerStart = DateTime.UtcNow,
+            AnswerEnd = DateTime.UtcNow
+        },
+        new CardCollectionListModel
+        {
+            Id = Guid.Parse((ReadOnlySpan<char>)"b72b54c4-9f35-4e3f-96a8-3fdcbbbc09ee"),
+            Title = "title cau",
+            AnswerStart = DateTime.UtcNow,
+            AnswerEnd = DateTime.UtcNow
+        }
         };
         
         

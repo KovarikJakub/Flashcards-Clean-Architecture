@@ -7,6 +7,16 @@ namespace Flashcards.Web.App.Pages
 {
     public partial class CardCollectionListPage
     {
+
+        private CardCollectionDetailModel Model = new CardCollectionDetailModel
+        {
+            Id = Guid.NewGuid(),
+            Title = string.Empty,
+            AnswerStart = DateTime.Now,
+            AnswerEnd = DateTime.Now.AddDays(1)
+        };
+        
+        
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
         [Inject]
@@ -44,6 +54,22 @@ namespace Flashcards.Web.App.Pages
             {
                 Console.WriteLine($"Failed to delete collection: {ex.Message}");
             }
+        }
+        
+ 
+
+
+        private async Task HandleSubmit(CardCollectionDetailModel model)
+        {
+            CardCollectionDetailModel newCollection = new CardCollectionDetailModel
+            {
+                Id = Guid.NewGuid(),
+                Title = model.Title,
+                AnswerStart = model.AnswerStart,
+                AnswerEnd = model.AnswerEnd,
+                Cards = model.Cards
+            };
+            await CardCollectionFacade.UpsertAsync(newCollection);
         }
     }
 }

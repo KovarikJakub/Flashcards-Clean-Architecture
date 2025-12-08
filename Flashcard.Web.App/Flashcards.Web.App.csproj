@@ -19,6 +19,11 @@
     <Watch Include="./Styles/tailwind.css" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Pages\CardCollectionListPage.razor.js" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+
   <Target Name="TailwindDebug" BeforeTargets="Compile" Condition="'$(Configuration)' == 'Debug'">
     <Exec WorkingDirectory="$(ProjectDir)"
           Command="npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/tailwind.css" />

@@ -2,18 +2,114 @@
 @namespace Flashcards.Web.App.Pages
 @layout ListLayout
 @inherits PageBase
-<h3>CardCollectionListPage</h3>
+@using Flashcards.Web.App.Components
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-gray-100 h-full rounded p-4">
+<div class="top-10">
+    <div>
+        <h2 class="font-bold text-4xl text-center">My collections</h2>
         @if (CardCollections.Count != 0)
         {
-            <div class="grid gap-4">
-                @foreach (var collection in CardCollections)
-                {
-                    <CardCollectionCard Collection="collection" OnEdit="@(()=>OnEditCollection(collection))" OnDelete="@(()=>OnDeleteCollection(collection))" />
-                }
+            <div class="grid grid-cols-[1480px_auto] grid-rows-1 w-full gap-4 items-center">
+                <div class="top-5 pl-5 pr-5 relative max-w-[1480px]">
+                    <button class="absolute left-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollLeft(scrollContainerMy)">&#9664;</button>
+                    <div class="overflow-hidden ml-12">
+                        <div class="flex gap-10 bg-amber-950 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerMy">
+                            @foreach (var collection in CardCollections)
+                            {
+                                <CardCollectionCard class="w-[425px] h-full bg-blue-500 flex-shrink-0" Collection="collection" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
+                            }
+                        </div>
+                    </div>
+                    <button class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollRight(scrollContainerMy)">&#9654;</button>
+                </div>
+                <div class="top-5">
+ 
+                        <CardCollectionForm Model="@Model" Submit="@HandleSubmit"/>
+            
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-10">
+        <h2 class="font-bold text-4xl text-center">All available collections</h2>
+        @if (CardCollections.Count != 0)
+        {
+            <div class="grid grid-cols-[1480px_auto] grid-rows-1 w-full gap-4 items-center">
+                <div class="top-5 pl-5 pr-5 relative max-w-[1480px]">
+                    <button class="absolute left-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollLeft(scrollContainerAll)">&#9664;</button>
+                    <div class="overflow-hidden ml-12">
+                        <div class="flex gap-10 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerAll">
+                            @foreach (var collection in CardCollections)
+                            {
+                                <CardCollectionCard class="w-[425px] h-full bg-blue-500 flex-shrink-0" Collection="collection" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
+                            }
+                        </div>
+                    </div>
+                    <button class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollRight(scrollContainerAll)">&#9654;</button>
+                </div>
             </div>
         }
     </div>
 </div>
+
+
+
+@inject IJSRuntime JS
+
+@code {
+
+    private ElementReference scrollContainerMy;
+    private ElementReference scrollContainerAll;
+    private IJSObjectReference? _module;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                Console.WriteLine("Attempting to load JS module...");
+                _module = await JS.InvokeAsync<IJSObjectReference>(
+                    "import", "Pages/CardCollectionListPage.razor.js");
+                Console.WriteLine("JS module loaded successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to load JS module: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ScrollLeft(ElementReference container)
+    {
+        Console.WriteLine("ScrollLeft called.");
+        if (_module is not null)
+        {
+            Console.WriteLine("Invoking scrollLeft JS function...");
+            await _module.InvokeVoidAsync("scrollLeft", container, 450);
+        }
+        else
+        {
+            Console.WriteLine("_module is null. JS function not invoked.");
+        }
+    }
+
+    private async Task ScrollRight(ElementReference container)
+    {
+        Console.WriteLine("ScrollRight called.");
+        if (_module is not null)
+        {
+            Console.WriteLine("Invoking scrollRight JS function...");
+            await _module.InvokeVoidAsync("scrollRight", container, 450);
+        }
+        else
+        {
+            Console.WriteLine("_module is null. JS function not invoked.");
+        }
+    }
+
+
+}
+
+
