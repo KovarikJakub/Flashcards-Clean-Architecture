@@ -13,7 +13,8 @@ namespace Flashcards.Web.App.Pages
             Id = Guid.NewGuid(),
             Title = string.Empty,
             AnswerStart = DateTime.Now,
-            AnswerEnd = DateTime.Now.AddDays(1)
+            AnswerEnd = DateTime.Now.AddDays(1),
+            Cards = new List<CardDetailModel>()
         };
 
         private bool showCreateForm = false;
@@ -23,6 +24,7 @@ namespace Flashcards.Web.App.Pages
         private NavigationManager NavigationManager { get; set; } = null!;
 
         private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
+        
         protected override async Task OnInitializedAsync()
         {
             
@@ -59,8 +61,7 @@ namespace Flashcards.Web.App.Pages
         private void HandlePlayCollection(CardCollectionListModel collection)
         {
             //TODOO correct navigation to play page
-            //TODO Task is redundant?
-            NavigationManager.NavigateTo($"collections/play/{collection.Id}");
+            NavigationManager.NavigateTo($"/play/{collection.Id}");
         }
         
         private async Task HandleSubmit(CardCollectionDetailModel model)

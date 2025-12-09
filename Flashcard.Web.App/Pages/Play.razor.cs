@@ -1,10 +1,25 @@
 using Flashcards.Common.Models;
 using Flashcards.Common.Enums;
+using Flashcards.Web.BL.Facades;
+using Microsoft.AspNetCore.Components;
 
 namespace Flashcards.Web.App.Pages
 {
     public partial class Play : PageBase
     {
+        [Parameter]
+        public Guid Id { get; init; }
+        
+        public static CardCollectionDetailModel? _cardCollection { get; set; }
+        
+        [Inject]
+        private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
+
+        protected override async Task OnInitializedAsync()
+        {
+            _cardCollection = await CardCollectionFacade.GetByIdModelAsync(Id);        // Zmenit na getbyId, nepouzivat  provizorni webmodel
+        }
+
         private int _index = 0;
         private bool _isFlipped = false;
         
@@ -35,11 +50,12 @@ namespace Flashcards.Web.App.Pages
         
         // Dummy data
         // oddelat static, a getbyId()
+        /*
         private static CardCollectionDetailModel _cardCollection =
             new CardCollectionDetailModel
             {
                 Id = Guid.Parse((ReadOnlySpan<char>)"d4f5c8e2-3c6b-4f1a-9f7e-2b8e5d6c7a9b"),
-                Title = "Sample Card Collection",
+                Title = "IMS hater",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddHours(1),
                 Cards = new List<CardDetailModel>
@@ -59,14 +75,15 @@ namespace Flashcards.Web.App.Pages
                     {
                         Id = Guid.Parse((ReadOnlySpan<char>)"f1e2d3c4-b5a6-7d8e-9f0a-b1c2d3e4f5a6"),
                         Description = "ahoj",
-                        AnswerContent = "odpoved",
-                        QuestionContent = "otazka",
+                        AnswerContent = "Ano je docela borec",
+                        QuestionContent = "IMS je strasne spatny predmet, ale hruby je docela borec ne?",
                         AnswerType = ContentType.Text,
                         QuestionType = ContentType.Text,
                         DateCreated = DateTime.UtcNow
                     }
                 }
             };
+        */
             
          static UserDetailModel CurrentUser =
             new UserDetailModel
