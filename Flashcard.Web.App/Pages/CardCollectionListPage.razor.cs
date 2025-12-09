@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Flashcards.Web.App.Pages
 {
-    public partial class CardCollectionListPage
+    public partial class CardCollectionListPage : PageBase
     {
 
         private CardCollectionDetailModel Model = new CardCollectionDetailModel
