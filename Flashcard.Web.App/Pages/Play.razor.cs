@@ -25,7 +25,7 @@ namespace Flashcards.Web.App.Pages
         
         private void HandleClickNext()
         {
-            if (_index + 1 < Model.Cards.Count) _index++;
+            if (_index + 1 < _cardCollection.Cards.Count) _index++;
         }
         
         private void FlipCard()
@@ -33,7 +33,9 @@ namespace Flashcards.Web.App.Pages
            _isFlipped = !_isFlipped;
         }
         
-            static CardCollectionDetailModel Model =
+        // Dummy data
+        // oddelat static, a getbyId()
+        private static CardCollectionDetailModel _cardCollection =
             new CardCollectionDetailModel
             {
                 Id = Guid.Parse((ReadOnlySpan<char>)"d4f5c8e2-3c6b-4f1a-9f7e-2b8e5d6c7a9b"),
@@ -78,9 +80,9 @@ namespace Flashcards.Web.App.Pages
         public LessonDetailModel CurrentLesson =
             new LessonDetailModel
             {
-                Id = Guid.Parse((ReadOnlySpan<char>)"223e4567-e89b-12d3-a456-426614174001"),
+                Id = Guid.NewGuid(),
                 User = CurrentUser,
-                CardCollection = Model,
+                CardCollection = _cardCollection,
                 Start = DateTime.Now,
                 Correct = 0,
                 Seen = 0,

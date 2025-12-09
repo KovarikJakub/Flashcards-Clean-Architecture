@@ -6,22 +6,24 @@
 @inherits PageBase
 
 <div class="w-full h-full flex flex-col items-center px-4">
-    <label class="mt-5 text-center text-3xl font-bold">todo Title</label>
-    <label class="mt-2 text-center text-lg text-gray-600">todo answer time info</label>
+    <label class="mt-5 text-center text-3xl font-bold">@_cardCollection.Title</label>
+    <label class="mt-5 text-center text-lg text-gray-600">
+        Answers are accepted only between @_cardCollection.AnswerStart.ToLongDateString() - @_cardCollection.AnswerEnd.ToLongDateString()
+    </label>
 
     <div class="flex justify-center items-center w-full">
-        <div class="aspect-[3/2] mt-10 border border-blue-500 w-full max-w-[800px] bg-white">
+        <div class="aspect-[3/2] mt-7 border border-blue-500 w-full max-w-[800px] bg-white">
             <div class="w-full h-full  text-4xl flex items-center justify-center">
                 
                 <div class="flip-container" @onclick="FlipCard">
                     <div class="flip-card @(_isFlipped ? "flipped" : "")">
                         
                         <div class="flip-front">
-                            @Model.Cards[_index].QuestionContent
+                            @_cardCollection.Cards[_index].QuestionContent
                         </div>
                         
                         <div class="flip-back">
-                            @Model.Cards[_index].AnswerContent
+                            @_cardCollection.Cards[_index].AnswerContent
                         </div>
 
                     </div>
@@ -36,7 +38,7 @@
             <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
                     @onclick="@HandleClickBack">left</button>
             <span class="text-lg">
-                @(_index + 1) / @Model.Cards.Count 
+                @(_index + 1) / @_cardCollection.Cards.Count 
             </span>
             <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
                     @onclick="@HandleClickNext">to right</button>
