@@ -5,7 +5,7 @@ namespace Flashcards.Api.BL.Mappers
 {
     public class UserMapper
     {
-        public UserEntity ToEntity(UserDetailModel model)
+        public UserEntity ToEntity(UserDetailModel model, string? ownerId = null)
         {
             return new UserEntity
             {
@@ -13,6 +13,7 @@ namespace Flashcards.Api.BL.Mappers
                 Name = model.Name,
                 PhotographyUrl = model.PhotographyUrl,
                 Role = model.Role
+
             };
         }
 
@@ -34,6 +35,7 @@ namespace Flashcards.Api.BL.Mappers
                 Id = e.Id,
                 Name = e.Name,
                 Role = e.Role
+             
             }).ToList();
         }
     }

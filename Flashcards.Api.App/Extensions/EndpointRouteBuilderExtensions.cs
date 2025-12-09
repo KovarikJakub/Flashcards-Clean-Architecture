@@ -11,4 +11,10 @@ public static class EndpointRouteBuilderExtensions
         IOptions<IdentityOptions> identityOptions)
         => new CardCollectionEndpoints(identityOptions)
         .MapEndpoints(endpointRouteBuilder);
+
+    public static IEndpointRouteBuilder UseUserEndpoints(
+    this IEndpointRouteBuilder endpointRouteBuilder,
+    IOptions<IdentityOptions> identityOptions)
+    => new UserEndpoints(identityOptions)
+    .MapEndpoints(endpointRouteBuilder);
 }

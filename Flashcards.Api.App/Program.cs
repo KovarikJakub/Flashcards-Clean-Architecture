@@ -66,7 +66,7 @@ void UseEndpoints(WebApplication app)
     var identityOptions = app.Services.GetRequiredService<IOptions<IdentityOptions>>();
 
     CardEndpoints.MapEndpoints(endpointsBase);
-    UserEndpoints.MapEndpoints(endpointsBase);
+    endpointsBase.UseUserEndpoints(identityOptions);
     endpointsBase.UseCardCollectionEndpoints(identityOptions);
     LessonEndpoints.MapEndpoints(endpointsBase);
 }

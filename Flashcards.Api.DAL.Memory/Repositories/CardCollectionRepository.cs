@@ -54,7 +54,6 @@ namespace Flashcards.Api.DAL.Memory.Repositories
                 existingCollection.AnswerEnd = collection.AnswerEnd;
                 existingCollection.Title = collection.Title;
                 existingCollection.Cards = collection.Cards;
-                existingCollection.OwnerId = collection.OwnerId;
                 return existingCollection.Id;
             }
 

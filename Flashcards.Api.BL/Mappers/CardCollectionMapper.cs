@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Flashcards.Api.BL.Mappers;
 public class CardCollectionMapper
 {
-    public CardCollectionEntity ToEntity(CardCollectionDetailModel model)
+    public CardCollectionEntity ToEntity(CardCollectionDetailModel model, string? ownerId = null)
     {
         return new CardCollectionEntity
         {
@@ -14,7 +14,6 @@ public class CardCollectionMapper
             Title = model.Title,
             AnswerStart = model.AnswerStart,
             AnswerEnd = model.AnswerEnd,
-            OwnerId = model.OwnerId,
             Cards = model.Cards            
             .Select(card => new CardEntity
             {
@@ -41,7 +40,6 @@ public class CardCollectionMapper
             Title = model.Title,
             AnswerStart = model.AnswerStart,
             AnswerEnd = model.AnswerEnd,
-            OwnerId = model.OwnerId,
             Cards = model.Cards
             .Select(card => new CardDetailModel
             {
@@ -67,8 +65,7 @@ public class CardCollectionMapper
             Id = e.Id,
             Title = e.Title,
             AnswerStart = e.AnswerStart,
-            AnswerEnd = e.AnswerEnd,
-            OwnerId = e.OwnerId
+            AnswerEnd = e.AnswerEnd
 
         }).ToList();
     }

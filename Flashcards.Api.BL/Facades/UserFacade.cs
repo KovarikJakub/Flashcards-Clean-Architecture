@@ -1,60 +1,85 @@
-
-using System.Data;
-using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Repositories;
+using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {
-
     public class UserFacade : IUserFacade
     {
-        private readonly UserMapper _mapper;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository userRepository;
+        private readonly UserMapper mapper;
 
-        public UserFacade(UserMapper mapper, IUserRepository repository)
+        public UserFacade(
+            IUserRepository userRepository,
+            UserMapper mapper)
         {
-            _mapper = mapper;
-            _repository = repository;
-        }
-
-        public Guid Create(UserDetailModel user)
-        {
-            var userEntity = _mapper.ToEntity(user);
-            _repository.Insert(userEntity);
-            return userEntity.Id;
-        }
-
-        public Guid CreateOrUpdate(UserDetailModel user)
-        {
-            return _repository.Exists(user.Id)
-                ? Update(user)!.Value                // ! -> can not be null
-                : Create(user);
-        }
-
-        public void Delete(Guid id)
-        {
-            _repository.Remove(id);
+            this.userRepository = userRepository;
+            this.mapper = mapper;
         }
 
         public List<UserListModel> GetAll()
         {
-            var entities = _repository.GetAll();
-            return _mapper.ToListModel(entities);
+            var entities = userRepository.GetAll();
+            return mapper.ToListModel(entities);
         }
 
         public UserDetailModel? GetById(Guid id)
         {
-            var userEntity = _repository.GetById(id);
-            if (userEntity == null) return null;
-            return _mapper.ToDetailModel((userEntity));
+            var entity = userRepository.GetById(id);
+            return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public Guid? Update(UserDetailModel user)
+        public Guid CreateOrUpdate(UserDetailModel model, IList<string> userRoles, string? ownerId = null)
         {
-            var userEntity = _mapper.ToEntity(user);
-            return _repository.Update(userEntity);
+            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
+            return userRepository.Exists(model.Id)
+                ? Update(model, userRoles, ownerId)!.Value
+                : Create(model, userRoles, ownerId);
+        }
+
+        public Guid Create(UserDetailModel model, IList<string> userRoles, string? ownerId = null)
+        {
+
+            var entity = mapper.ToEntity(model, ownerId);
+            userRepository.Insert(entity);
+            return entity.Id;
+        }
+
+        public Guid? Update(UserDetailModel model, IList<string> userRoles, string? ownerId = null)
+        {
+            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
+
+            var existing = userRepository.GetById(model.Id);
+            if (existing == null)
+                return null;
+
+            var entity = mapper.ToEntity(model, ownerId);
+
+
+            return userRepository.Update(entity);
+        }
+
+        public void Delete(Guid id, IList<string> userRoles, string? ownerId = null)
+        {
+            ThrowIfWrongOwnerAndNotAdmin(id, userRoles, ownerId);
+            userRepository.Remove(id);
+        }
+
+        private void ThrowIfWrongOwnerAndNotAdmin(Guid? id, IList<string> userRoles, string? ownerId)
+        {
+            if (id is not null
+                && userRoles is not null
+                && !userRoles.Contains(RoleType.Administrator.ToString())
+                && ownerId is not null)
+            {
+                var existingUser = userRepository.GetById(id.Value);
+                if (existingUser != null && existingUser.Id.ToString() != ownerId)
+                {
+                    throw new UnauthorizedAccessException();
+                }
+            }
         }
     }
 }

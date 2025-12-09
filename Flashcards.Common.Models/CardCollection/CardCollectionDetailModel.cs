@@ -11,7 +11,7 @@ namespace Flashcards.Common.Models
 
         public IList<CardDetailModel> Cards { get; set; } = new List<CardDetailModel>();
 
-        public string? OwnerId { get; set; }
+      
 
     }
 }

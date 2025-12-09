@@ -41,8 +41,7 @@ namespace Flashcards.Api.BL.Facades
 
         public Guid Create(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
         {
-            model.OwnerId = ownerId;
-            var entity = mapper.ToEntity(model);
+            var entity = mapper.ToEntity(model, ownerId);
             cardCollectionRepository.Insert(entity);
             return entity.Id;
         }
@@ -55,7 +54,7 @@ namespace Flashcards.Api.BL.Facades
             if (existing == null)
                 return null;
 
-            var entity = mapper.ToEntity(model);
+            var entity = mapper.ToEntity(model, ownerId);
             entity.OwnerId = existing.OwnerId;
 
             entity.Cards = model.Cards.Select(c =>
