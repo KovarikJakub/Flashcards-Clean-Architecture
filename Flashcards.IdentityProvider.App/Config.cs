@@ -13,59 +13,60 @@ namespace Flashcards.IdentityProvider.App
                 var profileIdentityResources = new IdentityResources.Profile();
                 profileIdentityResources.UserClaims.Add("username");
 
-                return
-                [
+                return new IdentityResource[]
+                {
                     new IdentityResources.OpenId(),
-                    profileIdentityResources
-                ];
+                    profileIdentityResources,
+                    new IdentityResource("roles", new[] { JwtClaimTypes.Role })
+                };
             }
         }
 
-        public static IEnumerable<ApiResource> ApiResources =>
-        [
-            new ("flashcardsclientaudience")
-        ];
+        public static IEnumerable<ApiResource> ApiResources => new ApiResource[]
+        {
+            new ApiResource("flashcardsclientaudience") { UserClaims = { JwtClaimTypes.Role } }
+        };
 
-        public static IEnumerable<ApiScope> ApiScopes =>
-        [
-            new ("flashcardsapi", [JwtClaimTypes.Role])
-        ];
+        public static IEnumerable<ApiScope> ApiScopes => new ApiScope[]
+        {
+            new ApiScope("flashcardsapi", "Flashcards API", new[] { JwtClaimTypes.Role })
+        };
 
-        public static IEnumerable<Client> Clients =>
-        [
-            new()
+        public static IEnumerable<Client> Clients => new Client[]
+        {
+            new Client
             {
                 ClientName = "Flashcards Client",
                 ClientId = "flashcardsclient",
                 AllowOfflineAccess = true,
-                RedirectUris =
-                [
+                RedirectUris = new List<string>
+                {
                     "https://oauth.pstmn.io/v1/callback",
                     "https://localhost:44355/authentication/login-callback",
-                ],
-                PostLogoutRedirectUris =
-                [
+                },
+                PostLogoutRedirectUris = new List<string>
+                {
                     "https://localhost:44355"
-                ],
-                AllowedGrantTypes =
-                [
-                    GrantType.ClientCredentials,
-                    GrantType.ResourceOwnerPassword,
-                    GrantType.AuthorizationCode
-                ],
+                },
+                // This is a public SPA client — use Authorization Code + PKCE
+                AllowedGrantTypes = GrantTypes.Code,
                 RequirePkce = true,
-                AllowedScopes =
-                [
+                // SPA cannot keep a client secret
+                RequireClientSecret = false,
+                // Allow the browser to call the token endpoint from this origin
+                AllowedCorsOrigins = new List<string>
+                {
+                    "https://localhost:44355"
+                },
+                AllowedScopes = new List<string>
+                {
                     IdentityServerConstants.StandardScopes.OpenId,
                     IdentityServerConstants.StandardScopes.Profile,
+                    "roles",
                     "flashcardsapi"
-                ],
-                ClientSecrets =
-                {
-                    new Secret("secret".Sha256())
                 },
-                RequireClientSecret = false
+                AlwaysIncludeUserClaimsInIdToken = true
             }
-        ];
+        };
     }
 }

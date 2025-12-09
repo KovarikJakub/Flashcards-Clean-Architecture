@@ -1,9 +1,13 @@
+using Flashcards.Common.Extensions;
 using Flashcards.Common.Options;
 using Flashcards.Web.App;
+using Flashcards.Web.BL.Api;
 using Flashcards.Web.BL.Extensions;
+using Flashcards.Web.BL.Facades;
 using Flashcards.Web.BL.Installers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -26,18 +30,22 @@ if (identityOptions is null)
 }
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
 
-
-if (apiOptions != null)
-{
-    builder.Services.AddInstaller<WebBLInstaller>(identityOptions, apiOptions);
-}
-
+builder.Services.AddInstaller<WebBLInstaller>(identityOptions, apiOptions);
 
 
 // OIDC auth
 builder.Services.AddOidcAuthentication(options =>
 {
     builder.Configuration.Bind("IdentityOptions", options.ProviderOptions);
+
+    // ensure roles scope is requested so role claims are available
+    if (!options.ProviderOptions.DefaultScopes.Contains("roles"))
+    {
+        options.ProviderOptions.DefaultScopes.Add("roles");
+    }
+
+    // map role claim type used by the identity server
+    options.UserOptions.RoleClaim = "role";
 });
 
 // keep existing registration for fallback http client

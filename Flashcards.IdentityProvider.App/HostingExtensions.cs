@@ -47,6 +47,18 @@ namespace Flashcards.IdentityProvider.App
             // uncomment if you want to add a UI
             builder.Services.AddRazorPages();
 
+            // Add CORS policy to allow the SPA client to access discovery and token endpoints
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    // Allow the client origin used in development. Adjust as needed for production.
+                    policy.WithOrigins("https://localhost:44355")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             builder.Services.AddIdentityServer(options =>
                 {
                     // https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/api_scopes#authorization-based-on-scopes
@@ -65,6 +77,13 @@ namespace Flashcards.IdentityProvider.App
         public static WebApplication ConfigurePipeline(this WebApplication app)
         {
             app.UseSerilogRequestLogging();
+
+            app.UseCors(policy =>
+            {
+                policy.AllowAnyHeader();
+                policy.AllowAnyMethod();
+                policy.AllowAnyOrigin();
+            });
 
             if (app.Environment.IsDevelopment())
             {

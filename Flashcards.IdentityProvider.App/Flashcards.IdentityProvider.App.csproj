@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Flashcards.IdentityProvider.BL\Flashcards.IdentityProvider.BL.csproj" />
     <ProjectReference Include="..\Flashcards.IdentityProvider.DAL\Flashcards.IdentityProvider.DAL.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
 </Project>
