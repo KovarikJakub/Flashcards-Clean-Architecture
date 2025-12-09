@@ -14,7 +14,8 @@ public class CardCollectionMapper
             Title = model.Title,
             AnswerStart = model.AnswerStart,
             AnswerEnd = model.AnswerEnd,
-            Cards = model.Cards
+            OwnerId = model.OwnerId,
+            Cards = model.Cards            
             .Select(card => new CardEntity
             {
                 Id = card.Id,
@@ -40,6 +41,7 @@ public class CardCollectionMapper
             Title = model.Title,
             AnswerStart = model.AnswerStart,
             AnswerEnd = model.AnswerEnd,
+            OwnerId = model.OwnerId,
             Cards = model.Cards
             .Select(card => new CardDetailModel
             {
@@ -65,8 +67,9 @@ public class CardCollectionMapper
             Id = e.Id,
             Title = e.Title,
             AnswerStart = e.AnswerStart,
-            AnswerEnd = e.AnswerEnd      
-         
+            AnswerEnd = e.AnswerEnd,
+            OwnerId = e.OwnerId
+
         }).ToList();
     }
 }

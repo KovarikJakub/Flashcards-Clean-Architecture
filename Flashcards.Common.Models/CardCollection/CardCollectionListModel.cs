@@ -6,5 +6,7 @@
         public required string Title { get; set; }
         public required DateTime AnswerStart { get; set; }
         public required DateTime AnswerEnd { get; set; }
+
+        public string? OwnerId { get; set; }
     }
 }

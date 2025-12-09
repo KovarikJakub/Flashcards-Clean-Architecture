@@ -9,5 +9,7 @@ namespace Flashcards.Api.DAL.Common.Entities
         public required DateTime AnswerEnd { get; set; }
 
         public ICollection<CardEntity> Cards { get; set; } = new List<CardEntity>();
+
+        public string? OwnerId { get; set; }
     }
 }

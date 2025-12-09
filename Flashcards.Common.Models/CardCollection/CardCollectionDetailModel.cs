@@ -10,5 +10,8 @@ namespace Flashcards.Common.Models
         public required DateTime AnswerEnd { get; set; }
 
         public IList<CardDetailModel> Cards { get; set; } = new List<CardDetailModel>();
+
+        public string? OwnerId { get; set; }
+
     }
 }
