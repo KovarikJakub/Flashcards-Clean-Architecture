@@ -1,7 +1,8 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Test;
+using Flashcards.IdentityProvider.BL.Facades;
+using Flashcards.IdentityProvider.BL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,25 +13,24 @@ namespace Flashcards.IdentityProvider.App.Pages.Create;
 [AllowAnonymous]
 public class Index : PageModel
 {
-    private readonly TestUserStore _users;
     private readonly IIdentityServerInteractionService _interaction;
+    private readonly IAppUserFacade appUserFacade;
 
     [BindProperty]
     public InputModel Input { get; set; } = default!;
 
     public Index(
         IIdentityServerInteractionService interaction,
-        TestUserStore? users = null)
+        IAppUserFacade appUserFacade)
     {
-        // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
-        _users = users ?? throw new InvalidOperationException("Please call 'AddTestUsers(TestUsers.Users)' on the IIdentityServerBuilder in Startup or remove the TestUserStore from the AccountController.");
-
         _interaction = interaction;
+        this.appUserFacade = appUserFacade;
+
     }
 
     public IActionResult OnGet(string? returnUrl)
     {
-        Input = new InputModel { ReturnUrl = returnUrl };
+        Input = new InputModel { ReturnUrl = returnUrl ?? "~/"};
         return Page();
     }
 
@@ -66,22 +66,21 @@ public class Index : PageModel
             }
         }
 
-        if (_users.FindByUsername(Input.Username) != null)
+        if ((await appUserFacade.GetUserByUserNameAsync(Input.Username)) != null)
         {
             ModelState.AddModelError("Input.Username", "Invalid username");
         }
 
         if (ModelState.IsValid)
         {
-            var user = _users.CreateUser(Input.Username, Input.Password, Input.Name, Input.Email);
-
-            // issue authentication cookie with subject ID and username
-            var isuser = new IdentityServerUser(user.SubjectId)
+            var appUserCreateModel = new AppUserCreateModel
             {
-                DisplayName = user.Username
+                UserName = Input.Username,
+                Password = Input.Password,
+                Email = Input.Email,
+                Subject = Input.Username,
             };
-
-            await HttpContext.SignInAsync(isuser);
+            var user = await appUserFacade.CreateAppUserAsync(appUserCreateModel);
 
             if (context != null)
             {

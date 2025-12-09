@@ -1,20 +1,23 @@
 using Duende.IdentityServer.Licensing;
 using Flashcards.Common.Extensions;
 using Flashcards.IdentityProvider.App;
+using Flashcards.IdentityProvider.App.Endpoints;
 using Flashcards.IdentityProvider.App.Installers;
 using Flashcards.IdentityProvider.BL.Installers;
 using Flashcards.IdentityProvider.DAL.Installers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Flashcards.IdentityProvider.DAL.Entities;
 using Serilog;
 using System.Globalization;
 using System.Text;
-using Flashcards.IdentityProvider.App.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
 Log.Information("Starting up");
+
 
 try
 {
@@ -43,6 +46,53 @@ try
     app.MapGroup("api")
         .AllowAnonymous()
         .UseUserEndpoints();
+
+    //////
+    /*using (var scope = app.Services.CreateScope())
+    {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUserEntity>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRoleEntity>>();
+
+        // Create roles if not exists
+        if (!await roleManager.RoleExistsAsync("Admin"))
+            await roleManager.CreateAsync(new AppRoleEntity(){ Name = "Admin"});
+
+        if (!await roleManager.RoleExistsAsync("User"))
+            await roleManager.CreateAsync(new AppRoleEntity(){ Name = "User"});
+
+        // Create admin user if not exists
+        string username = "User";
+        string adminEmail = "User@email.com";
+        string adminPassword = "User123";
+
+        var existingUser = await userManager.FindByEmailAsync(adminEmail);
+        if (existingUser == null)
+        {
+            var admin = new AppUserEntity
+            {
+                UserName = username,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                Active = true,
+                Subject = username
+            };
+
+            var result = await userManager.CreateAsync(admin, adminPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(admin, "User");
+                Console.WriteLine("User user created successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to create admin user:");
+                foreach (var e in result.Errors)
+                    Console.WriteLine($" - {e.Description}");
+            }
+        }
+    }*/
+    //as
 
     app.Run();
 }
