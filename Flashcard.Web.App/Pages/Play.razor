@@ -5,17 +5,48 @@
 @layout PlayLayout
 @inherits PageBase
 
-<div class="w-full h-full flex flex-col ">
+<div class="w-full h-full flex flex-col items-center px-4">
     <label class="mt-5 text-center text-3xl font-bold">todo Title</label>
-    <label class="mt-10 text-center text-3xl font-bold">todo answer time info</label>
-    <div class="flex justify-center items-center">
-        <div class="aspect-[3/2] mt-10 border border-blue-500 w-1/2 h-1/2">
-            
-            @code {
-                // TODO set textare size
-            }
-            
-            <textarea class="w-full h-full p-4 outline-none">otazka cislo 1</textarea>
+    <label class="mt-2 text-center text-lg text-gray-600">todo answer time info</label>
+
+    <div class="flex justify-center items-center w-full">
+        <div class="aspect-[3/2] mt-10 border border-blue-500 w-full max-w-[800px] bg-white">
+            <div class="w-full h-full  text-4xl flex items-center justify-center">
+                
+                <div class="flip-container" @onclick="FlipCard">
+                    <div class="flip-card @(_isFlipped ? "flipped" : "")">
+                        
+                        <div class="flip-front">
+                            @Model.Cards[_index].QuestionContent
+                        </div>
+                        
+                        <div class="flip-back">
+                            @Model.Cards[_index].AnswerContent
+                        </div>
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex justify-between items-center mt-6 w-full max-w-[800px]">
+        <div class="flex items-center gap-4">
+            <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
+                    @onclick="@HandleClickBack">left</button>
+            <span class="text-lg">
+                @(_index + 1) / @Model.Cards.Count 
+            </span>
+            <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
+                    @onclick="@HandleClickNext">to right</button>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button type="button" class="w-[120px] h-12 text-lg text-white bg-green-500 rounded hover:bg-green-600 active:scale-95 flex items-center justify-center"
+                    @onclick="HandleClickCorrect">correct</button>
+            <button type="button" class="w-[120px] h-12 text-lg text-white bg-red-500 rounded hover:bg-red-600 flex items-center justify-center"
+                    @onclick="@HandleClickWrong">wrong</button>
         </div>
     </div>
 </div>
@@ -23,7 +54,6 @@
 
 
 
-
 @code {
-    
+    //<textarea class="w-full h-full p-4 outline-none">otazka cislo 1</textarea>
 }
