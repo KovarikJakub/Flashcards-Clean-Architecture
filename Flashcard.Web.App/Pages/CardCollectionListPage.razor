@@ -2,7 +2,7 @@
 @namespace Flashcards.Web.App.Pages
 @layout ListLayout
 @inherits PageBase
-@using Flashcards.Web.App.Components
+
 
 <div class="top-10">
     <div>
@@ -13,19 +13,30 @@
                 <div class="top-5 pl-5 pr-5 relative max-w-[1480px]">
                     <button class="absolute left-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollLeft(scrollContainerMy)">&#9664;</button>
                     <div class="overflow-hidden ml-12">
-                        <div class="flex gap-10 bg-amber-950 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerMy">
+                        <div class="flex gap-10 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerMy">
                             @foreach (var collection in CardCollections)
                             {
-                                <CardCollectionCard class="w-[425px] h-full bg-blue-500 flex-shrink-0" Collection="collection" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
+                                <CardCollectionCard class="w-[425px] h-full  flex-shrink-0" Collection="collection" IsOwner="true" 
+                                                    onPlay="@(() => HandlePlayCollection(collection))" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
                             }
                         </div>
                     </div>
                     <button class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollRight(scrollContainerMy)">&#9654;</button>
                 </div>
                 <div class="top-5">
- 
-                        <CardCollectionForm Model="@Model" Submit="@HandleSubmit"/>
-            
+                    @if (!showCreateForm)
+                    {
+                        <div class="ml-10  ">
+                            <button class=" border rounded p-8 text-4xl font-bold hover:bg-blue-500 hover:text-white transition"
+                                    @onclick="HandleOpenForm">
+                                +
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <CardCollectionForm Model="@Model" Submit="@HandleSubmit" Cancel="@HandleCancel"/>
+                    }
                 </div>
             </div>
         }
@@ -42,7 +53,8 @@
                         <div class="flex gap-10 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerAll">
                             @foreach (var collection in CardCollections)
                             {
-                                <CardCollectionCard class="w-[425px] h-full bg-blue-500 flex-shrink-0" Collection="collection" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
+                                <CardCollectionCard class="w-[425px] h-full flex-shrink-0" Collection="collection" IsOwner="false" 
+                                                    onPlay="@(() => HandlePlayCollection(collection))"/>
                             }
                         </div>
                     </div>

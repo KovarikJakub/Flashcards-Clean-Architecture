@@ -15,8 +15,8 @@ namespace Flashcards.Web.App.Pages
             AnswerStart = DateTime.Now,
             AnswerEnd = DateTime.Now.AddDays(1)
         };
-        
-        
+
+        private bool showCreateForm = false;
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
         [Inject]
@@ -56,9 +56,13 @@ namespace Flashcards.Web.App.Pages
             }
         }
         
- 
-
-
+        private void HandlePlayCollection(CardCollectionListModel collection)
+        {
+            //TODOO correct navigation to play page
+            //TODO Task is redundant?
+            NavigationManager.NavigateTo($"collections/play/{collection.Id}");
+        }
+        
         private async Task HandleSubmit(CardCollectionDetailModel model)
         {
             CardCollectionDetailModel newCollection = new CardCollectionDetailModel
@@ -71,5 +75,15 @@ namespace Flashcards.Web.App.Pages
             };
             await CardCollectionFacade.UpsertAsync(newCollection);
         }
+        
+        private void  HandleCancel()
+        {
+            showCreateForm = false;
+        }
+
+        private void HandleOpenForm()
+        {
+            showCreateForm = true;
+        } 
     }
 }
