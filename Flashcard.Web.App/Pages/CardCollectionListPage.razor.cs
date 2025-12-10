@@ -1,12 +1,29 @@
 ﻿using Flashcards.Common.Models;
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace Flashcards.Web.App.Pages
 {
     public partial class CardCollectionListPage : PageBase
     {
-        private CardCollectionDetailModel Model = new CardCollectionDetailModel
+        [Inject]
+        private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = null!;
+        [Inject]
+        private IJSRuntime JS { get; set; } = null!;
+        
+        private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
+        private string FilterMy { get; set; } = string.Empty;
+        private string FilterAll { get; set; } = string.Empty;
+        
+        private bool _showCreateForm = false;
+        private ElementReference _scrollContainerMy;
+        private ElementReference _scrollContainerAll;
+        private IJSObjectReference? _module;
+        
+        private CardCollectionDetailModel _model = new CardCollectionDetailModel
         {
             Id = Guid.NewGuid(),
             Title = string.Empty,
@@ -14,17 +31,6 @@ namespace Flashcards.Web.App.Pages
             AnswerEnd = DateTime.Now.AddDays(1),
             Cards = new List<CardDetailModel>()
         };
-
-        private bool showCreateForm = false;
-        [Inject]
-        private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
-        [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
-
-        private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
-
-        private string FilterMy { get; set; } = string.Empty;
-        private string FilterAll { get; set; } = string.Empty;
 
         private List<CardCollectionListModel> FilteredMyCollections =>
             string.IsNullOrWhiteSpace(FilterMy)
@@ -84,7 +90,7 @@ namespace Flashcards.Web.App.Pages
                     Cards = model.Cards
                 };
                 
-                showCreateForm = false;
+               _showCreateForm = false;
                 await CardCollectionFacade.UpsertAsync(newCollection);
                 await LoadData();
             }
@@ -96,12 +102,12 @@ namespace Flashcards.Web.App.Pages
         
         private void  HandleCancel()
         {
-            showCreateForm = false;
+            _showCreateForm = false;
         }
 
         private void HandleOpenForm()
         {
-            showCreateForm = true;
+            _showCreateForm = true;
         } 
 
         private bool IsCollectionActive(CardCollectionListModel collection)
@@ -110,6 +116,52 @@ namespace Flashcards.Web.App.Pages
             var startUtc = collection.AnswerStart.ToUniversalTime();
             var endUtc = collection.AnswerEnd.ToUniversalTime();
             return now >= startUtc && now <= endUtc;
+        }
+        
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                try
+                {
+                    Console.WriteLine("Attempting to load JS module...");
+                    _module = await JS.InvokeAsync<IJSObjectReference>(
+                        "import", "/js/Scroll.js");
+                    Console.WriteLine("JS module loaded successfully.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to load JS module: {ex.Message}");
+                }
+            }
+        }
+
+        private async Task ScrollLeft(ElementReference container)
+        {
+            Console.WriteLine("ScrollLeft called.");
+            if (_module is not null)
+            {
+                Console.WriteLine("Invoking scrollLeft JS function...");
+                await _module.InvokeVoidAsync("scrollLeft", container, 450);
+            }
+            else
+            {
+                Console.WriteLine("_module is null. JS function not invoked.");
+            }
+        }
+
+        private async Task ScrollRight(ElementReference container)
+        {
+            Console.WriteLine("ScrollRight called.");
+            if (_module is not null)
+            {
+                Console.WriteLine("Invoking scrollRight JS function...");
+                await _module.InvokeVoidAsync("scrollRight", container, 450);
+            }
+            else
+            {
+                Console.WriteLine("_module is null. JS function not invoked.");
+            }
         }
     }
 }
