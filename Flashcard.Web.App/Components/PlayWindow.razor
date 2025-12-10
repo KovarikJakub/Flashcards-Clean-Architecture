@@ -14,11 +14,25 @@
                         <div class="flip-card @(_isFlipped ? "flipped" : "")">
 
                             <div class="flip-front px-8 text-center break-words leading-normal">
-                                @_cardCollection.Cards[_index].QuestionContent
+                                @if (_cardCollection.Cards[_index].QuestionType == ContentType.Image)
+                                {
+                                    <img src="@_cardCollection.Cards[_index].QuestionContent" alt="@_cardCollection.Cards[_index].Description" class="max-w-full max-h-full object-contain" />
+                                }
+                                else
+                                {
+                                    @_cardCollection.Cards[_index].QuestionContent
+                                }
                             </div>
 
                             <div class="flip-back px-8 text-center break-words leading-normal">
-                                @_cardCollection.Cards[_index].AnswerContent
+                                @if (_cardCollection.Cards[_index].AnswerType == ContentType.Image)
+                                {
+                                    <img src="@_cardCollection.Cards[_index].AnswerContent" alt="@_cardCollection.Cards[_index].Description" class="max-w-full max-h-full object-contain" />
+                                }
+                                else
+                                {
+                                    @_cardCollection.Cards[_index].AnswerContent
+                                }
                             </div>
 
                         </div>
