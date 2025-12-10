@@ -2,7 +2,6 @@
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 
-
 namespace Flashcards.Web.App.Pages
 {
     public partial class CardCollectionListPage : PageBase
@@ -23,7 +22,20 @@ namespace Flashcards.Web.App.Pages
         private NavigationManager NavigationManager { get; set; } = null!;
 
         private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
-        
+
+        private string FilterMy { get; set; } = string.Empty;
+        private string FilterAll { get; set; } = string.Empty;
+
+        private List<CardCollectionListModel> FilteredMyCollections =>
+            string.IsNullOrWhiteSpace(FilterMy)
+                ? CardCollections.ToList()
+                : CardCollections.Where(c => c.Title?.Contains(FilterMy.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
+
+        private List<CardCollectionListModel> FilteredAllCollections =>
+            string.IsNullOrWhiteSpace(FilterAll)
+                ? CardCollections.ToList()
+                : CardCollections.Where(c => c.Title?.Contains(FilterAll.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
+
         protected override async Task OnInitializedAsync()
         {
             await LoadData();

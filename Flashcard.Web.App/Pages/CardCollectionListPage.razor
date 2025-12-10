@@ -7,6 +7,11 @@
 <div class="top-10">
     <div>
         <h2 class="font-bold text-4xl text-center">My collections</h2>
+
+        <div class="flex ml-[70px]">
+            <input class="w-[350px] p-2 border rounded" placeholder="Filter my collections by title..." @bind="FilterMy" @bind:event="oninput" />
+        </div>
+
         @if (CardCollections.Count != 0)
         {
             <div class="grid grid-cols-[1480px_auto] grid-rows-1 w-full gap-4 items-center">
@@ -14,10 +19,19 @@
                     <button class="absolute left-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollLeft(scrollContainerMy)">&#9664;</button>
                     <div class="overflow-hidden ml-12">
                         <div class="flex gap-10 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerMy">
-                            @foreach (var collection in CardCollections)
+                            @if (FilteredMyCollections.Any())
                             {
-                                <CardCollectionCard class="w-[425px] h-full  flex-shrink-0" Collection="collection" IsOwner="true" 
-                                                    onPlay="@(() => HandlePlayCollection(collection))" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
+                                @foreach (var collection in FilteredMyCollections)
+                                {
+                                    <CardCollectionCard class="w-[425px] h-full  flex-shrink-0" Collection="collection" IsOwner="true" 
+                                                        onPlay="@(() => HandlePlayCollection(collection))" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
+                                }
+                            }
+                            else
+                            {
+                                <div class="flex items-center justify-center w-full text-gray-500">
+                                    No collections match your filter.
+                                </div>
                             }
                         </div>
                     </div>
@@ -44,6 +58,11 @@
 
     <div class="mt-10">
         <h2 class="font-bold text-4xl text-center">All available collections</h2>
+
+        <div class="flex ml-[70px]">
+            <input class="w-[350px] p-2 border rounded" placeholder="Filter all available collections by title..." @bind="FilterAll" @bind:event="oninput" />
+        </div>
+
         @if (CardCollections.Count != 0)
         {
             <div class="grid grid-cols-[1480px_auto] grid-rows-1 w-full gap-4 items-center">
@@ -51,10 +70,19 @@
                     <button class="absolute left-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full z-10" @onclick="() => ScrollLeft(scrollContainerAll)">&#9664;</button>
                     <div class="overflow-hidden ml-12">
                         <div class="flex gap-10 w-full h-[350px] overflow-x-auto scroll-smooth" @ref="scrollContainerAll">
-                            @foreach (var collection in CardCollections)
+                            @if (FilteredAllCollections.Any())
                             {
-                                <CardCollectionCard class="w-[425px] h-full flex-shrink-0" Collection="collection" IsOwner="false" 
-                                                    onPlay="@(() => HandlePlayCollection(collection))"/>
+                                @foreach (var collection in FilteredAllCollections)
+                                {
+                                    <CardCollectionCard class="w-[425px] h-full flex-shrink-0" Collection="collection" IsOwner="false" 
+                                                        onPlay="@(() => HandlePlayCollection(collection))"/>
+                                }
+                            }
+                            else
+                            {
+                                <div class="flex items-center justify-center w-full text-gray-500">
+                                    No collections match your filter.
+                                </div>
                             }
                         </div>
                     </div>
@@ -64,6 +92,7 @@
         }
     </div>
 </div>
+
 
 
 
@@ -123,5 +152,3 @@
 
 
 }
-
-
