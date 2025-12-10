@@ -6,17 +6,12 @@ namespace Flashcards.Api.BL.Facades
 {
     public interface IUserFacade : IFacade
     {
-        public Guid Create(UserDetailModel user);
-
-        public Guid CreateOrUpdate(UserDetailModel user);
-
-        public void Delete(Guid id);
-
-        public List<UserListModel> GetAll();
-
-        public UserDetailModel? GetById(Guid id);
-
-        public Guid? Update(UserDetailModel user);
+        List<UserListModel> GetAll();
+        UserDetailModel? GetById(Guid id);
+        Guid CreateOrUpdate(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
+        Guid Create(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
+        Guid? Update(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
+        void Delete(Guid id, IList<string> userRoles, string? ownerId = null);
     }
 }
 

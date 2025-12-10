@@ -9,6 +9,7 @@ namespace Flashcards.Common.Models
         public required string Name { get; set; }
         
         public required RoleType Role { get; set; }
+
     }
 }
 

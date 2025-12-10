@@ -19,7 +19,7 @@ namespace Flashcards.Api.BL.UnitTests
         {
             _fakeRepo = Substitute.For<IUserRepository>();
             _mapper = new UserMapper();
-            _facade = new UserFacade(_mapper, _fakeRepo);
+            _facade = new UserFacade(_fakeRepo, _mapper);
         }
 
         private UserDetailModel CreateUserDetailModel(Guid id)
@@ -43,7 +43,7 @@ namespace Flashcards.Api.BL.UnitTests
             var userId = Guid.NewGuid();
             
             // act
-            _facade.Delete(userId);
+            _facade.Delete(userId, []);
             
             // assert
             _fakeRepo.Received(1).Remove(userId);       
@@ -56,7 +56,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newUser = CreateUserDetailModel(Guid.NewGuid());
             
             // Act
-            var id = _facade.Create(newUser);
+            var id = _facade.Create(newUser, []);
             
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
@@ -75,7 +75,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newUser = CreateUserDetailModel(Guid.NewGuid());
 
             // Act
-            var result = _facade.CreateOrUpdate(newUser);
+            var result = _facade.CreateOrUpdate(newUser, []);
             
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
@@ -91,13 +91,15 @@ namespace Flashcards.Api.BL.UnitTests
         public void CreateOrUpdate_On_Existing_User()
         {
             // Arrange
-            _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
-            _fakeRepo.Update(Arg.Any<UserEntity>()).Returns(Guid.NewGuid());
             var existingUser = CreateUserDetailModel(Guid.NewGuid());
+            _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
+            _fakeRepo.GetById(existingUser.Id).Returns(_mapper.ToEntity(existingUser)); //added
+            _fakeRepo.Update(Arg.Any<UserEntity>()).Returns(Guid.NewGuid());
+            
             existingUser.Name = "Igor";
 
             // Act
-            _facade.CreateOrUpdate(existingUser);
+            _facade.CreateOrUpdate(existingUser, []);
     
             // Assert
             _fakeRepo.Received(1).Update(Arg.Is<UserEntity>(user =>
