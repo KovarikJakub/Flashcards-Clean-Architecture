@@ -82,7 +82,7 @@ namespace Flashcards.Api.BL.Facades
         {
             if (id is not null
                 && userRoles is not null
-                && !userRoles.Contains(RoleType.Administrator.ToString())
+                && !userRoles.Contains(RoleType.Admin.ToString())
                 && ownerId is not null
                 && cardCollectionRepository.GetById(id.Value)?.OwnerId != ownerId)
             {

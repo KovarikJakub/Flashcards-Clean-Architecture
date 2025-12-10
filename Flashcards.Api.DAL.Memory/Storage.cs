@@ -126,7 +126,7 @@ namespace Flashcards.Api.DAL.Memory
                 Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
                 Name = "Filip",
                 PhotographyUrl = String.Empty,
-                Role = RoleType.Administrator
+                Role = RoleType.Admin // Changed from Administrator
             });
 
             Users.Add(new UserEntity

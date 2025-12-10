@@ -66,6 +66,21 @@ namespace Flashcards.IdentityProvider.App
                     "flashcardsapi"
                 },
                 AlwaysIncludeUserClaimsInIdToken = true
+            },
+            new Client
+            {
+                ClientName = "Flashcards M2M Client",
+                ClientId = "flashcards.m2m.client", 
+                ClientSecrets =
+                {
+                    new Secret("SuperSecretPassword123!".Sha256())
+                },
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                AllowedScopes = new List<string> { "flashcardsapi" },
+                Claims = new List<ClientClaim>
+                {
+                    new ClientClaim(JwtClaimTypes.Role, "Admin")
+                }
             }
         };
     }

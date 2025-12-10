@@ -1,4 +1,5 @@
 ﻿using Flashcards.Api.BL.Facades;
+using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
 using Flashcards.Common.Options;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +37,35 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             var userRoles = GetUserRoles(httpContextAccessor);
 
             return userFacade.Create(user, userRoles, userId);
+        });
+
+        // NEW: Create user with Identity Server integration
+        userModifyingEndpoints.MapPost("create-with-identity", async Task<Results<Ok<Guid>, BadRequest<string>>> (
+            CreateUserWithIdentityRequest request, 
+            IUserFacade userFacade, 
+            IHttpContextAccessor httpContextAccessor) =>
+        {
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+
+            try
+            {
+                var createdUserId = await userFacade.CreateUserWithIdentityAsync(
+                    userName: request.UserName,
+                    password: request.Password,
+                    email: request.Email,
+                    name: request.Name,
+                    photographyUrl: request.PhotographyUrl,
+                    role: request.Role,
+                    userRoles: userRoles,
+                    ownerId: userId);
+
+                return TypedResults.Ok(createdUserId);
+            }
+            catch (Exception ex)
+            {
+                return TypedResults.BadRequest(ex.Message);
+            }
         });
 
         userModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult> (UserDetailModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
@@ -78,6 +108,38 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             }
         });
 
+        // NEW: Delete user with Identity Server integration
+        userModifyingEndpoints.MapDelete("{id:guid}/with-identity", async Task<Results<Ok, ForbidHttpResult, BadRequest<string>>> (
+            Guid id, 
+            IUserFacade userFacade, 
+            IHttpContextAccessor httpContextAccessor) =>
+        {
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+
+            try
+            {
+                await userFacade.DeleteUserWithIdentityAsync(id, userRoles, userId);
+                return TypedResults.Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return TypedResults.Forbid();
+            }
+            catch (Exception ex)
+            {
+                return TypedResults.BadRequest(ex.Message);
+            }
+        });
+
         return endpointRouteBuilder;
     }
 }
+
+public record CreateUserWithIdentityRequest(
+    string UserName,
+    string Password,
+    string Email,
+    string Name,
+    string? PhotographyUrl,
+    RoleType Role);

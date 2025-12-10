@@ -36,7 +36,31 @@ public static class UserEndpoints
                 catch (ArgumentException e)
                 {
                     return TypedResults.BadRequest(e.Message);
-                    throw;
+                }
+                catch (InvalidOperationException e)
+                {
+                    return TypedResults.BadRequest(e.Message);
+                }
+            });
+
+        userEndpoints.MapDelete("{id:guid}",
+            async Task<Results<Ok, NotFound, BadRequest<string>>> (
+                    IAppUserFacade appUserFacade,
+                    Guid id)
+                =>
+            {
+                try
+                {
+                    var result = await appUserFacade.DeleteAppUserAsync(id);
+                    if (result)
+                    {
+                        return TypedResults.Ok();
+                    }
+                    return TypedResults.NotFound();
+                }
+                catch (Exception e)
+                {
+                    return TypedResults.BadRequest(e.Message);
                 }
             });
 

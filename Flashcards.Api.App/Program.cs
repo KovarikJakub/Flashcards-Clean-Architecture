@@ -2,15 +2,14 @@ using Flashcards.Api.App.Endpoints;
 using Flashcards.Api.App.Extensions;
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
-using Flashcards.Common.Models;
 using Flashcards.Common.Options;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +35,57 @@ builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 
 builder.Services.AddHttpContextAccessor();
 
+// Configure Identity Server client for M2M communication from appsettings.json
+builder.Services.Configure<IdentityServerOptions>(
+    builder.Configuration.GetSection("IdentityServer"));
+
+builder.Services.AddHttpClient<IdentityServerClient>();
+
+// Get Identity Server authority from configuration for JWT validation
+var identityServerAuthority = builder.Configuration["IdentityServer:Authority"] 
+    ?? throw new InvalidOperationException("IdentityServer:Authority is not configured in appsettings.json");
+
+// Configure JWT Bearer Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // Identity Server authority from configuration
+        options.Authority = identityServerAuthority;
+        
+        // Validate the audience (which API this token is for)
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateAudience = false, // For now, we'll validate scope instead
+            ValidateIssuer = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+        
+        // For development: accept localhost certificates
+        if (builder.Environment.IsDevelopment())
+        {
+            options.RequireHttpsMetadata = false; // Only for development!
+        }
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    // Require the "flashcardsapi" scope for all API calls
+    options.AddPolicy("ApiScope", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("scope", "flashcardsapi");
+    });
+    
+    // Optional: Admin-only policy
+    options.AddPolicy("AdminOnly", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("scope", "flashcardsapi");
+        policy.RequireRole("Admin");
+    });
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -55,13 +105,20 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 app.UseHttpsRedirection();
 
+// IMPORTANT: Authentication must come before Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
 UseEndpoints(app);
 
 app.Run();
 
 void UseEndpoints(WebApplication app)
 {
-    var endpointsBase = app.MapGroup("api").RequireCors().WithOpenApi();
+    var endpointsBase = app.MapGroup("api")
+        .RequireCors()
+        .RequireAuthorization("ApiScope") // Protect all API endpoints
+        .WithOpenApi();
 
     var identityOptions = app.Services.GetRequiredService<IOptions<IdentityOptions>>();
 
