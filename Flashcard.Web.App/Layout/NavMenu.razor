@@ -11,21 +11,31 @@
 
 <div class="bg-gray-700 text-white" @onclick="ToggleNavMenu">
     <nav class="flex flex-col space-y-2 p-3 @(collapseNavMenu ? "hidden" : "")">
-        <div>
-            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="/" Match="NavLinkMatch.All" @onclick:stopPropagation>
+
+        <div @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
+            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="/" Match="NavLinkMatch.All">
                 <span class="mr-2">🏠</span> Home
             </NavLink>
         </div>
-        <div>
-            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="collections" @onclick:stopPropagation>
+
+        <div @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
+            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="collections">
                 <span class="mr-2">📚</span> Card Collections
             </NavLink>
         </div>
-        <div @onclick:stopPropagation>
-            <AdminDisplay />
+
+        <div @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
+            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="statistics">
+                <span class="mr-2">📈</span> Statistics
+            </NavLink>
         </div>
-        <div class="nav-item px-3">
+
+        <div class="nav-item px-3" @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
             <LoginDisplay />
+        </div>
+
+        <div class="nav-item px-3" @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
+            <AdminDisplay />
         </div>
     </nav>
 </div>
@@ -36,7 +46,5 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
-        Console.WriteLine($"NavMenu toggled. collapseNavMenu={collapseNavMenu}");
-        StateHasChanged();
     }
 }
