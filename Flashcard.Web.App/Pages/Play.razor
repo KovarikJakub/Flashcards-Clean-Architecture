@@ -1,44 +1,43 @@
-@page "/play/{Id:guid}" 
-
-@code { //TODO ADD /place/{Id:guid} 
-}
+@page "/play/{Id:guid}"
 @layout PlayLayout
 @inherits PageBase
 
 <div class="w-full h-full flex flex-col items-center px-4">
-    <label class="mt-5 text-center text-3xl font-bold">@_cardCollection.Title</label>
-    <label class="mt-5 text-center text-lg text-gray-600">
-        Answers are accepted only between @_cardCollection.AnswerStart.ToLongDateString() - @_cardCollection.AnswerEnd.ToLongDateString()
-    </label>
+    
+    @if (!_showStats)
+    {  
+        <label class="mt-5 text-center text-4xl font-bold">@_cardCollection.Title</label>
+        <label class="mt-5 text-center text-lg text-gray-600">
+            Answers are accepted only between @_cardCollection.AnswerStart.ToLongDateString() - @_cardCollection.AnswerEnd.ToLongDateString()
+        </label>
 
-    <div class="flex justify-center items-center w-full">
-        <div class="aspect-[3/2] mt-7 border border-blue-500 w-full max-w-[800px] bg-white">
-            <div class="w-full h-full  text-4xl flex items-center justify-center">
-                
-                <div class="flip-container" @onclick="FlipCard">
-                    <div class="flip-card @(_isFlipped ? "flipped" : "")">
-                        
-                        <div class="flip-front">
-                            @_cardCollection.Cards[_index].QuestionContent
-                        </div>
-                        
-                        <div class="flip-back">
-                            @_cardCollection.Cards[_index].AnswerContent
-                        </div>
+        <div class="flex justify-center items-center w-full">
+            <div class="aspect-[3/2] mt-7 border border-blue-500 w-full max-w-[800px] bg-white">
+                <div class="w-full h-full  text-4xl flex items-center justify-center">
+                    
+                    <div class="flip-container " @onclick="FlipCard">
+                        <div class="flip-card @(_isFlipped ? "flipped" : "")">
 
+                            <div class="flip-front px-8 text-center break-words leading-normal">
+                                @_cardCollection.Cards[_index].QuestionContent
+                            </div>
+
+                            <div class="flip-back px-8 text-center break-words leading-normal">
+                                @_cardCollection.Cards[_index].AnswerContent
+                            </div>
+
+                        </div>
                     </div>
                 </div>
-                
-            </div>
         </div>
     </div>
-    
+
     <div class="flex justify-between items-center mt-6 w-full max-w-[800px]">
         <div class="flex items-center gap-4">
             <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
                     @onclick="@HandleClickBack">left</button>
             <span class="text-lg">
-                @(_index + 1) / @_cardCollection.Cards.Count 
+                @(_index + 1) / @_cardCollection.Cards.Count
             </span>
             <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
                     @onclick="@HandleClickNext">to right</button>
@@ -51,6 +50,18 @@
                     @onclick="@HandleClickWrong">wrong</button>
         </div>
     </div>
+    }
+    else
+    {
+            if (newLesson != null)
+            {
+                <LessonStatistics Lesson="newLesson"/>
+            }
+            else
+            {
+                <div > Loading...</div>
+            }
+    }
 </div>
 
 
@@ -58,3 +69,5 @@
 
 @code {
 }
+
+

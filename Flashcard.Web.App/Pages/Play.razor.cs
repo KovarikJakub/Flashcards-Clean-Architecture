@@ -10,14 +10,49 @@ namespace Flashcards.Web.App.Pages
         [Parameter]
         public Guid Id { get; init; }
         
-        public static CardCollectionDetailModel? _cardCollection { get; set; }
+        private static CardCollectionDetailModel? _cardCollection { get; set; }
         
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
 
+        private LessonDetailModel? newLesson;
+        private bool _showStats = false;
+
         protected override async Task OnInitializedAsync()
         {
             _cardCollection = await CardCollectionFacade.GetByIdModelAsync(Id);        // Zmenit na getbyId, nepouzivat  provizorni webmodel
+
+            // If backend didn't return a collection (e.g. in preview or wrong id), use a local dummy so UI can be developed
+            if (_cardCollection == null)
+            {
+                _cardCollection = new CardCollectionDetailModel
+                {
+                    Id = Guid.Parse("d4f5c8e2-3c6b-4f1a-9f7e-2b8e5d6c7a9b"),
+                    Title = "Preview collection (local fallback)",
+                    AnswerStart = DateTime.UtcNow,
+                    AnswerEnd = DateTime.UtcNow.AddHours(1),
+                    Cards = new List<CardDetailModel>
+                    {
+                        new CardDetailModel { Id = Guid.NewGuid(), QuestionContent = "Q1?", AnswerContent = "A1", AnswerType = ContentType.Text, QuestionType = ContentType.Text, DateCreated = DateTime.UtcNow },
+                        new CardDetailModel { Id = Guid.NewGuid(), QuestionContent = "Q2?", AnswerContent = "A2", AnswerType = ContentType.Text, QuestionType = ContentType.Text, DateCreated = DateTime.UtcNow }
+                    }
+                };
+            }
+
+            // initialize preview lesson once we have the collection
+            if (_cardCollection != null)
+            {
+                newLesson = new LessonDetailModel
+                {
+                    Id = Guid.NewGuid(),
+                    User = CurrentUser,
+                    CardCollection = _cardCollection,
+                    Start = DateTime.Now,
+                    Correct = 0,
+                    Seen = 0,
+                    Wrong = 0
+                };
+            }
         }
 
         private int _index = 0;
@@ -25,12 +60,20 @@ namespace Flashcards.Web.App.Pages
         
         private void HandleClickCorrect()
         {
-            CurrentLesson.Correct++;
+            newLesson.Correct++;
+            newLesson.Seen++;
         }
         
         private void HandleClickWrong()
         {
-            CurrentLesson.Wrong++;
+            newLesson.Wrong++;
+            newLesson.Seen++;
+            
+            //TODO REMOVE
+            
+            _showStats = true;
+            
+            
         }
 
         private void HandleClickBack()
@@ -93,18 +136,5 @@ namespace Flashcards.Web.App.Pages
                 PhotographyUrl = null,
                 Role = RoleType.User
             };
-        
-        public LessonDetailModel CurrentLesson =
-            new LessonDetailModel
-            {
-                Id = Guid.NewGuid(),
-                User = CurrentUser,
-                CardCollection = _cardCollection,
-                Start = DateTime.Now,
-                Correct = 0,
-                Seen = 0,
-                Wrong = 0
-            };
     }
 }
-
