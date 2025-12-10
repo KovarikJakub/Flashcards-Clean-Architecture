@@ -47,11 +47,13 @@ namespace Flashcards.Web.App.Pages
 
         private Task HandleMarkCorrectAsync(Guid cardId)
         {
+            HandleClickNext();
             return HandleAnswerAsync(cardId, AnswerState.Correct);
         }
 
         private Task HandleMarkWrongAsync(Guid cardId)
         {
+            HandleClickNext();
             return HandleAnswerAsync(cardId, AnswerState.Wrong);
         }
 
