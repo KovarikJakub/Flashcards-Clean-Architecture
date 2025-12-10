@@ -20,7 +20,7 @@ namespace Flashcards.Api.App.EndpointTests.Tests
             Id = Guid.NewGuid(),
             Name = "Igor",
             PhotographyUrl = null,
-            Role = RoleType.Administrator
+            Role = RoleType.Admin  // Changed from Administrator
         };
         protected override UserDetailModel GetUpdatedModel(UserEntity entity)
         {

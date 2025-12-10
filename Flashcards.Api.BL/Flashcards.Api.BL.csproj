@@ -12,4 +12,9 @@
     <ProjectReference Include="..\Flashcards.Common.Models\Flashcards.Common.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="IdentityModel" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.1" />
+  </ItemGroup>
+
 </Project>

@@ -22,11 +22,18 @@ public class WebBLInstaller
         AddApiClient<ICardApiClient, CardApiClient>(serviceCollection, identityOptions, apiOptions);
 
         serviceCollection.AddTransient<CardCollectionFacade>();
-        serviceCollection.AddTransient<UserFacade>();
         serviceCollection.AddTransient<LessonFacade>();
         serviceCollection.AddTransient<CardFacade>();
+        
+        // UserFacade needs both IUserApiClient and HttpClient (for auth)
+        serviceCollection.AddTransient<UserFacade>(sp =>
+        {
+            var userApiClient = sp.GetRequiredService<IUserApiClient>();
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient(nameof(IUserApiClient));
+            return new UserFacade(userApiClient, httpClient);
+        });
     }
-
 
     private void AddApiClient<TInterface, TImplementation>(
         IServiceCollection serviceCollection,

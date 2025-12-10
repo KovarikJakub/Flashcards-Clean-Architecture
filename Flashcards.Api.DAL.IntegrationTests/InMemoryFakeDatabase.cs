@@ -1,5 +1,4 @@
-﻿
-using Flashcards.Api.DAL.Common.Entities;
+﻿using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
@@ -157,7 +156,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Id = UserGuids[3],
                 Name = "Adam",
                 PhotographyUrl = null,
-                Role = RoleType.Administrator
+                Role = RoleType.Admin
             });
 
             inMemoryStorage.Collections.Add(new CardCollectionEntity

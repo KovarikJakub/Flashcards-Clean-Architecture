@@ -1,4 +1,5 @@
 using Flashcards.Common.BL.Facades;
+using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
 
 
@@ -12,7 +13,21 @@ namespace Flashcards.Api.BL.Facades
         Guid Create(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
         Guid? Update(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
         void Delete(Guid id, IList<string> userRoles, string? ownerId = null);
+        
+        // New methods for Identity integration
+        Task<Guid> CreateUserWithIdentityAsync(
+            string userName,
+            string password,
+            string email,
+            string name,
+            string? photographyUrl,
+            RoleType role,
+            IList<string> userRoles,
+            string? ownerId = null);
+        
+        Task DeleteUserWithIdentityAsync(Guid id, IList<string> userRoles, string? ownerId = null);
     }
 }
+
 
 

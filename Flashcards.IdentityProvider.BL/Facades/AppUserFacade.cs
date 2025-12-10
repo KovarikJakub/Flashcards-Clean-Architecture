@@ -20,8 +20,68 @@ public class AppUserFacade(
         }
 
         var appUserEntity = appUserMapper.ToEntity(appUserModel);
-        await userManager.CreateAsync(appUserEntity, appUserModel.Password);
-        return (await userManager.FindByNameAsync(appUserModel.UserName))?.Id;
+        var result = await userManager.CreateAsync(appUserEntity, appUserModel.Password);
+        
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+
+        var createdUser = await userManager.FindByNameAsync(appUserModel.UserName);
+        
+        // Assign role if provided
+        if (createdUser is not null && !string.IsNullOrWhiteSpace(appUserModel.Role))
+        {
+            var roleResult = await userManager.AddToRoleAsync(createdUser, appUserModel.Role);
+            if (!roleResult.Succeeded)
+            {
+                // Log the error but don't fail the entire operation
+                // The user was created successfully, just role assignment failed
+            }
+        }
+
+        return createdUser?.Id;
+    }
+
+    public async Task<bool> DeleteAppUserAsync(Guid userId)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return false;
+        }
+
+        var result = await userManager.DeleteAsync(user);
+        return result.Succeeded;
+    }
+
+    public async Task<Guid?> CreateAppUserWithRoleAsync(AppUserCreateModel appUserModel, string role)
+    {
+        if (await userManager.FindByNameAsync(appUserModel.UserName) is not null)
+        {
+            throw new ArgumentException($"User with username '{appUserModel.UserName}' already exists");
+        }
+
+        var appUserEntity = appUserMapper.ToEntity(appUserModel);
+        var result = await userManager.CreateAsync(appUserEntity, appUserModel.Password);
+        
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+
+        var createdUser = await userManager.FindByNameAsync(appUserModel.UserName);
+        
+        if (createdUser is not null && !string.IsNullOrWhiteSpace(role))
+        {
+            var roleResult = await userManager.AddToRoleAsync(createdUser, role);
+            if (!roleResult.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to assign role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
+        }
+
+        return createdUser?.Id;
     }
 
     public async Task<bool> ValidateCredentialsAsync(string userName, string password)

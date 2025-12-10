@@ -1,5 +1,6 @@
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
@@ -13,13 +14,15 @@ namespace Flashcards.Api.BL.UnitTests
     {
         private readonly IUserRepository _fakeRepo;
         private readonly UserMapper _mapper;
+        private readonly IdentityServerClient _fakeIdentityClient;
         private readonly UserFacade _facade;
 
         public UserFacadeTests()
         {
             _fakeRepo = Substitute.For<IUserRepository>();
             _mapper = new UserMapper();
-            _facade = new UserFacade(_fakeRepo, _mapper);
+            _fakeIdentityClient = Substitute.For<IdentityServerClient>();
+            _facade = new UserFacade(_fakeRepo, _mapper, _fakeIdentityClient);
         }
 
         private UserDetailModel CreateUserDetailModel(Guid id)
@@ -93,7 +96,7 @@ namespace Flashcards.Api.BL.UnitTests
             // Arrange
             var existingUser = CreateUserDetailModel(Guid.NewGuid());
             _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
-            _fakeRepo.GetById(existingUser.Id).Returns(_mapper.ToEntity(existingUser)); //added
+            _fakeRepo.GetById(existingUser.Id).Returns(_mapper.ToEntity(existingUser));
             _fakeRepo.Update(Arg.Any<UserEntity>()).Returns(Guid.NewGuid());
             
             existingUser.Name = "Igor";
@@ -171,6 +174,35 @@ namespace Flashcards.Api.BL.UnitTests
             Assert.NotNull(result);       
             Assert.Empty(result);       
             _fakeRepo.Received(1).GetAll();  
+        }
+
+        [Fact]
+        public async Task CreateUserWithIdentity_Creates_Both_Users()
+        {
+            // Arrange
+            var fakeIdentityClient = Substitute.For<IdentityServerClient>();
+            var expectedGuid = Guid.NewGuid();
+            fakeIdentityClient.CreateUserAsync(Arg.Any<CreateUserRequest>())
+                .Returns(expectedGuid);
+            
+            var facade = new UserFacade(_fakeRepo, _mapper, fakeIdentityClient);
+
+            // Act
+            var result = await facade.CreateUserWithIdentityAsync(
+                userName: "test.user",
+                password: "Test123!",
+                email: "test@test.com",
+                name: "Test User",
+                photographyUrl: null,
+                role: RoleType.User,
+                userRoles: new List<string>(),
+                ownerId: null);
+
+            // Assert
+            Assert.Equal(expectedGuid, result);
+            await fakeIdentityClient.Received(1).CreateUserAsync(Arg.Any<CreateUserRequest>());
+
+            _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(u => u.Id == expectedGuid));
         }
     }
 }
