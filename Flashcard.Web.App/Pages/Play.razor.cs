@@ -10,6 +10,9 @@ namespace Flashcards.Web.App.Pages
         [Parameter]
         public Guid Id { get; init; }
         
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = null!;
+        
         private static CardCollectionDetailModel? _cardCollection { get; set; }
         
         [Inject]
@@ -22,7 +25,7 @@ namespace Flashcards.Web.App.Pages
         {
             _cardCollection = await CardCollectionFacade.GetByIdModelAsync(Id);        // Zmenit na getbyId, nepouzivat  provizorni webmodel
 
-            // If backend didn't return a collection (e.g. in preview or wrong id), use a local dummy so UI can be developed
+            // TODO REMOVE Fallback dummy data
             if (_cardCollection == null)
             {
                 _cardCollection = new CardCollectionDetailModel
@@ -38,8 +41,6 @@ namespace Flashcards.Web.App.Pages
                     }
                 };
             }
-
-            // initialize preview lesson once we have the collection
             if (_cardCollection != null)
             {
                 newLesson = new LessonDetailModel
@@ -57,38 +58,72 @@ namespace Flashcards.Web.App.Pages
 
         private int _index = 0;
         private bool _isFlipped = false;
-        
-        private void HandleClickCorrect()
+
+        private enum AnswerState { None, Correct, Wrong }
+        private readonly Dictionary<Guid, AnswerState> _answers = new();
+
+        private bool IsAnswered(Guid cardId) => _answers.TryGetValue(cardId, out var s) && s != AnswerState.None;
+        private AnswerState GetAnswerState(Guid cardId) => _answers.TryGetValue(cardId, out var s) ? s : AnswerState.None;
+
+        private Task HandleMarkCorrectAsync(Guid cardId)
         {
-            newLesson.Correct++;
-            newLesson.Seen++;
+            return HandleAnswerAsync(cardId, AnswerState.Correct);
         }
-        
-        private void HandleClickWrong()
+
+        private Task HandleMarkWrongAsync(Guid cardId)
         {
-            newLesson.Wrong++;
-            newLesson.Seen++;
+            return HandleAnswerAsync(cardId, AnswerState.Wrong);
+        }
+
+        private Task HandleAnswerAsync(Guid cardId, AnswerState state)
+        {
+            if (IsAnswered(cardId)) return Task.CompletedTask;
+
+            _answers[cardId] = state;
+
+            if (newLesson != null)
+            {
+                newLesson.Seen++;
+                if (state == AnswerState.Correct) newLesson.Correct++;
+                else if (state == AnswerState.Wrong) newLesson.Wrong++;
+            }
+
+            InvokeAsync(StateHasChanged);
             
-            //TODO REMOVE
-            
-            _showStats = true;
-            
-            
+            return Task.CompletedTask;
         }
 
         private void HandleClickBack()
         {
-            if (_index - 1 >= 0) _index--;
-        } 
-        
+            if (_index > 0) _index--;
+        }
+
         private void HandleClickNext()
         {
-            if (_index + 1 < _cardCollection.Cards.Count) _index++;
+            if (_cardCollection != null && _index + 1 < _cardCollection.Cards.Count) _index++;
+            else _showStats = true;
         }
         
         private void FlipCard()
         {
            _isFlipped = !_isFlipped;
+        }
+        
+        private void HandlePlayAgain()
+        {
+            newLesson.Correct = 0;
+            newLesson.Wrong = 0;
+            newLesson.Seen = 0;
+            _index = 0;
+            _isFlipped = false;
+            _showStats = false;
+            _answers.Clear();
+            NavigationManager.NavigateTo($"/play/{Id}");
+        }
+        
+        private void HandleTryDifferentCollection()
+        {
+            NavigationManager.NavigateTo("/collections");
         }
         
         // Dummy data
@@ -127,7 +162,8 @@ namespace Flashcards.Web.App.Pages
                 }
             };
         */
-            
+           
+        // TODO remove dummy user
          static UserDetailModel CurrentUser =
             new UserDetailModel
             {

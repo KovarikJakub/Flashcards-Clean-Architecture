@@ -30,11 +30,13 @@
         </div>
 
         <div class="flex justify-end gap-4 mt-auto w-full">
-            <button class="px-6 py-3 bg-blue-500 text-white rounded-lg text-lg font-semibold hover:bg-blue-600">
+            <button class="px-6 py-3 bg-blue-500 text-white rounded-lg text-lg font-semibold hover:bg-blue-600"
+                    @onclick="HandlePlayAgain">
                 Play again
             </button>
 
-            <button class="px-6 py-3 bg-green-500 rounded-lg text-lg font-semibold hover:bg-green-500">
+            <button class="px-6 py-3 bg-green-500 rounded-lg text-lg font-semibold hover:bg-green-500"
+                    @onclick="HandleTryDifferent">
                 Try different flashcards
             </button>
         </div>
@@ -48,4 +50,29 @@
 @code {
     [Parameter]
     public LessonDetailModel? Lesson { get; set; }
+    
+    [Parameter]
+    public EventCallback OnPlayAgain { get; set; }
+    
+    [Parameter]
+    public EventCallback OnTryDifferent { get; set; }
+
+    private void HandlePlayAgain()
+    {
+        if (OnPlayAgain.HasDelegate)
+        {
+            OnPlayAgain.InvokeAsync();
+        }
+    }
+
+    private void HandleTryDifferent()
+    {
+        if (OnTryDifferent.HasDelegate)
+        {
+            OnTryDifferent.InvokeAsync();
+        }
+    }
+    
+    
+    
 }

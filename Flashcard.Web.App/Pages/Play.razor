@@ -37,29 +37,46 @@
             <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
                     @onclick="@HandleClickBack">left</button>
             <span class="text-lg">
-                @(_index + 1) / @_cardCollection.Cards.Count
+                @(_index + 1) / @_cardCollection.Cards.Count 
             </span>
             <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
                     @onclick="@HandleClickNext">to right</button>
         </div>
-
+    
         <div class="flex items-center gap-4">
-            <button type="button" class="w-[120px] h-12 text-lg text-white bg-green-500 rounded hover:bg-green-600 active:scale-95 flex items-center justify-center"
-                    @onclick="HandleClickCorrect">correct</button>
-            <button type="button" class="w-[120px] h-12 text-lg text-white bg-red-500 rounded hover:bg-red-600 flex items-center justify-center"
-                    @onclick="@HandleClickWrong">wrong</button>
-        </div>
-    </div>
+            @if (_cardCollection.Cards.Count  > 0)
+            {
+                var currentCard = @_cardCollection.Cards[_index];
+                if (!IsAnswered(currentCard.Id))
+                {
+                    <button type="button" class="w-[120px] h-12 text-lg text-white bg-green-500 rounded hover:bg-green-600 active:scale-95 flex items-center justify-center"
+                            @onclick="() => HandleMarkCorrectAsync(currentCard.Id)">correct</button>
+                    <button type="button" class="w-[120px] h-12 text-lg text-white bg-red-500 rounded hover:bg-red-600 flex items-center justify-center"
+                            @onclick="() => HandleMarkWrongAsync(currentCard.Id)">wrong</button>
+                }
+                else
+                {
+                    <div class="px-4 py-2 rounded text-white bg-gray-700">Answered: @GetAnswerState(currentCard.Id)</div>
+                }
+            }
+            else
+            {
+                <div>No cards</div>
+            }
+         </div>
+     </div>
     }
     else
     {
             if (newLesson != null)
             {
-                <LessonStatistics Lesson="newLesson"/>
+                <div>
+                    <LessonStatistics Lesson="@newLesson" OnPlayAgain="@HandlePlayAgain" OnTryDifferent="@HandleTryDifferentCollection" />
+                </div>
             }
             else
             {
-                <div > Loading...</div>
+                <div class="text-gray-600">LessonStatistics component will render after lesson data is loaded.</div>
             }
     }
 </div>
@@ -69,5 +86,3 @@
 
 @code {
 }
-
-
