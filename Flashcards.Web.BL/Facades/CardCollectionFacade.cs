@@ -6,7 +6,7 @@ namespace Flashcards.Web.BL.Facades
     public class CardCollectionFacade
     {
         private readonly ICardCollectionApiClient apiClient;
-        
+
         public CardCollectionFacade(ICardCollectionApiClient apiClient)
         {
             this.apiClient = apiClient;

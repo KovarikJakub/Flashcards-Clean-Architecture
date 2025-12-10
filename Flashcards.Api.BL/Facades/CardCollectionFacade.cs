@@ -31,6 +31,12 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
+        public List<CardCollectionListModel> GetByOwner(string ownerId)
+        {
+            var entities = cardCollectionRepository.GetAll().Where(e => e.OwnerId != null && e.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
+            return mapper.ToListModel(entities);
+        }
+
         public Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
         {
             ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);

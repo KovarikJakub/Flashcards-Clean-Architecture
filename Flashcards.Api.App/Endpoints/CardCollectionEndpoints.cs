@@ -21,6 +21,12 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
                 ? TypedResults.Ok(cardCollection)
                 : TypedResults.NotFound("This card collection was not found!"));
 
+        cardCollectionEndpoints.MapGet("user/{ownerId}", (string ownerId, ICardCollectionFacade cardCollectionFacade) =>
+        {
+            var result = cardCollectionFacade.GetByOwner(ownerId);
+            return TypedResults.Ok(result);
+        });
+
         var cardCollectionModifyingEndpoints = cardCollectionEndpoints.MapGroup("");
 
         if (identityOptions.Value.IsIdentityEnabled)

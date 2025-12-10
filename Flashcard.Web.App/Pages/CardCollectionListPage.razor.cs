@@ -13,7 +13,7 @@ namespace Flashcards.Web.App.Pages
         [Inject]
         private NavigationManager NavigationManager { get; set; } = null!;
         [Inject]
-        private IJSRuntime Js { get; set; } = null!; // renamed to satisfy analyzer
+        private IJSRuntime Js { get; set; } = null!; 
         
         [Inject]
         private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
