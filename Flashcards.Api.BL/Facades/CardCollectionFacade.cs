@@ -49,26 +49,11 @@ namespace Flashcards.Api.BL.Facades
         public Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
         {
             ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
-
             var existing = cardCollectionRepository.GetById(model.Id);
             if (existing == null)
                 return null;
-
             var entity = mapper.ToEntity(model, ownerId);
             entity.OwnerId = existing.OwnerId;
-
-            entity.Cards = model.Cards.Select(c =>
-                new CardEntity
-                {
-                    Id = c.Id,
-                    QuestionType = c.QuestionType,
-                    QuestionContent = c.QuestionContent,
-                    DateCreated = c.DateCreated,
-                    AnswerType = c.AnswerType,
-                    AnswerContent = c.AnswerContent,
-                    Description = c.Description
-                }).ToList();
-
             return cardCollectionRepository.Update(entity);
         }
 

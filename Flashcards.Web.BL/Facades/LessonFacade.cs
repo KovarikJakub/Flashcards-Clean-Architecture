@@ -11,7 +11,13 @@ namespace Flashcards.Web.BL.Facades
             {
                 _apiClient = apiClient;
             }
-            
+
+            public async Task<List<LessonListModel>> GetUserHistoryAsync(Guid userId)
+            {
+                var result = await _apiClient.LessonGetAsync(userId, null, 1, 1000, null, true);
+                return result.ToList();
+            }
+
             public async Task <ICollection<LessonListModel>> GetAllAsync()
             {
                 var lessons = await _apiClient.AllAsync();
