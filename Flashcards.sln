@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36511.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Api.App", "Flashcards.Api.App\Flashcards.Api.App.csproj", "{2AB5D194-3425-4810-8DF4-E6BA53C13998}"
 EndProject
@@ -36,6 +36,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Web.App", "Flashcard.Web.App\Flashcards.Web.App.csproj", "{3BE5F513-BE0E-495D-BD01-6188817B7A51}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Web.BL", "Flashcards.Web.BL\Flashcards.Web.BL.csproj", "{0EA57036-B752-43EB-BE86-70B9E9239A62}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{FBED23FE-FA0A-4463-8629-9D9A3A1C909C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.IdentityProvider.App", "Flashcards.IdentityProvider.App\Flashcards.IdentityProvider.App.csproj", "{ECB1C91D-3AE2-4505-9F3D-7D78E7136BAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.IdentityProvider.DAL", "Flashcards.IdentityProvider.DAL\Flashcards.IdentityProvider.DAL.csproj", "{F0C41761-DF40-4697-BAA3-8A2D77DDCFE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.IdentityProvider.BL", "Flashcards.IdentityProvider.BL\Flashcards.IdentityProvider.BL.csproj", "{B8CC37FC-A88C-4893-AC0E-9D53F2737B6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +99,18 @@ Global
 		{0EA57036-B752-43EB-BE86-70B9E9239A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EA57036-B752-43EB-BE86-70B9E9239A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EA57036-B752-43EB-BE86-70B9E9239A62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECB1C91D-3AE2-4505-9F3D-7D78E7136BAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECB1C91D-3AE2-4505-9F3D-7D78E7136BAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECB1C91D-3AE2-4505-9F3D-7D78E7136BAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECB1C91D-3AE2-4505-9F3D-7D78E7136BAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0C41761-DF40-4697-BAA3-8A2D77DDCFE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0C41761-DF40-4697-BAA3-8A2D77DDCFE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0C41761-DF40-4697-BAA3-8A2D77DDCFE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0C41761-DF40-4697-BAA3-8A2D77DDCFE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8CC37FC-A88C-4893-AC0E-9D53F2737B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8CC37FC-A88C-4893-AC0E-9D53F2737B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8CC37FC-A88C-4893-AC0E-9D53F2737B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8CC37FC-A88C-4893-AC0E-9D53F2737B6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +130,9 @@ Global
 		{7295C9A7-0606-473E-99EB-D102FAC1CB5F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{3BE5F513-BE0E-495D-BD01-6188817B7A51} = {1393BD9C-6D1D-4849-9B1D-92B1CEBC7355}
 		{0EA57036-B752-43EB-BE86-70B9E9239A62} = {1393BD9C-6D1D-4849-9B1D-92B1CEBC7355}
+		{ECB1C91D-3AE2-4505-9F3D-7D78E7136BAF} = {FBED23FE-FA0A-4463-8629-9D9A3A1C909C}
+		{F0C41761-DF40-4697-BAA3-8A2D77DDCFE4} = {FBED23FE-FA0A-4463-8629-9D9A3A1C909C}
+		{B8CC37FC-A88C-4893-AC0E-9D53F2737B6A} = {FBED23FE-FA0A-4463-8629-9D9A3A1C909C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D57E7CE4-B6BD-4357-A3B1-D035A7AFBE98}

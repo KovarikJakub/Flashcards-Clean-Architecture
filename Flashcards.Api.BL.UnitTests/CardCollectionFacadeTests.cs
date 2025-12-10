@@ -43,7 +43,7 @@ namespace Flashcards.Api.BL.UnitTests
             var collectionId = Guid.NewGuid();
 
             // Act
-            _facade.Delete(collectionId);
+            _facade.Delete(collectionId, []);
 
             // Assert
             _fakeRepo.Received(1).Remove(collectionId);
@@ -56,7 +56,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
             
             // Act
-            var id = _facade.Create(newCollection);
+            var id = _facade.Create(newCollection, []);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
@@ -75,7 +75,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
             
             // Act
-            var id = _facade.CreateOrUpdate(newCollection);
+            var id = _facade.CreateOrUpdate(newCollection, []);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
@@ -88,15 +88,17 @@ namespace Flashcards.Api.BL.UnitTests
         [Fact]
         public void CreateOrUpdate_On_Existing_Collection()
         {
+            var existing = CreateCardCollectionDetailModel(Guid.NewGuid());
             // Arrange
             _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
+            _fakeRepo.GetById(existing.Id).Returns(_mapper.ToEntity(existing)); //added
             _fakeRepo.Update(Arg.Any<CardCollectionEntity>()).Returns(Guid.NewGuid());
 
-            var existing = CreateCardCollectionDetailModel(Guid.NewGuid());
+            
             existing.Title = "Updated Science Deck";
 
             // Act
-           _facade.CreateOrUpdate(existing);
+           _facade.CreateOrUpdate(existing, []);
 
             // Assert
             _fakeRepo.Received(1).Update(Arg.Is<CardCollectionEntity>(c =>

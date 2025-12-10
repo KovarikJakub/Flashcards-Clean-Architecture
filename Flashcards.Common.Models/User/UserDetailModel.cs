@@ -11,6 +11,7 @@ namespace Flashcards.Common.Models
         public required string? PhotographyUrl { get; set; }
         
         public required RoleType Role { get; set; }
+
     }
 }
 
