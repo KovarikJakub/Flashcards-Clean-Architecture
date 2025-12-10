@@ -1,9 +1,38 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.9" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Flashcards.Web.BL\Flashcards.Web.BL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Include="./Styles/tailwind.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Pages\CardCollectionListPage.razor.js" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+
+  <Target Name="TailwindDebug" BeforeTargets="Compile" Condition="'$(Configuration)' == 'Debug'">
+    <Exec WorkingDirectory="$(ProjectDir)"
+          Command="npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/tailwind.css" />
+  </Target>
+
+  <Target Name="TailwindRelease" BeforeTargets="Compile" Condition="'$(Configuration)' == 'Release'">
+    <Exec WorkingDirectory="$(ProjectDir)"
+          EnvironmentVariables="NODE_ENV=production"
+          Command="npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/tailwind.css --minify" />
+  </Target>
 
 </Project>

@@ -1,5 +1,6 @@
 using Flashcards.Common.Models;
 using Flashcards.Web.BL.Facades;
+using Flashcards.Web.BL.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace Flashcards.Web.App.Pages
@@ -31,10 +32,10 @@ namespace Flashcards.Web.App.Pages
         {
             if (!IsCreate && Id.HasValue)
             {
-                var result = await CardCollectionFacade.GetByIdAsync(Id.Value);
-                if (result != null)
+                var wrapper = await CardCollectionFacade.GetByIdAsync(Id.Value);
+                if (wrapper != null)
                 {
-                    Model = result;
+                    Model = wrapper.ApiModel;
                     Cards = Model.Cards.ToList();
                 }
             }
@@ -90,7 +91,9 @@ namespace Flashcards.Web.App.Pages
         public async Task Save()
         {
             Model.Cards = Cards;
-            var id = await CardCollectionFacade.UpsertAsync(Model);
+            // wrap the model with possible OwnerId (null for now)
+            var webModel = new CardCollectionWebModel(Model, ownerId: null);
+            await CardCollectionFacade.UpsertAsync(webModel);
             NavigationManager.NavigateTo($"/collections");
         }
     }

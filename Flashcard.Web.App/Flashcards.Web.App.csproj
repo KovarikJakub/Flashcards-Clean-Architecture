@@ -23,6 +23,13 @@
     <Watch Include="./Styles/tailwind.css" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\js\Scroll.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+
   <Target Name="TailwindDebug" BeforeTargets="Compile" Condition="'$(Configuration)' == 'Debug'">
     <Exec WorkingDirectory="$(ProjectDir)"
           Command="npx tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/tailwind.css" />

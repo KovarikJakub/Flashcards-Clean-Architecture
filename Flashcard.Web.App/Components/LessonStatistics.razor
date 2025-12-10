@@ -1,0 +1,78 @@
+@namespace Flashcards.Web.App.Components
+
+<div class="h-full w-full flex items-center justify-center mt-10">
+
+    <div class="aspect-[3/2] w-full max-w-[900px] bg-white border border-blue-500 rounded-xl p-8 shadow flex flex-col gap-2">
+        
+        <div class="text-center text-5xl font-bold leading-tight">
+            @Lesson.CardCollection.Title
+        </div>
+
+        <div class="text-center text-3xl leading-tight mt-5">
+            Great Job! You reviewed @Lesson.Seen from @Lesson.CardCollection.Cards.Count cards!
+        </div>
+
+        <div class="grid grid-cols-2  items-center mt-10">
+
+            <div class="grid  border rounded-lg p-4 text-base leading-tight">
+                <div class="text-4xl font-semibold mt-1 ">Your progress</div>
+                <div class="text-2xl mt-4">Completed <span class="ml-10">@Lesson.Seen/@Lesson.CardCollection.Cards.Count</span></div>
+                <div class="text-2xl mt-0.5">Correct <span class="ml-20">@Lesson.Correct</span></div>
+                <div class="text-2xl">Wrong <span class="ml-[88px]">@Lesson.Wrong</span></div>
+            </div>
+
+            <div class="flex justify-center items-center">
+                <div class="w-28 h-28 bg-gray-100 border rounded-lg flex items-center justify-center">
+                    ICON TODO
+                </div>
+            </div>
+
+        </div>
+
+        <div class="flex justify-end gap-4 mt-auto w-full">
+            <button class="px-6 py-3 bg-blue-500 text-white rounded-lg text-lg font-semibold hover:bg-blue-600"
+                    @onclick="HandlePlayAgain">
+                Play again
+            </button>
+
+            <button class="px-6 py-3 bg-green-500 rounded-lg text-lg font-semibold hover:bg-green-500"
+                    @onclick="HandleTryDifferent">
+                Try different flashcards
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@code {
+    [Parameter]
+    public LessonDetailModel? Lesson { get; set; }
+    
+    [Parameter]
+    public EventCallback OnPlayAgain { get; set; }
+    
+    [Parameter]
+    public EventCallback OnTryDifferent { get; set; }
+
+    private void HandlePlayAgain()
+    {
+        if (OnPlayAgain.HasDelegate)
+        {
+            OnPlayAgain.InvokeAsync();
+        }
+    }
+
+    private void HandleTryDifferent()
+    {
+        if (OnTryDifferent.HasDelegate)
+        {
+            OnTryDifferent.InvokeAsync();
+        }
+    }
+    
+    
+    
+}

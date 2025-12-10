@@ -1,0 +1,88 @@
+@page "/play/{Id:guid}"
+@layout PlayLayout
+@inherits PageBase
+
+<div class="w-full h-full flex flex-col items-center px-4">
+    
+    @if (!_showStats)
+    {  
+        <label class="mt-5 text-center text-4xl font-bold">@_cardCollection.Title</label>
+        <label class="mt-5 text-center text-lg text-gray-600">
+            Answers are accepted only between @_cardCollection.AnswerStart.ToLongDateString() - @_cardCollection.AnswerEnd.ToLongDateString()
+        </label>
+
+        <div class="flex justify-center items-center w-full">
+            <div class="aspect-[3/2] mt-7 border border-blue-500 w-full max-w-[800px] bg-white">
+                <div class="w-full h-full  text-4xl flex items-center justify-center">
+                    
+                    <div class="flip-container " @onclick="FlipCard">
+                        <div class="flip-card @(_isFlipped ? "flipped" : "")">
+
+                            <div class="flip-front px-8 text-center break-words leading-normal">
+                                @_cardCollection.Cards[_index].QuestionContent
+                            </div>
+
+                            <div class="flip-back px-8 text-center break-words leading-normal">
+                                @_cardCollection.Cards[_index].AnswerContent
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center mt-6 w-full max-w-[800px]">
+        <div class="flex items-center gap-4">
+            <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
+                    @onclick="@HandleClickBack">left</button>
+            <span class="text-lg">
+                @(_index + 1) / @_cardCollection.Cards.Count 
+            </span>
+            <button type="button" class="w-[120px] h-12 text-lg text-white bg-blue-500 rounded hover:bg-blue-600 flex items-center justify-center"
+                    @onclick="@HandleClickNext">to right</button>
+        </div>
+    
+        <div class="flex items-center gap-4">
+            @if (_cardCollection.Cards.Count  > 0)
+            {
+                var currentCard = @_cardCollection.Cards[_index];
+                if (!IsAnswered(currentCard.Id))
+                {
+                    <button type="button" class="w-[120px] h-12 text-lg text-white bg-green-500 rounded hover:bg-green-600 active:scale-95 flex items-center justify-center"
+                            @onclick="() => HandleMarkCorrectAsync(currentCard.Id)">correct</button>
+                    <button type="button" class="w-[120px] h-12 text-lg text-white bg-red-500 rounded hover:bg-red-600 flex items-center justify-center"
+                            @onclick="() => HandleMarkWrongAsync(currentCard.Id)">wrong</button>
+                }
+                else
+                {
+                    <div class="px-4 py-2 rounded text-white bg-gray-700">Answered: @GetAnswerState(currentCard.Id)</div>
+                }
+            }
+            else
+            {
+                <div>No cards</div>
+            }
+         </div>
+     </div>
+    }
+    else
+    {
+            if (newLesson != null)
+            {
+                <div>
+                    <LessonStatistics Lesson="@newLesson" OnPlayAgain="@HandlePlayAgain" OnTryDifferent="@HandleTryDifferentCollection" />
+                </div>
+            }
+            else
+            {
+                <div class="text-gray-600">LessonStatistics component will render after lesson data is loaded.</div>
+            }
+    }
+</div>
+
+
+
+
+@code {
+}
