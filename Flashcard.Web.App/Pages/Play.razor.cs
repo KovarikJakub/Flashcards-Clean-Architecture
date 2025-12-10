@@ -23,7 +23,7 @@ namespace Flashcards.Web.App.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            _cardCollection = await CardCollectionFacade.GetByIdModelAsync(Id);        // Zmenit na getbyId, nepouzivat  provizorni webmodel
+            _cardCollection = await CardCollectionFacade.GetByIdAsync(Id);        // Zmenit na getbyId, nepouzivat  provizorni webmodel
 
             // TODO REMOVE Fallback dummy data
             if (_cardCollection == null)
