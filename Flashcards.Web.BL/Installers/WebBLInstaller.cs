@@ -16,28 +16,35 @@ public class WebBLInstaller
         // Message handler provides token or fallback behaviour
         serviceCollection.AddScoped<CustomAuthorizationMessageHandler>();
 
-        // Register API client using HttpClientFactory for card collections
-        var cardClientBuilder = serviceCollection.AddHttpClient<ICardCollectionApiClient, CardCollectionApiClient>(client =>
-        {
-            client.BaseAddress = new Uri(apiOptions.BaseUrl);
-        });
+        AddApiClient<ICardCollectionApiClient, CardCollectionApiClient>(serviceCollection, identityOptions, apiOptions);
+        AddApiClient<IUserApiClient, UserApiClient>(serviceCollection, identityOptions, apiOptions);
+        AddApiClient<ILessonApiClient, LessonApiClient>(serviceCollection, identityOptions, apiOptions);
+        AddApiClient<ICardApiClient, CardApiClient>(serviceCollection, identityOptions, apiOptions);
 
-        cardClientBuilder.AddHttpMessageHandler(serviceProvider =>
-            serviceProvider.GetRequiredService<CustomAuthorizationMessageHandler>()
-                .ConfigureHandler(authorizedUrls: new[] { apiOptions.BaseUrl }, scopes: identityOptions.DefaultScopes));
-
-        // Register API client using HttpClientFactory for users
-        var userClientBuilder = serviceCollection.AddHttpClient<IUserApiClient, UserApiClient>(client =>
-        {
-            client.BaseAddress = new Uri(apiOptions.BaseUrl);
-        });
-
-        userClientBuilder.AddHttpMessageHandler(serviceProvider =>
-            serviceProvider.GetRequiredService<CustomAuthorizationMessageHandler>()
-                .ConfigureHandler(authorizedUrls: new[] { apiOptions.BaseUrl }, scopes: identityOptions.DefaultScopes));
-
-        // Register facades and other services explicitly
         serviceCollection.AddTransient<CardCollectionFacade>();
         serviceCollection.AddTransient<UserFacade>();
+    }
+
+
+    private void AddApiClient<TInterface, TImplementation>(
+        IServiceCollection serviceCollection,
+        IdentityOptions identityOptions,
+        ApiOptions apiOptions)
+        where TInterface : class, IApiClient
+        where TImplementation : class, TInterface
+    {
+        var httpClient = serviceCollection.AddHttpClient<TInterface, TImplementation>(client =>
+        {
+            client.BaseAddress = new Uri(apiOptions.BaseUrl);
+        });
+
+        if (identityOptions.IsIdentityEnabled)
+        {
+            httpClient.AddHttpMessageHandler(serviceProvider
+                => serviceProvider.GetRequiredService<CustomAuthorizationMessageHandler>()
+                    .ConfigureHandler(
+                        authorizedUrls: [apiOptions.BaseUrl],
+                        scopes: identityOptions.DefaultScopes));
+        }
     }
 }
