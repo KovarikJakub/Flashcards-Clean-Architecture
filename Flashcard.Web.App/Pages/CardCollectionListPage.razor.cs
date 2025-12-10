@@ -18,7 +18,8 @@ namespace Flashcards.Web.App.Pages
         [Inject]
         private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
         
-        private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
+        private ICollection<CardCollectionListModel> CardCollectionsAll { get; set; } = new List<CardCollectionListModel>();
+        private ICollection<CardCollectionListModel> CardCollectionsMine { get; set; } = new List<CardCollectionListModel>();
         private string FilterMy { get; set; } = string.Empty;
         private string FilterAll { get; set; } = string.Empty;
         
@@ -39,13 +40,13 @@ namespace Flashcards.Web.App.Pages
 
         private List<CardCollectionListModel> FilteredMyCollections =>
             string.IsNullOrWhiteSpace(FilterMy)
-                ? CardCollections.ToList()
-                : CardCollections.Where(c => c.Title?.Contains(FilterMy.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
+                ? CardCollectionsMine.ToList()
+                : CardCollectionsMine.Where(c => c.Title?.Contains(FilterMy.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
 
         private List<CardCollectionListModel> FilteredAllCollections =>
             string.IsNullOrWhiteSpace(FilterAll)
-                ? CardCollections.ToList()
-                : CardCollections.Where(c => c.Title?.Contains(FilterAll.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
+                ? CardCollectionsAll.ToList()
+                : CardCollectionsAll.Where(c => c.Title?.Contains(FilterAll.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
 
         protected override async Task OnInitializedAsync()
         {
@@ -69,7 +70,8 @@ namespace Flashcards.Web.App.Pages
 
         private async Task LoadData()
         {
-            CardCollections = await CardCollectionFacade.GetAllAsync();
+            CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
+            CardCollectionsMine = await CardCollectionFacade.GetByOwnerAsync("Jakub");      //TODO fix ownerId
         }
 
         private Task OnEditCollection(CardCollectionListModel collection)
