@@ -7,7 +7,6 @@ namespace Flashcards.Web.App.Pages
 {
     public partial class CardCollectionListPage : PageBase
     {
-
         private CardCollectionDetailModel Model = new CardCollectionDetailModel
         {
             Id = Guid.NewGuid(),
@@ -27,9 +26,7 @@ namespace Flashcards.Web.App.Pages
         
         protected override async Task OnInitializedAsync()
         {
-            
             await LoadData();
-
             await base.OnInitializedAsync();
         }
 
@@ -46,7 +43,6 @@ namespace Flashcards.Web.App.Pages
 
         private async Task OnDeleteCollection(CardCollectionListModel collection)
         {
-            // Example: call facade to delete and reload list
             try
             {
                 await CardCollectionFacade.DeleteAsync(collection.Id);
@@ -60,21 +56,30 @@ namespace Flashcards.Web.App.Pages
         
         private void HandlePlayCollection(CardCollectionListModel collection)
         {
-            //TODOO correct navigation to play page
             NavigationManager.NavigateTo($"/play/{collection.Id}");
         }
         
         private async Task HandleSubmit(CardCollectionDetailModel model)
         {
-            CardCollectionDetailModel newCollection = new CardCollectionDetailModel
+            try 
             {
-                Id = Guid.NewGuid(),
-                Title = model.Title,
-                AnswerStart = model.AnswerStart,
-                AnswerEnd = model.AnswerEnd,
-                Cards = model.Cards
-            };
-            await CardCollectionFacade.UpsertAsync(newCollection);
+                CardCollectionDetailModel newCollection = new CardCollectionDetailModel
+                {
+                    Id = Guid.NewGuid(),
+                    Title = model.Title,
+                    AnswerStart = model.AnswerStart,
+                    AnswerEnd = model.AnswerEnd,
+                    Cards = model.Cards
+                };
+                
+                showCreateForm = false;
+                await CardCollectionFacade.UpsertAsync(newCollection);
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create collection: {ex.Message}");
+            }
         }
         
         private void  HandleCancel()
