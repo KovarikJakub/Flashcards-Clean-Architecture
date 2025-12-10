@@ -172,9 +172,9 @@
                 }
             */
 
-                            // 1. Fetch Lessons
-                            // We use the new GetUserHistoryAsync method we added to LessonFacade
-                            lessons = await LessonFacade.GetUserHistoryAsync(userId);
+            // 1. Fetch Lessons
+            // We use the new GetUserHistoryAsync method we added to LessonFacade
+            lessons = await LessonFacade.GetUserHistoryAsync(userId);
 
             // 2. Fetch User Name
             // We try to get the real name from the API. If it fails, we keep the default "User".
@@ -215,7 +215,6 @@
             double totalCorrect = lessons.Sum(l => (double)l.Correct);
             double totalWrong = lessons.Sum(l => (double)l.Wrong);
             double totalAnswers = totalCorrect + totalWrong;
-
             return totalAnswers == 0 ? 0 : (totalCorrect / totalAnswers) * 100;
         }
     }
