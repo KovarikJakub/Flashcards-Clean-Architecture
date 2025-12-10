@@ -13,5 +13,25 @@
         "DebugTarget": "Flashcards.Web.App"
       }
     ]
+  },
+  {
+    "Name": "API + Web UI + Identity",
+    "Projects": [
+      {
+        "Path": "Flashcards.Api.App\\Flashcards.Api.App.csproj",
+        "Action": "Start",
+        "DebugTarget": "Flashcards.Api"
+      },
+      {
+        "Path": "Flashcard.Web.App\\Flashcards.Web.App.csproj",
+        "Action": "Start",
+        "DebugTarget": "Flashcards.Web.App"
+      },
+      {
+        "Path": "Flashcards.IdentityProvider.App\\Flashcards.IdentityProvider.App.csproj",
+        "Action": "Start",
+        "DebugTarget": "SelfHost"
+      }
+    ]
   }
 ]
