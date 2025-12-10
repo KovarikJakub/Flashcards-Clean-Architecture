@@ -23,6 +23,8 @@ public class WebBLInstaller
 
         serviceCollection.AddTransient<CardCollectionFacade>();
         serviceCollection.AddTransient<UserFacade>();
+        serviceCollection.AddTransient<LessonFacade>();
+        serviceCollection.AddTransient<CardFacade>();
     }
 
 

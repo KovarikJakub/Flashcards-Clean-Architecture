@@ -1,13 +1,9 @@
-using Flashcards.Common.Extensions;
 using Flashcards.Common.Options;
 using Flashcards.Web.App;
-using Flashcards.Web.BL.Api;
 using Flashcards.Web.BL.Extensions;
-using Flashcards.Web.BL.Facades;
 using Flashcards.Web.BL.Installers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -31,7 +27,6 @@ if (identityOptions is null)
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
 
 builder.Services.AddInstaller<WebBLInstaller>(identityOptions, apiOptions);
-
 
 // OIDC auth
 builder.Services.AddOidcAuthentication(options =>
