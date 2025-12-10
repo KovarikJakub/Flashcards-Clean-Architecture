@@ -2,6 +2,7 @@
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Flashcards.Web.App.Pages
 {
@@ -12,7 +13,10 @@ namespace Flashcards.Web.App.Pages
         [Inject]
         private NavigationManager NavigationManager { get; set; } = null!;
         [Inject]
-        private IJSRuntime JS { get; set; } = null!;
+        private IJSRuntime Js { get; set; } = null!; // renamed to satisfy analyzer
+        
+        [Inject]
+        private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
         
         private ICollection<CardCollectionListModel> CardCollections { get; set; } = new List<CardCollectionListModel>();
         private string FilterMy { get; set; } = string.Empty;
@@ -22,7 +26,8 @@ namespace Flashcards.Web.App.Pages
         private ElementReference _scrollContainerMy;
         private ElementReference _scrollContainerAll;
         private IJSObjectReference? _module;
-        
+        private string? _userId;
+
         private CardCollectionDetailModel _model = new CardCollectionDetailModel
         {
             Id = Guid.NewGuid(),
@@ -44,6 +49,20 @@ namespace Flashcards.Web.App.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            try
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                if (user.Identity?.IsAuthenticated == true)
+                {
+                     _userId = user.FindFirst("sub")?.Value;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to retrieve auth state: {ex.Message}");
+            }
+
             await LoadData();
             await base.OnInitializedAsync();
         }
@@ -125,7 +144,7 @@ namespace Flashcards.Web.App.Pages
                 try
                 {
                     Console.WriteLine("Attempting to load JS module...");
-                    _module = await JS.InvokeAsync<IJSObjectReference>(
+                    _module = await Js.InvokeAsync<IJSObjectReference>(
                         "import", "/js/Scroll.js");
                     Console.WriteLine("JS module loaded successfully.");
                 }
