@@ -7,6 +7,7 @@ namespace Flashcards.Api.BL.Facades
     {
         List<CardCollectionListModel> GetAll();
         CardCollectionDetailModel? GetById(Guid id);
+        List<CardCollectionListModel> GetByOwner(string ownerId);
         Guid CreateOrUpdate(CardCollectionDetailModel CardCollectionModel, IList<string> userRoles, string? ownerId = null);
         Guid Create(CardCollectionDetailModel CardCollectionModel, IList<string> userRoles, string? ownerId = null);
         Guid? Update(CardCollectionDetailModel CardCollectionModel, IList<string> userRoles, string? ownerId = null);
