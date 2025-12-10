@@ -152,32 +152,8 @@
     {
         try
         {
-            // ============================================================
-            // 🔧 HARDCODED ID FOR TESTING (JAKUB USER)
-            // ============================================================
             var userId = Guid.Parse("fb4049db-148d-44c2-9be4-5abeffe971a2");
-
-            /* 🔓 REAL AUTHENTICATION LOGIC (Uncomment when ready)
-            ---------------------------------------------------
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (user.Identity != null && user.Identity.IsAuthenticated)
-            {
-                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier) ?? user.FindFirst("sub");
-                if(userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var parsedId))
-                {
-                    userId = parsedId;
-                    }
-                }
-            */
-
-            // 1. Fetch Lessons
-            // We use the new GetUserHistoryAsync method we added to LessonFacade
             lessons = await LessonFacade.GetUserHistoryAsync(userId);
-
-            // 2. Fetch User Name
-            // We try to get the real name from the API. If it fails, we keep the default "User".
             try
             {
                 var userDetail = await UserClient.UserGetAsync(userId);
@@ -190,7 +166,6 @@
             {
                 userName = "Test User";
             }
-
         }
         catch (Exception ex)
         {
@@ -201,8 +176,6 @@
             isLoading = false;
         }
     }
-
-    // --- Computed Properties ---
 
     private long TotalCardsSeen => lessons?.Sum(l => (long)l.Seen) ?? 0;
 
@@ -219,8 +192,6 @@
         }
     }
 
-    // --- Helper Methods ---
-
     private double CalculateAccuracy(double correct, double wrong)
     {
         double total = correct + wrong;
@@ -230,9 +201,9 @@
 
     private string GetAccuracyColor(double accuracy) => accuracy switch
     {
-        >= 80 => "text-green-600",   // High score
-        >= 50 => "text-yellow-600",  // Medium score
-        _ => "text-red-600"          // Low score
+        >= 80 => "text-green-600",   
+        >= 50 => "text-yellow-600",  
+        _ => "text-red-600"          
     };
 
     private string GetInitials(string name)
