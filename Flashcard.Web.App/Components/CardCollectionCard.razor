@@ -1,6 +1,6 @@
 @namespace Flashcards.Web.App.Components
 
-<div class="border rounded shadow @Class">
+<div class="border rounded shadow @Class @(IsActive ? string.Empty : "bg-gray-100")">
     <div class="flex flex-col p-4 h-full">
 
         <div class="flex items-center justify-center border p-3 ">
@@ -22,7 +22,7 @@
         @if (IsOwner)
         {
            <div class="mt-10 flex justify-between items-center">
-            <button class="px-4 py-2 text-sm text-blue-500 border border-blue-500 rounded hover:bg-blue-500 hover:text-white" @onclick="HandlePlayClicked">Play</button>
+            <button class="px-4 py-2 text-sm @(IsActive ? "text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white" : "text-gray-400 border border-gray-300") rounded" @onclick="HandlePlayClicked" disabled="@(!IsActive)">Play</button>
             <div class="flex gap-2">
                 <button class="px-4 py-2 text-sm text-green-500 border border-green-500 rounded hover:bg-green-500 hover:text-white" @onclick="EditClicked">Edit</button>
                 <button class="px-4 py-2 text-sm text-red-500 border border-red-500 rounded hover:bg-red-500 hover:text-white" @onclick="DeleteClicked">Delete</button>
@@ -32,8 +32,8 @@
         else
         {
             <div class="mt-10 flex justify-center items-center">
-                <button class="w-[100px] font-bold text-3xl text-blue-500 border border-blue-500 rounded hover:bg-blue-500 hover:text-white" 
-                        @onclick="HandlePlayClicked">Play</button>
+                <button class="w-[100px] font-bold text-3xl @(IsActive ? "text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white" : "text-gray-400 border border-gray-300") rounded" 
+                        @onclick="HandlePlayClicked" disabled="@(!IsActive)">Play</button>
             </div>
         }
         
@@ -60,6 +60,9 @@
     [Parameter]
     public bool IsOwner { get; set; }
 
+    [Parameter]
+    public bool IsActive { get; set; } = true;
+
     private async Task EditClicked()
     {
         if (OnEdit.HasDelegate)
@@ -78,7 +81,7 @@
     
     private async Task HandlePlayClicked()
     {
-        if (onPlay.HasDelegate)
+        if (onPlay.HasDelegate && IsActive)
         {
             await onPlay.InvokeAsync(Collection);
         }

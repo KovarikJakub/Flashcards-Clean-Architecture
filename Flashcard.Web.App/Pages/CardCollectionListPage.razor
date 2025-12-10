@@ -23,7 +23,7 @@
                             {
                                 @foreach (var collection in FilteredMyCollections)
                                 {
-                                    <CardCollectionCard class="w-[425px] h-full  flex-shrink-0" Collection="collection" IsOwner="true" 
+                                    <CardCollectionCard class="w-[425px] h-full  flex-shrink-0" Collection="collection" IsOwner="true" IsActive="@IsCollectionActive(collection)"
                                                         onPlay="@(() => HandlePlayCollection(collection))" OnEdit="@(() => OnEditCollection(collection))" OnDelete="@(() => OnDeleteCollection(collection))" />
                                 }
                             }
@@ -74,7 +74,7 @@
                             {
                                 @foreach (var collection in FilteredAllCollections)
                                 {
-                                    <CardCollectionCard class="w-[425px] h-full flex-shrink-0" Collection="collection" IsOwner="false" 
+                                    <CardCollectionCard class="w-[425px] h-full flex-shrink-0" Collection="collection" IsOwner="false" IsActive="@IsCollectionActive(collection)"
                                                         onPlay="@(() => HandlePlayCollection(collection))"/>
                                 }
                             }

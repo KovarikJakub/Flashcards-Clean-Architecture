@@ -103,5 +103,13 @@ namespace Flashcards.Web.App.Pages
         {
             showCreateForm = true;
         } 
+
+        private bool IsCollectionActive(CardCollectionListModel collection)
+        {
+            var now = DateTime.UtcNow;
+            var startUtc = collection.AnswerStart.ToUniversalTime();
+            var endUtc = collection.AnswerEnd.ToUniversalTime();
+            return now >= startUtc && now <= endUtc;
+        }
     }
 }
