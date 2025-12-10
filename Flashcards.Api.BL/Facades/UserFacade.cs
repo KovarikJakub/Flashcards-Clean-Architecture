@@ -128,6 +128,12 @@ namespace Flashcards.Api.BL.Facades
         {
             ThrowIfWrongOwnerAndNotAdmin(id, userRoles, ownerId);
 
+            var deletedUser = userRepository.GetById(id);
+            if (deletedUser?.Role == RoleType.Admin)
+            {
+                throw new InvalidOperationException("Cannot delete an Admin user!");
+            }
+
             // Delete from API database first
             userRepository.Remove(id);
 
