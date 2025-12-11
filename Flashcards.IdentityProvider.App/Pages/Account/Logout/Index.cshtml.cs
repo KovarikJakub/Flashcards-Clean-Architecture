@@ -4,6 +4,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -65,7 +66,8 @@ public class Index : PageModel
             // this can still return null if there is no context needed
             LogoutId ??= await _interaction.CreateLogoutContextAsync();
 
-            // delete local authentication cookie
+            // Delete authentication cookies - sign out from both IdentityServer and ASP.NET Identity
+            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
             await HttpContext.SignOutAsync();
 
             // see if we need to trigger federated logout
