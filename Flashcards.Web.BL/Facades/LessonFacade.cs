@@ -46,5 +46,11 @@ namespace Flashcards.Web.BL.Facades
             {
                 return await _apiClient.LessonPostAsync(model);
             }
+            
+            public async Task <List<LessonListModel>> GetAllLessonsWiithOwnerIdAsync(string ownerId)
+            {
+                var lessons = await _apiClient.UserAsync(ownerId);
+                return lessons.ToList();
+            }
     }   
 }

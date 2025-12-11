@@ -1,13 +1,9 @@
 ﻿@page "/statistics"
 @page "/stats"
-
-@using Flashcards.Common.Models
-@using Flashcards.Web.BL.Facades
+@attribute [Authorize]
 @using Flashcards.Web.BL.Api
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
 
-@inject LessonFacade LessonFacade
 @inject IUserApiClient UserClient
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -145,31 +141,38 @@
 
 @code {
     private List<LessonListModel>? lessons;
-    private string userName = "User"; // Default fallback name
+    private string userName = "User"; 
     private bool isLoading = true;
+    private string? _userId;
+    [Inject]
+    private UserFacade UserFacade { get; set; } = null!;
+    [Inject]
+    private LessonFacade LessonFacade { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var userId = Guid.Parse("fb4049db-148d-44c2-9be4-5abeffe971a2");
-            lessons = await LessonFacade.GetUserHistoryAsync(userId);
             try
             {
-                var userDetail = await UserClient.UserGetAsync(userId);
-                if (userDetail != null)
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                if (user.Identity?.IsAuthenticated == true)
                 {
-                    userName = userDetail.Name;
+                    _userId = user.FindFirst("sub")?.Value;
+                    var userModel = await UserFacade.GetByOwnerIdAsync(_userId);
+                    userName = userModel.Name;
+                    lessons = await LessonFacade.GetAllLessonsWiithOwnerIdAsync(_userId);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                userName = "Test User";
+                Console.WriteLine($"Failed to retrieve auth state: {ex.Message}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Critical Error loading stats: {ex.Message}");
+            Console.WriteLine($"Error loading stats: {ex.Message}");
         }
         finally
         {
@@ -184,7 +187,6 @@
         get
         {
             if (lessons == null || !lessons.Any()) return 0;
-
             double totalCorrect = lessons.Sum(l => (double)l.Correct);
             double totalWrong = lessons.Sum(l => (double)l.Wrong);
             double totalAnswers = totalCorrect + totalWrong;
@@ -201,9 +203,9 @@
 
     private string GetAccuracyColor(double accuracy) => accuracy switch
     {
-        >= 80 => "text-green-600",   
-        >= 50 => "text-yellow-600",  
-        _ => "text-red-600"          
+        >= 80 => "text-green-600",
+        >= 50 => "text-yellow-600",
+        _ => "text-red-600"
     };
 
     private string GetInitials(string name)
