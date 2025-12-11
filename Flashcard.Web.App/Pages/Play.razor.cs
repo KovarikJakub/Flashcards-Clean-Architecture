@@ -1,5 +1,5 @@
 using Flashcards.Common.Models;
-using Flashcards.Common.Enums;
+using Microsoft.AspNetCore.Components.Authorization;
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 
@@ -9,6 +9,7 @@ namespace Flashcards.Web.App.Pages
     {
         [Parameter]
         public Guid Id { get; init; }
+        public string? ownerId { get; set; }
         
         [Inject]
         private NavigationManager NavigationManager { get; set; } = null!;
@@ -16,18 +17,42 @@ namespace Flashcards.Web.App.Pages
         private static CardCollectionDetailModel? _cardCollection { get; set; }
         
         [Inject]
+        private LessonFacade LessonFacade { get; set; } = null!;
+        
+        [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
+        
+        [Inject]
+        private UserFacade UserFacade { get; set; } = null!;
+        
+        [Inject]
+        private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
 
         private LessonDetailModel? newLesson;
+        private UserDetailModel? _currentUser;
         private bool _showStats = false;
-
+        private string? _userId;
         protected override async Task OnInitializedAsync()
         {
-            _cardCollection = await CardCollectionFacade.GetByIdAsync(Id);        
+            _cardCollection = await CardCollectionFacade.GetByIdAsync(Id);
+            try
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                if (user.Identity?.IsAuthenticated == true)
+                {
+                    _userId = user.FindFirst("sub")?.Value;
+                    _currentUser = await UserFacade.GetByOwnerIdAsync(ownerId);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to retrieve auth state: {ex.Message}");
+            }
             newLesson = new LessonDetailModel
                 {
                     Id = Guid.NewGuid(),
-                    User = CurrentUser,
+                    User = _currentUser,
                     CardCollection = _cardCollection,
                     Start = DateTime.Now,
                     Correct = 0,
@@ -80,10 +105,21 @@ namespace Flashcards.Web.App.Pages
             if (_index > 0) _index--;
         }
 
-        private void HandleClickNext()
+        private async Task HandleClickNext()
         {
             if (_cardCollection != null && _index + 1 < _cardCollection.Cards.Count) _index++;
-            else _showStats = true;
+            else
+            {
+                try
+                {
+                    await LessonFacade.UpsertAsync(newLesson);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                _showStats = true;
+            }
         }
         
         private void FlipCard()
@@ -107,15 +143,5 @@ namespace Flashcards.Web.App.Pages
         {
             NavigationManager.NavigateTo("/collections");
         }
-           
-        // TODO remove dummy user
-         static UserDetailModel CurrentUser =
-            new UserDetailModel
-            {
-                Id = Guid.Parse((ReadOnlySpan<char>)"123e4567-e89b-12d3-a456-426614174000"),
-                Name = "pepa",
-                PhotographyUrl = null,
-                Role = RoleType.User
-            };
     }
 }

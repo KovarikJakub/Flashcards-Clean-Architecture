@@ -15,6 +15,19 @@ namespace Flashcards.Web.BL.Facades
             this.apiClient = apiClient;
             this.httpClient = httpClient;
         }
+        
+        public async Task<UserDetailModel?> GetByOwnerIdAsync(string ownerId)
+        {
+            try
+            {
+                var user = await apiClient.OwnerAsync(ownerId);
+                return user;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public async Task<List<UserListModel>> GetAllAsync()
         {
