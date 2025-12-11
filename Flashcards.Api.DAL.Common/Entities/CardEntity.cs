@@ -8,7 +8,7 @@ namespace Flashcards.Api.DAL.Common.Entities
         public required ContentType AnswerType { get; set; }
         public required string QuestionContent { get; set; }
         public required string AnswerContent { get; set; }
-        public required DateTime DateCreated { get; set; }
+        public required DateTime Created { get; set; }
         public string? Description { get; set; }
     }
 }

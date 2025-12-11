@@ -22,7 +22,7 @@ public class CardCollectionMapper
                 AnswerType = card.AnswerType,
                 QuestionContent = card.QuestionContent,
                 AnswerContent = card.AnswerContent,
-                DateCreated = card.DateCreated,
+                Created = card.DateCreated,
                 Description = card.Description
 
 
@@ -48,7 +48,7 @@ public class CardCollectionMapper
                 AnswerType = card.AnswerType,
                 QuestionContent = card.QuestionContent,
                 AnswerContent = card.AnswerContent,
-                DateCreated = card.DateCreated,
+                DateCreated = card.Created,
                 Description = card.Description
 
 

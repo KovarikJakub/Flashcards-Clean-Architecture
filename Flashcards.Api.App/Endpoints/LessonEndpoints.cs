@@ -11,7 +11,11 @@ public static class LessonEndpoints
     {
         var lessonEndpoints = group.MapGroup("lesson").WithTags("lesson");
 
-        lessonEndpoints.MapGet("all", (ILessonFacade lessonFacade) => lessonFacade.GetAll());
+        lessonEndpoints.MapGet("all", (ILessonFacade lessonFacade) =>
+        {
+            var result = lessonFacade.GetAll();
+            return TypedResults.Ok(result);
+        });
 
         lessonEndpoints.MapGet("", (
             ILessonFacade lessonFacade,

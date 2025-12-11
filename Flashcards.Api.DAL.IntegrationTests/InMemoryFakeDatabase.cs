@@ -101,7 +101,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 AnswerType = ContentType.Text,
                 QuestionContent = "Who is showing up to friday morning ISA lecture?",
                 AnswerContent = "Not me",
-                DateCreated = new DateTime(2025, 2, 1, 10,0,0,0),
+                Created = new DateTime(2025, 2, 1, 10,0,0,0),
                 Description = "A common sense question."
             });
 
@@ -112,7 +112,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 AnswerType = ContentType.Text,
                 QuestionContent = "Best asian food?",
                 AnswerContent = "Kottu",
-                DateCreated = new DateTime(2025, 2, 2, 11, 0, 0, 0),
+                Created = new DateTime(2025, 2, 2, 11, 0, 0, 0),
                 Description = "A general question"
             });
 
@@ -123,7 +123,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 AnswerType = ContentType.Text,
                 QuestionContent = "What is the most overhyped programming language?",
                 AnswerContent = "Rust",
-                DateCreated = new DateTime(2025, 2, 3, 9, 0, 0, 0),
+                Created = new DateTime(2025, 2, 3, 9, 0, 0, 0),
                 Description = "A programming question"
             });
             
@@ -131,7 +131,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[0],
                 Name = "Pavel",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             });
             
@@ -139,7 +139,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[1],
                 Name = "Oliver",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             });
             
@@ -147,7 +147,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[2],
                 Name = "Vit",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             });
             
@@ -155,7 +155,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[3],
                 Name = "Adam",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.Admin
             });
 

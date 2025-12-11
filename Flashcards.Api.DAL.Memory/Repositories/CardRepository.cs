@@ -52,7 +52,7 @@ namespace Flashcards.Api.DAL.Memory.Repositories
             {
                 existingCard.AnswerContent = card.AnswerContent;
                 existingCard.QuestionContent = card.QuestionContent;
-                existingCard.DateCreated = card.DateCreated;
+                existingCard.Created = card.Created;
                 existingCard.AnswerType = card.AnswerType;
                 existingCard.QuestionType = card.QuestionType;
                 return existingCard.Id;
