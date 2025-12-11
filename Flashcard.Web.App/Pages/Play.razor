@@ -1,6 +1,8 @@
 @page "/play/{Id:guid}"
 @layout PlayLayout
 @inherits PageBase
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <div class="w-full h-full flex flex-col items-center px-4">
     @if (!_showStats)
