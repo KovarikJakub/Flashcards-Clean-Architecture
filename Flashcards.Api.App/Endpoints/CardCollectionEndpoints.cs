@@ -13,6 +13,7 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
     {
         var cardCollectionEndpoints = endpointRouteBuilder.MapGroup("cardCollection")
             .WithTags("cardCollection");
+        cardCollectionEndpoints.RequireAuthorization();
 
         cardCollectionEndpoints.MapGet("", (ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.GetAll());
 

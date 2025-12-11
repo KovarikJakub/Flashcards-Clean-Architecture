@@ -6,12 +6,11 @@ namespace Flashcards.Api.DAL.Common.Entities
     {
         public required string Name { get; set; }
 
-        public required string? PhotographyUrl { get; set; }
+        public  string? PhotoUrl { get; set; }
         
         public required RoleType Role { get; set; }
 
         public string? OwnerId { get; set; }
-
     }
 }
 

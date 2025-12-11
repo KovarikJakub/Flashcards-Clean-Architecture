@@ -11,7 +11,7 @@ namespace Flashcards.Api.BL.Mappers
             {
                 Id = model.Id,
                 Name = model.Name,
-                PhotographyUrl = model.PhotographyUrl,
+                PhotoUrl = model.PhotographyUrl,
                 Role = model.Role
 
             };
@@ -23,7 +23,7 @@ namespace Flashcards.Api.BL.Mappers
             {
                 Id = model.Id,
                 Name = model.Name,
-                PhotographyUrl = model.PhotographyUrl,
+                PhotographyUrl = model.PhotoUrl,
                 Role = model.Role
             };
         }

@@ -143,6 +143,13 @@ namespace Flashcards.Api.BL.Facades
             }
         }
 
+        public UserDetailModel? GetByOwnerId(string ownerId)
+        {
+            if (string.IsNullOrWhiteSpace(ownerId)) return null;
+            var userEntity = userRepository.GetAll().FirstOrDefault(u => u.OwnerId != null && u.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
+            return userEntity == null ? null : mapper.ToDetailModel(userEntity);
+        }
+
         private void ThrowIfWrongOwnerAndNotAdmin(Guid? id, IList<string> userRoles, string? ownerId)
         {
             if (id is not null

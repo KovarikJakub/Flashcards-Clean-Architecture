@@ -71,7 +71,7 @@ namespace Flashcards.Web.App.Pages
         private async Task LoadData()
         {
             CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
-            CardCollectionsMine = await CardCollectionFacade.GetByOwnerAsync("Jakub");      //TODO fix ownerId
+            CardCollectionsMine = await CardCollectionFacade.GetByOwnerAsync(_userId);
         }
 
         private Task OnEditCollection(CardCollectionListModel collection)

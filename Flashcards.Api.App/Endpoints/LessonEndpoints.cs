@@ -1,4 +1,5 @@
-﻿using Flashcards.Api.BL.Facades;
+﻿using System.Runtime.InteropServices.Marshalling;
+using Flashcards.Api.BL.Facades;
 using Flashcards.Common.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -9,15 +10,18 @@ public static class LessonEndpoints
     public static RouteGroupBuilder MapEndpoints(this RouteGroupBuilder group)
     {
         var lessonEndpoints = group.MapGroup("lesson").WithTags("lesson");
+        lessonEndpoints.RequireAuthorization();
 
-        lessonEndpoints.MapGet("all", (ILessonFacade lessonFacade) => lessonFacade.GetAll());
-
-        lessonEndpoints.MapGet("", (
-            ILessonFacade lessonFacade,
-            [AsParameters] LessonQueryModel query) =>
+        lessonEndpoints.MapGet("", (ILessonFacade lessonFacade) =>
         {
-            var result = lessonFacade.GetByQuery(query);
+            var result = lessonFacade.GetAll();
             return TypedResults.Ok(result);
+        });
+        
+        lessonEndpoints.MapGet("user/{ownerId}", (string ownerId, ILessonFacade lessonFacade) =>
+        {   
+                 var result = lessonFacade.GetAllByOwner(ownerId);
+                 return TypedResults.Ok(result);
         });
 
         lessonEndpoints.MapGet("{id:guid}", Results<Ok<LessonDetailModel>, NotFound<string>> (Guid id, ILessonFacade lessonFacade)

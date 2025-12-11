@@ -1,5 +1,4 @@
-﻿
-using Flashcards.Api.BL.Mappers;
+﻿using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Models;
 
@@ -57,6 +56,12 @@ namespace Flashcards.Api.BL.Facades
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             return _mapper.ToListModel(items);
+        }
+
+        public List<LessonListModel> GetAllByOwner(string ownerId)
+        {
+            var entities = _repository.GetAll().Where(e => e.CardCollection != null && e.CardCollection.OwnerId != null && e.CardCollection.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
+            return _mapper.ToListModel(entities);
         }
     }
 }

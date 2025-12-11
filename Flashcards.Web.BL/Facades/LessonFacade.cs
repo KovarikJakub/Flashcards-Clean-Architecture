@@ -12,15 +12,15 @@ namespace Flashcards.Web.BL.Facades
                 _apiClient = apiClient;
             }
 
-            public async Task<List<LessonListModel>> GetUserHistoryAsync(Guid userId)
+            public async Task<List<LessonListModel>> GetUserHistoryAsync(string userId)
             {
-                var result = await _apiClient.LessonGetAsync(userId, null, 1, 1000, null, true);
+                var result = await _apiClient.UserAsync(userId);
                 return result.ToList();
             }
 
             public async Task <ICollection<LessonListModel>> GetAllAsync()
             {
-                var lessons = await _apiClient.AllAsync();
+                var lessons = await _apiClient.LessonGetAsync();
                 return lessons.ToList();
             }
             
@@ -45,6 +45,12 @@ namespace Flashcards.Web.BL.Facades
             public async Task<Guid> UpsertAsync(LessonDetailModel model)
             {
                 return await _apiClient.LessonPostAsync(model);
+            }
+            
+            public async Task <List<LessonListModel>> GetAllLessonsWiithOwnerIdAsync(string ownerId)
+            {
+                var lessons = await _apiClient.UserAsync(ownerId);
+                return lessons.ToList();
             }
     }   
 }

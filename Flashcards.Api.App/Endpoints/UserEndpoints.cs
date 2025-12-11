@@ -14,14 +14,20 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
     {
         var userEndpoints = endpointRouteBuilder.MapGroup("user")
             .WithTags("user");
+        userEndpoints.RequireAuthorization();
 
-       
+
         userEndpoints.MapGet("", (IUserFacade userFacade) => userFacade.GetAll());
 
         userEndpoints.MapGet("{id:guid}", Results<Ok<UserDetailModel>, NotFound<string>> (Guid id, IUserFacade userFacade)
             => userFacade.GetById(id) is { } user
                 ? TypedResults.Ok(user)
                 : TypedResults.NotFound("This user was not found!"));
+
+        userEndpoints.MapGet("owner/{ownerId}", Results<Ok<UserDetailModel>, NotFound<string>> (string ownerId, IUserFacade userFacade)
+            => userFacade.GetByOwnerId(ownerId) is { } user
+                ? TypedResults.Ok(user)
+                : TypedResults.NotFound("User not found for given owner id"));
 
        
         var userModifyingEndpoints = userEndpoints.MapGroup("");
@@ -107,8 +113,7 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 return TypedResults.Forbid();
             }
         });
-
-        // NEW: Delete user with Identity Server integration
+        
         userModifyingEndpoints.MapDelete("{id:guid}/with-identity", async Task<Results<Ok, ForbidHttpResult, BadRequest<string>>> (
             Guid id, 
             IUserFacade userFacade, 
@@ -135,11 +140,3 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
         return endpointRouteBuilder;
     }
 }
-
-public record CreateUserWithIdentityRequest(
-    string UserName,
-    string Password,
-    string Email,
-    string Name,
-    string? PhotographyUrl,
-    RoleType Role);

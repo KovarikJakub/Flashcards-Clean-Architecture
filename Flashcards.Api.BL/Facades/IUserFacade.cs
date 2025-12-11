@@ -14,7 +14,6 @@ namespace Flashcards.Api.BL.Facades
         Guid? Update(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
         void Delete(Guid id, IList<string> userRoles, string? ownerId = null);
         
-        // New methods for Identity integration
         Task<Guid> CreateUserWithIdentityAsync(
             string userName,
             string password,
@@ -26,8 +25,7 @@ namespace Flashcards.Api.BL.Facades
             string? ownerId = null);
         
         Task DeleteUserWithIdentityAsync(Guid id, IList<string> userRoles, string? ownerId = null);
+        
+        UserDetailModel? GetByOwnerId(string ownerId);
     }
 }
-
-
-

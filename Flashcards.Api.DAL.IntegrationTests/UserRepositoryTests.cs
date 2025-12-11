@@ -19,7 +19,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
         {
             return user1.Id == user2.Id &&
                    user1.Name == user2.Name &&
-                   user1.PhotographyUrl == user2.PhotographyUrl &&
+                   user1.PhotoUrl == user2.PhotoUrl &&
                    user1.Role == user2.Role;
         }
         
@@ -73,7 +73,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = Guid.NewGuid(),
                 Name = "Kuba",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
 
             };

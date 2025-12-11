@@ -13,7 +13,7 @@ public class CardMapper
             AnswerType = model.AnswerType,
             QuestionContent = model.QuestionContent,
             AnswerContent = model.AnswerContent,
-            DateCreated = model.DateCreated,
+            Created = model.DateCreated,
             Description = model.Description
         };
     }
@@ -27,7 +27,7 @@ public class CardMapper
             AnswerType = entity.AnswerType,
             QuestionContent = entity.QuestionContent,
             AnswerContent = entity.AnswerContent,
-            DateCreated = entity.DateCreated,
+            DateCreated = entity.Created,
             Description = entity.Description
         };
     }

@@ -53,7 +53,7 @@ namespace Flashcards.Api.DAL.Memory.Repositories
             {
                 existingUser.Name = user.Name;
                 existingUser.Role = user.Role;
-                existingUser.PhotographyUrl = user.PhotographyUrl;
+                existingUser.PhotoUrl = user.PhotoUrl;
                 return existingUser.Id;
             }
 

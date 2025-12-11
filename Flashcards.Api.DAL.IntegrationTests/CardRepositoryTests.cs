@@ -24,7 +24,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 card1.QuestionContent == card2.QuestionContent &&
                 card1.AnswerContent == card2.AnswerContent &&
                 card1.Description == card2.Description &&
-                card1.DateCreated == card2.DateCreated;
+                card1.Created == card2.Created;
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 QuestionContent = "What is the capital of Spain?",
                 AnswerContent = "Madrid",
                 Description = "Geography question",
-                DateCreated = new DateTime(2025, 2, 1, 10, 0, 0, DateTimeKind.Utc)
+                Created = new DateTime(2025, 2, 1, 10, 0, 0, DateTimeKind.Utc)
             };
 
             // Act
