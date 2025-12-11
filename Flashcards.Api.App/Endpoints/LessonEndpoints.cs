@@ -1,4 +1,5 @@
-﻿using Flashcards.Api.BL.Facades;
+﻿using System.Runtime.InteropServices.Marshalling;
+using Flashcards.Api.BL.Facades;
 using Flashcards.Common.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -18,6 +19,12 @@ public static class LessonEndpoints
         {
             var result = lessonFacade.GetByQuery(query);
             return TypedResults.Ok(result);
+        });
+        
+        lessonEndpoints.MapGet("user/{ownerId}", (string ownerId, ILessonFacade lessonFacade) =>
+        {   
+                 var result = lessonFacade.GetAllByOwner(ownerId);
+                 return TypedResults.Ok(result);
         });
 
         lessonEndpoints.MapGet("{id:guid}", Results<Ok<LessonDetailModel>, NotFound<string>> (Guid id, ILessonFacade lessonFacade)

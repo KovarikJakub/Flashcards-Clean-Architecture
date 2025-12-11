@@ -8,6 +8,7 @@ namespace Flashcards.Api.BL.Facades
         public Guid Create(LessonDetailModel model);
         public LessonDetailModel? GetById(Guid id);
         public List<LessonListModel> GetAll();
+        public List<LessonListModel> GetAllByOwner(string ownerId);
         public void Delete(Guid id);
         List<LessonListModel>? GetByQuery(LessonQueryModel query);
     }
