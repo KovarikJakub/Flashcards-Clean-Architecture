@@ -6,7 +6,7 @@ namespace Flashcards.Api.DAL.Common.Entities
     {
         public required string Name { get; set; }
 
-        public string? PhotographyUrl { get; set; }
+        public string? PhotoUrl { get; set; }
         
         public required RoleType Role { get; set; }
 

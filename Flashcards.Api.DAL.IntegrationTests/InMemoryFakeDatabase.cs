@@ -131,7 +131,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[0],
                 Name = "Pavel",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             });
             
@@ -139,7 +139,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[1],
                 Name = "Oliver",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             });
             
@@ -147,7 +147,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[2],
                 Name = "Vit",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             });
             
@@ -155,7 +155,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             {
                 Id = UserGuids[3],
                 Name = "Adam",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.Admin
             });
 

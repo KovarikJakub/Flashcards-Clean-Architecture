@@ -65,7 +65,7 @@ namespace Flashcards.Api.BL.UnitTests
             _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
                 user.Id == newUser.Id &&
                 user.Name == newUser.Name &&
-                user.PhotographyUrl == newUser.PhotographyUrl &&
+                user.PhotoUrl == newUser.PhotographyUrl &&
                 user.Role == newUser.Role));
 
             Assert.Equal(id, newUser.Id);
@@ -84,7 +84,7 @@ namespace Flashcards.Api.BL.UnitTests
             _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
                 user.Id == newUser.Id &&
                 user.Name == newUser.Name &&
-                user.PhotographyUrl == newUser.PhotographyUrl &&
+                user.PhotoUrl == newUser.PhotographyUrl &&
                 user.Role == newUser.Role));
 
             Assert.Equal(result, newUser.Id);

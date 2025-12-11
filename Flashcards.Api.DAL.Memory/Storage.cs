@@ -125,7 +125,7 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
                 Name = "Filip",
-                PhotographyUrl = "https://i.pravatar.cc/150?u=7e664a56-e7b8-4301-84ad-ec08446465f2",
+                PhotoUrl = "https://i.pravatar.cc/150?u=7e664a56-e7b8-4301-84ad-ec08446465f2",
                 Role = RoleType.Admin
             });
 
@@ -133,7 +133,7 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
                 Name = "JakubUser",
-                PhotographyUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
+                PhotoUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
                 Role = RoleType.User,
                 OwnerId = "Jakub"
             });
@@ -142,7 +142,7 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = new Guid("241e43ef-e4ac-4dd6-8176-fb0ba2de4669"),
                 Name = "Petr",
-                PhotographyUrl = String.Empty,
+                PhotoUrl = String.Empty,
                 Role = RoleType.User
             });
         }

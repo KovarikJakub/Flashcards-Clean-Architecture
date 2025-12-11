@@ -78,7 +78,7 @@ namespace Flashcards.Api.App.EndpointTests
             {
                 Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
                 Name = "Filip",
-                PhotographyUrl = String.Empty,
+                PhotoUrl = String.Empty,
                 Role = RoleType.Admin  // Changed from Administrator
             });
 
@@ -86,7 +86,7 @@ namespace Flashcards.Api.App.EndpointTests
             {
                 Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
                 Name = "Prokop",
-                PhotographyUrl = String.Empty,
+                PhotoUrl = String.Empty,
                 Role = RoleType.User
             });
 
@@ -94,7 +94,7 @@ namespace Flashcards.Api.App.EndpointTests
             {
                 Id = new Guid("241e43ef-e4ac-4dd6-8176-fb0ba2de4669"),
                 Name = "Petr",
-                PhotographyUrl = String.Empty,
+                PhotoUrl = String.Empty,
                 Role = RoleType.User
             });
         }
