@@ -14,8 +14,9 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
     {
         var userEndpoints = endpointRouteBuilder.MapGroup("user")
             .WithTags("user");
+        userEndpoints.RequireAuthorization();
 
-       
+
         userEndpoints.MapGet("", (IUserFacade userFacade) => userFacade.GetAll());
 
         userEndpoints.MapGet("{id:guid}", Results<Ok<UserDetailModel>, NotFound<string>> (Guid id, IUserFacade userFacade)

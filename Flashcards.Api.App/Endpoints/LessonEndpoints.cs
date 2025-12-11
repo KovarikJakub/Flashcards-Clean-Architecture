@@ -10,6 +10,7 @@ public static class LessonEndpoints
     public static RouteGroupBuilder MapEndpoints(this RouteGroupBuilder group)
     {
         var lessonEndpoints = group.MapGroup("lesson").WithTags("lesson");
+        lessonEndpoints.RequireAuthorization();
 
         lessonEndpoints.MapGet("", (ILessonFacade lessonFacade) =>
         {

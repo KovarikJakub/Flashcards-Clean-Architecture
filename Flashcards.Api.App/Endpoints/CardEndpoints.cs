@@ -9,7 +9,7 @@ public static class CardEndpoints
     public static RouteGroupBuilder MapEndpoints(RouteGroupBuilder group)
     {
         var cardEndpoints = group.MapGroup("card").WithTags("card");
-
+        cardEndpoints.RequireAuthorization();
         cardEndpoints.MapGet("", (ICardFacade cardFacade) => cardFacade.GetAll());
 
         cardEndpoints.MapGet("{id:guid}", Results<Ok<CardDetailModel>, NotFound<string>> (Guid id, ICardFacade cardFacade)
