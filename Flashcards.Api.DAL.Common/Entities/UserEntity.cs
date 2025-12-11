@@ -11,7 +11,6 @@ namespace Flashcards.Api.DAL.Common.Entities
         public required RoleType Role { get; set; }
 
         public string? OwnerId { get; set; }
-
     }
 }
 

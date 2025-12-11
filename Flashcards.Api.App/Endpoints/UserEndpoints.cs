@@ -23,6 +23,11 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 ? TypedResults.Ok(user)
                 : TypedResults.NotFound("This user was not found!"));
 
+        userEndpoints.MapGet("owner/{ownerId}", Results<Ok<UserDetailModel>, NotFound<string>> (string ownerId, IUserFacade userFacade)
+            => userFacade.GetByOwnerId(ownerId) is { } user
+                ? TypedResults.Ok(user)
+                : TypedResults.NotFound("User not found for given owner id"));
+
        
         var userModifyingEndpoints = userEndpoints.MapGroup("");
 
@@ -107,8 +112,7 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 return TypedResults.Forbid();
             }
         });
-
-        // NEW: Delete user with Identity Server integration
+        
         userModifyingEndpoints.MapDelete("{id:guid}/with-identity", async Task<Results<Ok, ForbidHttpResult, BadRequest<string>>> (
             Guid id, 
             IUserFacade userFacade, 
