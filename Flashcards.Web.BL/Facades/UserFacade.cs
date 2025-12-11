@@ -29,6 +29,18 @@ namespace Flashcards.Web.BL.Facades
             }
         }
 
+        public async Task<UserDetailModel?> GetByIdAsync(Guid id)
+        {
+            try
+            {
+                return await apiClient.UserGetAsync(id);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public async Task<List<UserListModel>> GetAllAsync()
         {
             var users = await apiClient.UserGetAsync();

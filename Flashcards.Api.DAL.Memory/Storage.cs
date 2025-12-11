@@ -125,15 +125,15 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
                 Name = "Filip",
-                PhotoUrl = String.Empty,
-                Role = RoleType.Admin // Changed from Administrator
+                PhotoUrl = "https://i.pravatar.cc/150?u=7e664a56-e7b8-4301-84ad-ec08446465f2",
+                Role = RoleType.Admin
             });
 
             Users.Add(new UserEntity
             {
                 Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
                 Name = "JakubUser",
-                PhotoUrl = String.Empty,
+                PhotoUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
                 Role = RoleType.User,
                 OwnerId = "Jakub"
             });

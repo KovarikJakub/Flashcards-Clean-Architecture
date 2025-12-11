@@ -1,139 +1,185 @@
-@page "/users"
+﻿@page "/users"
 @namespace Flashcards.Web.App.Pages.Users
 @layout ListLayout
 @inherits PageBase
+@using Flashcards.Common.Models
+@using Flashcards.Common.Enums
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<h3 class="text-2xl font-semibold mb-4">Users</h3>
-
-<div class="bg-white shadow-sm rounded-md p-4">
-    <div class="flex items-center justify-between mb-4">
-        <div></div>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition" @onclick="ShowCreateForm">
-            <span class="mr-1">+</span> Create new user
+<div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div>
+        <h3 class="text-lg font-bold leading-6 text-gray-900">System Users</h3>
+        <p class="text-sm text-gray-500 mt-1">Manage access and profile details.</p>
+    </div>
+    <div class="flex gap-3">
+        <button class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center" @onclick="ShowCreateForm">
+            <span class="mr-2 text-lg leading-none">+</span> Add User
+        </button>
+        <button class="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center" @onclick="SaveAll">
+            <span>💾 Save Changes</span>
         </button>
     </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     @if (IsCreating)
     {
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-            <h4 class="text-lg font-semibold mb-4 text-gray-800">Create New User</h4>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                    <input type="text" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                           @bind="NewUser.FullName" 
-                           placeholder="John Doe" />
-                </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-indigo-100 mb-8 animation-fade-in">
+                 <div class="flex justify-between items-center mb-6">
+                     <h4 class="text-lg font-bold text-gray-800">New User Details</h4>
+                     <button class="text-gray-400 hover:text-gray-600" @onclick="CancelCreate">✕</button>
+                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                    <input type="text" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                           @bind="NewUser.UserName" 
-                           placeholder="johndoe" />
-                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div class="space-y-4">
+                         <div>
+                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Full Name</label>
+                             <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" 
+                                    placeholder="e.g. John Doe" @bind="NewUser.FullName" />
+                         </div>
+                         <div>
+                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</label>
+                             <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" 
+                                    placeholder="john@company.com" @bind="NewUser.Email" />
+                         </div>
+                     </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                           @bind="NewUser.Email" 
-                           placeholder="john@example.com" />
-                </div>
+                     <div class="space-y-4">
+                         <div>
+                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Username</label>
+                             <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" 
+                                    placeholder="johndoe" @bind="NewUser.UserName" />
+                         </div>
+                         <div>
+                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Password</label>
+                             <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" 
+                                    type="password" placeholder="••••••••" @bind="NewUser.Password" />
+                         </div>
+                     </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                           @bind="NewUser.Password" 
-                           placeholder="��������" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture URL</label>
-                    <input type="url" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                           @bind="NewUser.ProfilePicUrl" 
-                           placeholder="https://example.com/avatar.jpg" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                    <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                            @bind="NewUser.Role">
-                        <option value="@Flashcards.Common.Enums.RoleType.User">User</option>
-                        <option value="@Flashcards.Common.Enums.RoleType.Admin">Admin</option>
-                    </select>
-                </div>
-            </div>
+                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-gray-100">
+                         <div>
+                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                 Profile Picture URL <span class="text-gray-400 font-normal normal-case">(Optional)</span>
+                             </label>
+                             <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" 
+                                    placeholder="https://..." @bind="NewUser.ProfilePicUrl" />
+                         </div>
+                         <div>
+                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Role</label>
+                             <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition bg-white" 
+                                     @bind="NewUser.Role">
+                                <option value="@RoleType.User">User</option>
+                                <option value="@RoleType.Admin">Administrator</option>
+                             </select>
+                         </div>
+                     </div>
+                 </div>
 
             @if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                <div class="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-                    <p class="text-sm">@ErrorMessage</p>
-                </div>
+            { 
+                         <div class="mt-4 bg-red-50 text-red-700 px-4 py-3 rounded-lg border border-red-200 text-sm">
+                    @ErrorMessage
+                         </div> 
             }
 
-            <div class="flex gap-3 mt-6">
-                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition" 
-                        @onclick="CreateUser"
-                        disabled="@IsSubmitting">
-                    @if (IsSubmitting)
-                    {
-                        <span>Creating...</span>
-                    }
-                    else
-                    {
-                        <span>Create User</span>
-                    }
-                </button>
-                <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition" 
-                        @onclick="CancelCreate"
-                        disabled="@IsSubmitting">
-                    Cancel
-                </button>
+                 <div class="mt-6 flex gap-3 justify-end">
+                     <button class="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition" @onclick="CancelCreate">Cancel</button>
+                     <button class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-md transition" @onclick="CreateUser">
+                         Create User
+                     </button>
+                 </div>
             </div>
-        </div>
     }
 
-    <div class="flex flex-col space-y-3">
-        @if (Users == null)
-        {
-            <p class="text-gray-500">Loading...</p>
-        }
-        else
-        {
-            @foreach (var u in Users)
-            {
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div class="flex items-center">
-                        <div class="flex-grow">
-                            <input class="border border-gray-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                                   @bind="u.Name" 
-                                   placeholder="User name" />
-                        </div>
-                        <div class="ml-3 flex items-center gap-2">
-                            <span class="text-xs px-2 py-1 rounded @(u.Role == Flashcards.Common.Enums.RoleType.Admin ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700")">
-                                @u.Role
-                            </span>
-                            <button class="text-sm text-red-600 hover:text-red-800 px-3 py-1 rounded border border-red-200 hover:bg-red-50 transition" 
-                                    @onclick="() => DeleteUser(u)">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-    </div>
+    <div class="flex flex-col">
+        <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg bg-white">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Profile</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if (Users != null)
+                            {
+                                @foreach (var u in Users)
+                                {
+                                            <tr class="hover:bg-gray-50 transition group">
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
 
-    <div class="mt-6">
-        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition" @onclick="SaveAll">
-            Save all changes
-        </button>
+                                                        <div class="flex-shrink-0 h-10 w-10">
+                                                    @{
+                                                        string? photoUrl = null;
+                                                        if (UserPhotos.TryGetValue(u.Id, out var url))
+                                                        {
+                                                            photoUrl = url;
+                                                        }
+                                                    }
+
+                                                    @if (!string.IsNullOrEmpty(photoUrl))
+                                                    {
+                                                                    <img class="h-10 w-10 rounded-full object-cover border border-gray-200 shadow-sm" 
+                                                                         src="@photoUrl" 
+                                                                         alt="@u.Name" />
+                                                    }
+                                                    else
+                                                    {
+                                                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-700 border border-indigo-200 flex items-center justify-center text-sm font-bold shadow-sm">
+                                                            @(string.IsNullOrEmpty(u.Name) ? "?" : u.Name.Substring(0, 1).ToUpper())
+                                                                    </div>
+                                                    }
+                                                        </div>
+                                                        <div class="ml-4 w-full max-w-xs">
+                                                            <input type="text" class="text-sm font-semibold text-gray-900 border-none focus:ring-0 p-0 bg-transparent w-full cursor-pointer hover:text-indigo-600 transition" 
+                                                                   @bind="u.Name" placeholder="Enter name..." />
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full @(u.Role == RoleType.Admin ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800")">
+                                                @u.Role
+                                                    </span>
+                                                </td>
+
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <span class="flex items-center gap-1.5">
+                                                        <span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span> Active
+                                                    </span>
+                                                </td>
+
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            @if (u.Role != RoleType.Admin)
+                                            {
+                                                            <button class="text-gray-400 hover:text-red-600 transition p-2 rounded-full hover:bg-red-50" @onclick="() => DeleteUser(u)" title="Delete User">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                            }
+                                            else
+                                            {
+                                                            <span class="text-gray-300 cursor-not-allowed text-xs">Protected</span>
+                                            }
+                                                </td>
+                                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
