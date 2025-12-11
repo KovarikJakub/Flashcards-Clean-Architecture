@@ -139,11 +139,3 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
         return endpointRouteBuilder;
     }
 }
-
-public record CreateUserWithIdentityRequest(
-    string UserName,
-    string Password,
-    string Email,
-    string Name,
-    string? PhotographyUrl,
-    RoleType Role);
