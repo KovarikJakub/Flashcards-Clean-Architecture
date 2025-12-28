@@ -7,7 +7,7 @@ steps:
   - script: |
      npm install
     displayName: 'npm install'
-    workingDirectory: 'Flashcard.Web.App' # IMPORTANT: Point this to the folder containing package.json
+    workingDirectory: 'Flashcards.Web.App'
 
   - task: DotNetCoreCLI@2
     name: "Build"
