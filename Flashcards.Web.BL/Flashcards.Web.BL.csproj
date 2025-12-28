@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Flashcards.Common.Models\Flashcards.Common.Models.csproj" />
-    <ProjectReference Include="..\Flashcards.IdentityProvider.BL\Flashcards.IdentityProvider.BL.csproj" />
   </ItemGroup>
 
   <ItemGroup>

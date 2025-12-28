@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Api.App.Endpoint
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{1393BD9C-6D1D-4849-9B1D-92B1CEBC7355}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Web.App", "Flashcard.Web.App\Flashcards.Web.App.csproj", "{3BE5F513-BE0E-495D-BD01-6188817B7A51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Web.App", "Flashcards.Web.App\Flashcards.Web.App.csproj", "{3BE5F513-BE0E-495D-BD01-6188817B7A51}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.Web.BL", "Flashcards.Web.BL\Flashcards.Web.BL.csproj", "{0EA57036-B752-43EB-BE86-70B9E9239A62}"
 EndProject
