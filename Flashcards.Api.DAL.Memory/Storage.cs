@@ -35,7 +35,6 @@ namespace Flashcards.Api.DAL.Memory
             Collections.Clear();
             Lessons.Clear();
         }
-
         private void SeedCards()
         {
             // --- General Knowledge ---
@@ -123,27 +122,20 @@ namespace Flashcards.Api.DAL.Memory
         {
             Users.Add(new UserEntity
             {
-                Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
-                Name = "Filip",
-                PhotoUrl = "https://i.pravatar.cc/150?u=7e664a56-e7b8-4301-84ad-ec08446465f2",
-                Role = RoleType.Admin
-            });
-
-            Users.Add(new UserEntity
-            {
                 Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
-                Name = "JakubUser",
-                PhotoUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
-                Role = RoleType.User,
+                Name = "Jakub",
+                PhotographyUrl = String.Empty,
+                Role = RoleType.Admin,
                 OwnerId = "Jakub"
             });
 
             Users.Add(new UserEntity
             {
-                Id = new Guid("241e43ef-e4ac-4dd6-8176-fb0ba2de4669"),
-                Name = "Petr",
-                PhotoUrl = String.Empty,
-                Role = RoleType.User
+                Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
+                Name = "User",
+                PhotographyUrl = String.Empty,
+                Role = RoleType.User,
+                OwnerId = "User"
             });
         }
 
@@ -162,7 +154,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "General Knowledge Mix",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddMinutes(10),
-                OwnerId = Users[0].Id.ToString(), 
+                OwnerId = Users[0].OwnerId,
                 Cards = mixCards
             });
 
@@ -175,7 +167,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "C# Interview Prep",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddDays(1),
-                OwnerId = "Jakub",
+                OwnerId = Users[0].OwnerId,
                 Cards = csharpCards
             });
 
@@ -188,42 +180,36 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "Biology 101",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddHours(2),
-                OwnerId = Users[2].Id.ToString(),
+                OwnerId = Users[1].OwnerId,
                 Cards = bioCards
             });
         }
 
         private void SeedLessons()
         {
-            if (Users.Any() && Collections.Any())
+            if (!Users.Any() || !Collections.Any()) return;
+            Lessons.Add(new LessonEntity
             {
-                
-                Lessons.Add(new LessonEntity
-                {
-                    User = Users[0],
-                    CardCollection = Collections[0],
-                    Id = new("536adfc4-8284-404d-a00e-b4a007413a44"),
-                    Start = DateTime.UtcNow,
-                    Seen = 3,
-                    Correct = 2,
-                    Wrong = 1
-                });
+                User = Users[0],
+                CardCollection = Collections[0],
+                Id = new("536adfc4-8284-404d-a00e-b4a007413a44"),
+                Start = DateTime.UtcNow,
+                Seen = 3,
+                Correct = 2,
+                Wrong = 1
+            });
 
-                
-                if (Collections.Count > 1)
-                {
-                    Lessons.Add(new LessonEntity
-                    {
-                        User = Users[1],
-                        CardCollection = Collections[1],
-                        Id = Guid.NewGuid(),
-                        Start = DateTime.UtcNow.AddHours(-1),
-                        Seen = 2,
-                        Correct = 2,
-                        Wrong = 0
-                    });
-                }
-            }
+            if (Collections.Count < 1) return;
+            Lessons.Add(new LessonEntity
+            {
+                User = Users[1],
+                CardCollection = Collections[1],
+                Id = Guid.NewGuid(),
+                Start = DateTime.UtcNow.AddHours(-1),
+                Seen = 2,
+                Correct = 2,
+                Wrong = 0
+            });
         }
     }
 }
