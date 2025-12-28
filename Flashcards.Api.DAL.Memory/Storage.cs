@@ -124,7 +124,7 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
                 Name = "Jakub",
-                PhotographyUrl = String.Empty,
+                PhotoUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
                 Role = RoleType.Admin,
                 OwnerId = "Jakub"
             });
@@ -133,7 +133,7 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
                 Name = "User",
-                PhotographyUrl = String.Empty,
+                PhotoUrl = String.Empty,
                 Role = RoleType.User,
                 OwnerId = "User"
             });
