@@ -8,7 +8,7 @@
         "DebugTarget": "Flashcards.Api"
       },
       {
-        "Path": "Flashcard.Web.App\\Flashcards.Web.App.csproj",
+        "Path": "Flashcards.Web.App\\Flashcards.Web.App.csproj",
         "Action": "Start",
         "DebugTarget": "Flashcards.Web.App"
       }
@@ -23,14 +23,14 @@
         "DebugTarget": "Flashcards.Api"
       },
       {
-        "Path": "Flashcard.Web.App\\Flashcards.Web.App.csproj",
-        "Action": "Start",
-        "DebugTarget": "Flashcards.Web.App"
-      },
-      {
         "Path": "Flashcards.IdentityProvider.App\\Flashcards.IdentityProvider.App.csproj",
         "Action": "Start",
         "DebugTarget": "SelfHost"
+      },
+      {
+        "Path": "Flashcards.Web.App\\Flashcards.Web.App.csproj",
+        "Action": "Start",
+        "DebugTarget": "Flashcards.Web.App"
       }
     ]
   }
