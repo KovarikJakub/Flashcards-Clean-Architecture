@@ -2,7 +2,6 @@ using Flashcards.Api.App.Endpoints;
 using Flashcards.Api.App.Extensions;
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
-using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
@@ -10,6 +9,7 @@ using Flashcards.Api.DAL.Memory.Repositories;
 using Flashcards.Common.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Flashcards.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,89 +35,22 @@ builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 
 builder.Services.AddHttpContextAccessor();
 
-// Configure Identity Server client for M2M communication from appsettings.json
-builder.Services.Configure<IdentityServerOptions>(
-    builder.Configuration.GetSection("IdentityServer"));
-
-builder.Services.AddHttpClient<IdentityServerClient>();
-
-// Get Identity Server authority from configuration for JWT validation
-var identityServerAuthority = builder.Configuration["IdentityServer:Authority"] 
-    ?? throw new InvalidOperationException("IdentityServer:Authority is not configured in appsettings.json");
-
-// Configure JWT Bearer Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        // Identity Server authority from configuration
-        options.Authority = identityServerAuthority;
-        
-        // Validate the audience (which API this token is for)
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-        {
-            ValidateAudience = false, // For now, we'll validate scope instead
-            ValidateIssuer = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
-        };
-        
-        // For development: accept localhost certificates
-        if (builder.Environment.IsDevelopment())
-        {
-            options.RequireHttpsMetadata = false; // Only for development!
-        }
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    // Require the "flashcardsapi" scope for all API calls
-    options.AddPolicy("ApiScope", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.RequireClaim("scope", "flashcardsapi");
-    });
-    
-    // Optional: Admin-only policy
-    options.AddPolicy("AdminOnly", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.RequireClaim("scope", "flashcardsapi");
-        policy.RequireRole("Admin");
-    });
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-});
+ConfigureOptions(builder.Services);
+ConfigureCors(builder.Services);
+ConfigureAuthentication(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseOpenApi();
-    app.UseSwaggerUi();
-}
-
-app.UseCors();
-app.UseHttpsRedirection();
-
-// IMPORTANT: Authentication must come before Authorization
-app.UseAuthentication();
-app.UseAuthorization();
-
+UseSecurityFeatures(app);
+UseAuthenticationAndAuthorization(app);
 UseEndpoints(app);
+UseOpenApi(app);
 
 app.Run();
 
 void UseEndpoints(WebApplication app)
 {
     var endpointsBase = app.MapGroup("api")
-        .RequireCors()
-        .RequireAuthorization("ApiScope") // Protect all API endpoints
         .WithOpenApi();
 
     var identityOptions = app.Services.GetRequiredService<IOptions<IdentityOptions>>();
@@ -126,6 +59,59 @@ void UseEndpoints(WebApplication app)
     endpointsBase.UseUserEndpoints(identityOptions);
     endpointsBase.UseCardCollectionEndpoints(identityOptions);
     LessonEndpoints.MapEndpoints(endpointsBase);
+}
+
+void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguration configuration)
+{
+    var identityOptions = configuration.GetSection("IdentityOptions").Get<IdentityOptions>();
+
+    serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = identityOptions?.Authority;
+            options.TokenValidationParameters.ValidateAudience = false;
+        });
+
+    serviceCollection.AddAuthorizationBuilder()
+        .AddPolicy("admin", policy =>
+            policy.RequireAuthenticatedUser()
+                .RequireRole(UserRoles.Admin)
+        );
+
+    serviceCollection.AddHttpContextAccessor();
+}
+
+void ConfigureOptions(IServiceCollection serviceCollection)
+{
+    serviceCollection.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
+}
+
+void ConfigureCors(IServiceCollection serviceCollection)
+{
+    serviceCollection.AddCors(options =>
+    {
+        options.AddDefaultPolicy(o =>
+            o.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+    });
+}
+
+void UseSecurityFeatures(IApplicationBuilder application)
+{
+    application.UseCors();
+    application.UseHttpsRedirection();
+}
+
+void UseAuthenticationAndAuthorization(IApplicationBuilder application)
+{
+    application.UseAuthentication();
+    application.UseAuthorization();
+}
+void UseOpenApi(IApplicationBuilder application)
+{
+    application.UseOpenApi();
+    application.UseSwaggerUi();
 }
 
 public partial class Program { }
