@@ -2,7 +2,6 @@ using Flashcards.Api.App.Endpoints;
 using Flashcards.Api.App.Extensions;
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
-using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
@@ -35,8 +34,6 @@ builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddHttpClient<IdentityServerClient>();
 
 ConfigureOptions(builder.Services);
 ConfigureCors(builder.Services);
@@ -87,7 +84,6 @@ void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguratio
 void ConfigureOptions(IServiceCollection serviceCollection)
 {
     serviceCollection.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
-    serviceCollection.Configure<IdentityServerOptions>(builder.Configuration.GetSection("IdentityServer"));
 }
 
 void ConfigureCors(IServiceCollection serviceCollection)

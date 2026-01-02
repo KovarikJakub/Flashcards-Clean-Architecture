@@ -56,17 +56,8 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
 
             try
             {
-                var createdUserId = await userFacade.CreateUserWithIdentityAsync(
-                    userName: request.UserName,
-                    password: request.Password,
-                    email: request.Email,
-                    name: request.Name,
-                    photographyUrl: request.PhotographyUrl,
-                    role: request.Role,
-                    userRoles: userRoles,
-                    ownerId: userId);
-
-                return TypedResults.Ok(createdUserId);
+                // Logic removed temporarily
+                throw new NotImplementedException("Identity Server integration is temporarily disabled.");
             }
             catch (Exception ex)
             {
@@ -124,8 +115,8 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
 
             try
             {
-                await userFacade.DeleteUserWithIdentityAsync(id, userRoles, userId);
-                return TypedResults.Ok();
+                // Logic removed temporarily
+                throw new NotImplementedException("Identity Server integration is temporarily disabled.");
             }
             catch (UnauthorizedAccessException)
             {

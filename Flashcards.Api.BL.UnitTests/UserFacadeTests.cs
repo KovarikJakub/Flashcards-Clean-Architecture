@@ -1,6 +1,5 @@
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
-using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
@@ -14,15 +13,13 @@ namespace Flashcards.Api.BL.UnitTests
     {
         private readonly IUserRepository _fakeRepo;
         private readonly UserMapper _mapper;
-        private readonly IdentityServerClient _fakeIdentityClient;
         private readonly UserFacade _facade;
 
         public UserFacadeTests()
         {
             _fakeRepo = Substitute.For<IUserRepository>();
             _mapper = new UserMapper();
-            _fakeIdentityClient = Substitute.For<IdentityServerClient>();
-            _facade = new UserFacade(_fakeRepo, _mapper, _fakeIdentityClient);
+            _facade = new UserFacade(_fakeRepo, _mapper);
         }
 
         private UserDetailModel CreateUserDetailModel(Guid id)
@@ -177,18 +174,13 @@ namespace Flashcards.Api.BL.UnitTests
         }
 
         [Fact]
-        public async Task CreateUserWithIdentity_Creates_Both_Users()
+        public async Task CreateUserWithIdentity_Throws_NotImplementedException()
         {
             // Arrange
-            var fakeIdentityClient = Substitute.For<IdentityServerClient>();
-            var expectedGuid = Guid.NewGuid();
-            fakeIdentityClient.CreateUserAsync(Arg.Any<CreateUserRequest>())
-                .Returns(expectedGuid);
-            
-            var facade = new UserFacade(_fakeRepo, _mapper, fakeIdentityClient);
+            var facade = new UserFacade(_fakeRepo, _mapper);
 
-            // Act
-            var result = await facade.CreateUserWithIdentityAsync(
+            // Act & Assert
+            await Assert.ThrowsAsync<NotImplementedException>(() => facade.CreateUserWithIdentityAsync(
                 userName: "test.user",
                 password: "Test123!",
                 email: "test@test.com",
@@ -196,13 +188,7 @@ namespace Flashcards.Api.BL.UnitTests
                 photographyUrl: null,
                 role: RoleType.User,
                 userRoles: new List<string>(),
-                ownerId: null);
-
-            // Assert
-            Assert.Equal(expectedGuid, result);
-            await fakeIdentityClient.Received(1).CreateUserAsync(Arg.Any<CreateUserRequest>());
-
-            _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(u => u.Id == expectedGuid));
+                ownerId: null));
         }
     }
 }
