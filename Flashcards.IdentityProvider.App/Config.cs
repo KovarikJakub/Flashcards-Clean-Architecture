@@ -49,9 +49,11 @@ namespace Flashcards.IdentityProvider.App
                     "https://localhost:44355"
                 },
                 // This is a public SPA client — use Authorization Code + PKCE
-                AllowedGrantTypes = GrantTypes.Code,
+                AllowedGrantTypes = [
+                    GrantType.ResourceOwnerPassword,
+                    GrantType.AuthorizationCode
+                ],
                 RequirePkce = true,
-                // SPA cannot keep a client secret
                 RequireClientSecret = false,
                 // Allow the browser to call the token endpoint from this origin
                 AllowedCorsOrigins = new List<string>
@@ -65,23 +67,8 @@ namespace Flashcards.IdentityProvider.App
                     "roles",
                     "flashcardsapi"
                 },
-                AlwaysIncludeUserClaimsInIdToken = true
+                AlwaysIncludeUserClaimsInIdToken = true,
             },
-            new Client
-            {
-                ClientName = "Flashcards M2M Client",
-                ClientId = "flashcards.m2m.client", 
-                ClientSecrets =
-                {
-                    new Secret("SuperSecretPassword123!".Sha256())
-                },
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-                AllowedScopes = new List<string> { "flashcardsapi" },
-                Claims = new List<ClientClaim>
-                {
-                    new ClientClaim(JwtClaimTypes.Role, "Admin")
-                }
-            }
         };
     }
 }
