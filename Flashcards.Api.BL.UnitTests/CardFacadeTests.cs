@@ -196,5 +196,100 @@ namespace Flashcards.Api.BL.UnitTests
             _fakeRepo.Received(1).Update(_mapper.ToEntity(card));
             Assert.Null(result);
         }
+
+        [Fact]
+        public void GetByQuery_Filters_By_Question_Text()
+        {
+            // Arrange
+            var cards = new List<CardEntity>()
+            {
+                new()
+                {
+                    Id = new("7f251cd6-3ac4-49be-b3e7-d1f9f7cfdd3a"),
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "What is the capital of France?",
+                    AnswerContent = "Paris",
+                    Created = DateTime.UtcNow,
+                    Description = "A geography question."
+                },
+                new()
+                {
+                    Id = new("23b3902d-7d4f-4213-9cf0-112348f56238"),
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "What is 2 + 2?",
+                    AnswerContent = "4",
+                    Created = DateTime.UtcNow,
+                    Description = "A simple math question."
+                },
+                new()
+                {
+                    Id = new("df935095-8709-4040-a2bb-b6f97cb416dc"),
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Who wrote 'Hamlet'?",
+                    AnswerContent = "William Shakespeare",
+                    Created = DateTime.UtcNow,
+                    Description = "A literature question."
+                }
+            };
+            _fakeRepo.GetAll().Returns(cards);
+
+            var query = new CardQueryModel() { SearchString = "What" };
+            var filtered = _facade.GetByQuery(query);
+
+            Assert.NotNull(filtered);
+            Assert.Equal(2, filtered.Count());
+        }
+
+        [Fact]
+        public void GetByQuery_Filters_By_QuestionTextAndDescription()
+        {
+            var cards = new List<CardEntity>()
+            {
+                new()
+                {
+                    Id = Guid.Empty,
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Question1",
+                    AnswerContent = "Answer1",
+                    Created = DateTime.UtcNow,
+                    Description = "Desc1."
+                },
+                new()
+                {
+                    Id = Guid.Empty,
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Question2FINDME",
+                    AnswerContent = "Answer2",
+                    Created = DateTime.UtcNow,
+                    Description = "Desc3"
+                },
+                new()
+                {
+                    Id = Guid.Empty,
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Question3",
+                    AnswerContent = "Answer3",
+                    Created = DateTime.UtcNow,
+                    Description = "Desc3FINDME_"
+                }
+            };
+
+            _fakeRepo.GetAll().Returns(cards);
+
+            var query = new CardQueryModel() { SearchString = "FINDME" };
+            var filtered = _facade.GetByQuery(query);
+
+            Assert.NotNull(filtered);
+            Assert.Equal(2, filtered.Count());
+            // Assert Questions 2 and 3 are in the result:
+            Assert.Contains(filtered, card => card.QuestionContent == "Question2FINDME");
+            Assert.Contains(filtered, card => card.QuestionContent == "Question3");
+        }
     }
 }

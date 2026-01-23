@@ -12,6 +12,8 @@ public static class CardEndpoints
         cardEndpoints.RequireAuthorization();
         cardEndpoints.MapGet("", (ICardFacade cardFacade) => cardFacade.GetAll());
 
+        cardEndpoints.MapPost("query", (CardQueryModel query, ICardFacade cardFacade) => cardFacade.GetByQuery(query));
+
         cardEndpoints.MapGet("{id:guid}", Results<Ok<CardDetailModel>, NotFound<string>> (Guid id, ICardFacade cardFacade)
             => cardFacade.GetById(id) is { } card
                 ? TypedResults.Ok(card)

@@ -3,6 +3,7 @@ using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
+using System;
 
 namespace Flashcards.Api.BL.Facades
 {
@@ -23,6 +24,25 @@ namespace Flashcards.Api.BL.Facades
         {
             var entities = cardCollectionRepository.GetAll();
             return mapper.ToListModel(entities);
+        }
+
+        public List<CardCollectionListModel> GetByQuery(CardCollectionQueryModel query)
+        {
+            var collection = cardCollectionRepository.GetAll().AsEnumerable();
+
+            if (!string.IsNullOrEmpty(query.Title))
+            {
+                collection = collection.Where(c => c.Title.Contains(query.Title, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (string.IsNullOrEmpty(query.OwnerId))
+            {
+                collection = collection.Where(c => string.Equals(c.OwnerId, query.OwnerId));
+            }
+
+            collection = QueryHelper.PerformPagination(collection, query);
+
+            return mapper.ToListModel(collection.ToList());
         }
 
         public CardCollectionDetailModel? GetById(Guid id)

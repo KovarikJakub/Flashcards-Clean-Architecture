@@ -17,6 +17,10 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
 
         cardCollectionEndpoints.MapGet("", (ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.GetAll());
 
+        cardCollectionEndpoints.MapPost("query",
+            (CardCollectionQueryModel query, ICardCollectionFacade cardCollectionFacade) =>
+                cardCollectionFacade.GetByQuery(query));
+
         cardCollectionEndpoints.MapGet("{id:guid}", Results<Ok<CardCollectionDetailModel>, NotFound<string>> (Guid id, ICardCollectionFacade cardCollectionFacade)
             => cardCollectionFacade.GetById(id) is { } cardCollection
                 ? TypedResults.Ok(cardCollection)

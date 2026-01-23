@@ -8,6 +8,7 @@ namespace Flashcards.Api.BL.Facades
     public interface IUserFacade : IFacade
     {
         List<UserListModel> GetAll();
+        List<UserListModel> GetByQuery(UserQueryModel query);
         UserDetailModel? GetById(Guid id);
         Guid CreateOrUpdate(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);
         Guid Create(UserDetailModel UserModel, IList<string> userRoles, string? ownerId = null);

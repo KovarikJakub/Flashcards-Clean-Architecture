@@ -16,8 +16,11 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             .WithTags("user");
         userEndpoints.RequireAuthorization();
 
-
         userEndpoints.MapGet("", (IUserFacade userFacade) => userFacade.GetAll());
+
+        userEndpoints.MapPost("query",
+            (UserQueryModel query, IUserFacade userFacade) =>
+                userFacade.GetByQuery(query));
 
         userEndpoints.MapGet("{id:guid}", Results<Ok<UserDetailModel>, NotFound<string>> (Guid id, IUserFacade userFacade)
             => userFacade.GetById(id) is { } user

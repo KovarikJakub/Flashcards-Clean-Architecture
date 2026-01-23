@@ -25,6 +25,20 @@ namespace Flashcards.Api.BL.Facades
             return mapper.ToListModel(entities);
         }
 
+        public List<UserListModel> GetByQuery(UserQueryModel query)
+        {
+            var collection = userRepository.GetAll().AsEnumerable();
+
+            if (query.Role is not null)
+            {
+                collection = collection.Where(u => u.Role == query.Role);
+            }
+
+            collection = QueryHelper.PerformPagination(collection, query);
+
+            return mapper.ToListModel(collection.ToList());
+        }
+
         public UserDetailModel? GetById(Guid id)
         {
             var entity = userRepository.GetById(id);

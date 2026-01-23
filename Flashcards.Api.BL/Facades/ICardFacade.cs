@@ -6,6 +6,7 @@ namespace Flashcards.Api.BL.Facades
     public interface ICardFacade : IFacade
     {
         List<CardListModel> GetAll();
+        List<CardListModel> GetByQuery(CardQueryModel query);
         CardDetailModel? GetById(Guid id);
         Guid Create(CardDetailModel card);
         Guid CreateOrUpdate(CardDetailModel card);

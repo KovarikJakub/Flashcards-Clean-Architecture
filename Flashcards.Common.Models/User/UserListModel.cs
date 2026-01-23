@@ -12,4 +12,3 @@ namespace Flashcards.Common.Models
 
     }
 }
-

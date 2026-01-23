@@ -6,6 +6,7 @@ namespace Flashcards.Api.BL.Facades
     public interface ICardCollectionFacade : IFacade
     {
         List<CardCollectionListModel> GetAll();
+        List<CardCollectionListModel> GetByQuery(CardCollectionQueryModel query);
         CardCollectionDetailModel? GetById(Guid id);
         List<CardCollectionListModel> GetByOwner(string ownerId);
         Guid CreateOrUpdate(CardCollectionDetailModel CardCollectionModel, IList<string> userRoles, string? ownerId = null);

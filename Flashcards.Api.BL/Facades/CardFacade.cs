@@ -38,7 +38,25 @@ namespace Flashcards.Api.BL.Facades
         {
             var entities = cardRepository.GetAll();
             return mapper.ToListModel(entities);
-        } 
+        }
+
+        public List<CardListModel> GetByQuery(CardQueryModel query)
+        {
+            var collection = cardRepository.GetAll().AsEnumerable();
+            
+            if (!string.IsNullOrEmpty(query.SearchString))
+            {
+                var search = query.SearchString.Trim();
+                collection = collection.Where(c =>
+                    (c.QuestionContent.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (c.Description != null && c.Description.Contains(search, StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            collection = QueryHelper.PerformPagination(collection, query);
+            
+            return mapper.ToListModel(collection.ToList());
+        }
 
         public CardDetailModel? GetById(Guid id)
         {
