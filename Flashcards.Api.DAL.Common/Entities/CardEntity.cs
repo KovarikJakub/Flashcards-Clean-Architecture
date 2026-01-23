@@ -9,6 +9,8 @@ namespace Flashcards.Api.DAL.Common.Entities
         public required string QuestionContent { get; set; }
         public required string AnswerContent { get; set; }
         public required DateTime Created { get; set; }
-        public string? Description { get; set; }
+        public Guid OwnerId { get; set; }
+        public UserEntity? Owner { get; set; }
+        public string? Description { get; set; } = null;
     }
 }

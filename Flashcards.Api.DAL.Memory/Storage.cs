@@ -126,7 +126,7 @@ namespace Flashcards.Api.DAL.Memory
                 Name = "Jakub",
                 PhotoUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
                 Role = RoleType.Admin,
-                OwnerId = "Jakub"
+                IdentityOwnerId = "Jakub"
             });
 
             Users.Add(new UserEntity
@@ -135,7 +135,7 @@ namespace Flashcards.Api.DAL.Memory
                 Name = "User",
                 PhotoUrl = String.Empty,
                 Role = RoleType.User,
-                OwnerId = "User"
+                IdentityOwnerId = "User"
             });
         }
 
@@ -154,7 +154,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "General Knowledge Mix",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddMinutes(10),
-                OwnerId = Users[0].OwnerId,
+                OwnerId = Users[0].IdentityOwnerId,
                 Cards = mixCards
             });
 
@@ -167,7 +167,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "C# Interview Prep",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddDays(1),
-                OwnerId = Users[0].OwnerId,
+                OwnerId = Users[0].IdentityOwnerId,
                 Cards = csharpCards
             });
 
@@ -180,7 +180,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "Biology 101",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddHours(2),
-                OwnerId = Users[1].OwnerId,
+                OwnerId = Users[1].IdentityOwnerId,
                 Cards = bioCards
             });
         }

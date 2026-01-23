@@ -1,15 +1,12 @@
-﻿using Flashcards.Common.Enums;
-
-namespace Flashcards.Api.DAL.Common.Entities
+﻿namespace Flashcards.Api.DAL.Common.Entities
 {
     public record CardCollectionEntity : EntityBase
     {
         public required string Title { get; set; }
-        public required DateTime AnswerStart { get; set; }
-        public required DateTime AnswerEnd { get; set; }
-
         public ICollection<CardEntity> Cards { get; set; } = new List<CardEntity>();
-
-        public string? OwnerId { get; set; }
+        public DateTime? AnswerStart { get; set; } = null;
+        public DateTime? AnswerEnd { get; set; } = null;
+        public  Guid OwnerId { get; set; }
+        public UserEntity? Owner { get; set; }
     }
 }
