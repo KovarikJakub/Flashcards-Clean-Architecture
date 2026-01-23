@@ -30,9 +30,9 @@ namespace Flashcards.Api.BL.Facades
         {
             var collection = cardCollectionRepository.GetAll().AsEnumerable();
 
-            if (!string.IsNullOrEmpty(query.Title))
+            if (!string.IsNullOrEmpty(query.SearchString))
             {
-                collection = collection.Where(c => c.Title.Contains(query.Title, StringComparison.OrdinalIgnoreCase));
+                collection = collection.Where(c => c.Title.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
             }
 
             if (string.IsNullOrEmpty(query.OwnerId))

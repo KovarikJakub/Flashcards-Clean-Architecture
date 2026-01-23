@@ -13,7 +13,6 @@ namespace Flashcards.Api.BL.Mappers
                 Name = model.Name,
                 PhotoUrl = model.PhotographyUrl,
                 Role = model.Role
-
             };
         }
 
@@ -35,7 +34,6 @@ namespace Flashcards.Api.BL.Mappers
                 Id = e.Id,
                 Name = e.Name,
                 Role = e.Role
-             
             }).ToList();
         }
     }

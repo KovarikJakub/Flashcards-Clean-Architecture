@@ -40,7 +40,7 @@ namespace Flashcards.Api.BL.Mappers
             {
                 Id = e.Id,
                 Start = e.Start,
-                CardCollectionName = e.CardCollection.Title,
+                CardCollectionTitle = e.CardCollection.Title,
                 CardCount = e.CardCollection.Cards.Count,
                 Wrong = e.Wrong,
                 Correct = e.Correct,

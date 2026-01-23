@@ -4,8 +4,8 @@ namespace Flashcards.Common.Models
     public class LessonDetailModel : IWithGuid
     {
         public required Guid Id { get; init; }
-        public required UserDetailModel User { get; set; }
-        public required CardCollectionDetailModel CardCollection { get; set; }
+        public required UserListModel User { get; set; }
+        public required CardCollectionListModel CardCollection { get; set; }
         public required DateTime Start { get; set; }
         public required uint Seen { get; set; }
         public required uint Correct { get; set; }

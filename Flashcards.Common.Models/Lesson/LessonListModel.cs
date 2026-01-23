@@ -3,8 +3,7 @@
     public class LessonListModel : IWithGuid
     {
         public required Guid Id { get; init; }
-        public required string CardCollectionName { get; set; }
-        public required int CardCount { get; set; }
+        public required string CardCollectionTitle { get; set; }
         public required DateTime Start { get; set; }
         public required uint Seen { get; set; }
         public required uint Wrong { get; set; }

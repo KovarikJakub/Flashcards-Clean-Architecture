@@ -4,11 +4,9 @@ namespace Flashcards.Common.Models
 {
     public class UserListModel : IWithGuid
     {
-        public Guid Id { get; init; }
-
+        public required Guid Id { get; init; }
         public required string Name { get; set; }
-        
         public required RoleType Role { get; set; }
-
+        public string? PhotographyUrl { get; set; } = null;
     }
 }

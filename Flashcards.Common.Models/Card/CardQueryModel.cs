@@ -1,12 +1,11 @@
-﻿
-using System.Net.Mime;
+﻿using Flashcards.Common.Enums;
 
 namespace Flashcards.Common.Models
 {
     public class CardQueryModel : BaseQueryModel
     {
-        public string? SearchString;
-        public ContentType? QuestionType;
-        public ContentType? AnswerType;
+        public string? SearchString { get; set; } = null;
+        public ContentType? QuestionType { get; set; } = null;
+        public ContentType? AnswerType { get; set; } = null;
     }
 }
