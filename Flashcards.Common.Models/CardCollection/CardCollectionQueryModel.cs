@@ -7,5 +7,6 @@ namespace Flashcards.Common.Models
         public Guid? OwnerId { get; set; }
         public bool IncludeMine { get; set; } = true;
         public bool IncludeOthers { get; set; } = true;
+        public bool ShowCurrentlyAvailableOnly { get; set; } = false;
     }
 }
