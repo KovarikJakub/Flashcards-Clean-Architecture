@@ -13,7 +13,7 @@ namespace Flashcards.Api.BL.Facades
 
         public Guid Create(CardCreateModel card, IList<string> userRoles, string requestorId)
         {
-            var requestorUserEntity = GetOwningEntity(requestorId);
+            var requestorUserEntity = userRepository.GetByIdentityId(requestorId);
 
             var cardEntity = mapper.ToEntity(card, requestorUserEntity);
             cardRepository.Insert(cardEntity);

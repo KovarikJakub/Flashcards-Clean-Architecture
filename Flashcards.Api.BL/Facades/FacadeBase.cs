@@ -8,15 +8,5 @@ namespace Flashcards.Api.BL.Facades
         where TRepository : IApiRepository<TEntity>
         where TEntity : IEntity
     {
-        protected UserEntity GetOwningEntity(string requestorId)
-        {
-            var requestorUserEntity = userRepository.FirstOrDefault(user => string.Equals(user.IdentityOwnerId, requestorId));
-            if (requestorUserEntity is null)
-            {
-                throw new ArgumentException("This users identity does not exist!");
-            }
-
-            return requestorUserEntity;
-        }
     }
 }

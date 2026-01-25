@@ -15,7 +15,7 @@ namespace Flashcards.Api.BL.Facades
             if(collection is null)
                 throw new ArgumentException("Existing collection ID is required to create a lesson.");
 
-            var requestorUserEntity = GetOwningEntity(requestorId);
+            var requestorUserEntity = userRepository.GetByIdentityId(requestorId);
 
             var entity = mapper.ToEntity(model, requestorUserEntity, collection);
             return lessonRepository.Insert(entity);
