@@ -13,7 +13,6 @@ public class WebBLInstaller
         IdentityOptions identityOptions,
         ApiOptions apiOptions)
     {
-        // Message handler provides token or fallback behaviour
         serviceCollection.AddScoped<CustomAuthorizationMessageHandler>();
 
         AddApiClient<ICardCollectionApiClient, CardCollectionApiClient>(serviceCollection, identityOptions, apiOptions);
@@ -25,7 +24,7 @@ public class WebBLInstaller
         serviceCollection.AddTransient<LessonFacade>();
         serviceCollection.AddTransient<CardFacade>();
         
-        // UserFacade needs both IUserApiClient and HttpClient (for auth)
+        // UserFacade 
         serviceCollection.AddTransient<UserFacade>(sp =>
         {
             var userApiClient = sp.GetRequiredService<IUserApiClient>();
@@ -42,18 +41,14 @@ public class WebBLInstaller
         where TInterface : class, IApiClient
         where TImplementation : class, TInterface
     {
-        var httpClient = serviceCollection.AddHttpClient<TInterface, TImplementation>(client =>
+        var httpClientBuilder = serviceCollection.AddHttpClient<TInterface, TImplementation>(client =>
         {
             client.BaseAddress = new Uri(apiOptions.BaseUrl);
         });
 
         if (identityOptions.IsIdentityEnabled)
         {
-            httpClient.AddHttpMessageHandler(serviceProvider
-                => serviceProvider.GetRequiredService<CustomAuthorizationMessageHandler>()
-                    .ConfigureHandler(
-                        authorizedUrls: [apiOptions.BaseUrl],
-                        scopes: identityOptions.DefaultScopes));
+            httpClientBuilder.AddHttpMessageHandler<CustomAuthorizationMessageHandler>();
         }
     }
 }
