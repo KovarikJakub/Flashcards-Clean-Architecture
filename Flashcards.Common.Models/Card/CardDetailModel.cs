@@ -10,7 +10,7 @@ namespace Flashcards.Common.Models
         public required ContentType AnswerType { get; set; }
         public required string AnswerContent { get; set; }
         public required DateTime DateCreated { get; set; }
-        public required UserListModel Owner { get; set; }
+        public UserListModel? Owner { get; set; } = null;
         public string? Description { get; set; }
     }
 }

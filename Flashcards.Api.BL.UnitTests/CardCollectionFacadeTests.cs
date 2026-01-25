@@ -56,7 +56,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
             
             // Act
-            var id = _facade.Create(newCollection, []);
+            var id = _facade.Create(newCollection, [], TODO);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
@@ -75,7 +75,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
             
             // Act
-            var id = _facade.CreateOrUpdate(newCollection, []);
+            var id = _facade.CreateOrUpdate(TODO, []);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
@@ -98,7 +98,7 @@ namespace Flashcards.Api.BL.UnitTests
             existing.Title = "Updated Science Deck";
 
             // Act
-           _facade.CreateOrUpdate(existing, []);
+           _facade.CreateOrUpdate(TODO, []);
 
             // Assert
             _fakeRepo.Received(1).Update(Arg.Is<CardCollectionEntity>(c =>

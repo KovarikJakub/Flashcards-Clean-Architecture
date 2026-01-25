@@ -67,7 +67,7 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
             var userId = GetUserId(httpContextAccessor);
             var userRoles = GetUserRoles(httpContextAccessor);
 
-            var id = cardCollectionFacade.CreateOrUpdate(cardCollection, userRoles, userId);
+            var id = cardCollectionFacade.CreateOrUpdate(cardCollection, userRoles, TODO);
             return TypedResults.Ok(id);
         });
 

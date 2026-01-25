@@ -1,4 +1,5 @@
-﻿using Flashcards.Common.BL.Facades;
+﻿using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Common.BL.Facades;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
@@ -8,9 +9,9 @@ namespace Flashcards.Api.BL.Facades
         List<CardListModel> GetAll();
         List<CardListModel> GetByQuery(CardQueryModel query);
         CardDetailModel? GetById(Guid id);
-        Guid Create(CardDetailModel card);
-        Guid CreateOrUpdate(CardDetailModel card);
-        Guid? Update(CardDetailModel card);
+        Guid Create(CardCreateModel card, IList<string> userRoles, string requestorId);
+        Guid CreateOrUpdate(CardDetailModel card, IList<string> userRoles, string requestorId);
+        Guid? Update(CardDetailModel card, IList<string> userRoles, string requestorId);
         void Delete(Guid id);
     }
 }

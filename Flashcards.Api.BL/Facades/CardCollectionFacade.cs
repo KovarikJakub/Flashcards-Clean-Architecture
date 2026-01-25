@@ -7,19 +7,13 @@ using System;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class CardCollectionFacade : ICardCollectionFacade
+    public class CardCollectionFacade(
+        ICardCollectionRepository cardCollectionRepository,
+        IUserRepository userRepository,
+        CardCollectionMapper mapper)
+        : FacadeBase<ICardCollectionRepository, CardCollectionEntity>(cardCollectionRepository, userRepository),
+        ICardCollectionFacade
     {
-        private readonly ICardCollectionRepository cardCollectionRepository;
-        private readonly CardCollectionMapper mapper;
-
-        public CardCollectionFacade(
-            ICardCollectionRepository cardCollectionRepository,
-            CardCollectionMapper mapper)
-        {
-            this.cardCollectionRepository = cardCollectionRepository;
-            this.mapper = mapper;
-        }
-
         public List<CardCollectionListModel> GetAll()
         {
             var entities = cardCollectionRepository.GetAll();
@@ -35,9 +29,9 @@ namespace Flashcards.Api.BL.Facades
                 collection = collection.Where(c => c.Title.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (string.IsNullOrEmpty(query.OwnerId))
+            if (query.OwnerId is not null)
             {
-                collection = collection.Where(c => string.Equals(c.OwnerId, query.OwnerId));
+                collection = collection.Where(c => c.OwnerId == query.OwnerId);
             }
 
             collection = QueryHelper.PerformPagination(collection, query);
@@ -51,54 +45,36 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public List<CardCollectionListModel> GetByOwner(string ownerId)
+        public Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string requestorId)
         {
-            var entities = cardCollectionRepository.GetAll().Where(e => e.OwnerId != null && e.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
-            return mapper.ToListModel(entities);
-        }
-
-        public Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
-        {
-            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
             return cardCollectionRepository.Exists(model.Id)
-                ? Update(model, userRoles, ownerId)!.Value
-                : Create(model, userRoles, ownerId);
+                ? Update(model, userRoles, requestorId)!.Value
+                : Create(mapper.ToCreateModel(model), userRoles, requestorId);
         }
 
-        public Guid Create(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
+        public Guid Create(CardCollectionCreateModel model, IList<string> userRoles, string requestorId)
         {
-            var entity = mapper.ToEntity(model, ownerId);
+            var requestorUserEntity = GetOwningEntity(requestorId);
+
+            var entity = mapper.ToEntity(model, requestorUserEntity);
             cardCollectionRepository.Insert(entity);
             return entity.Id;
         }
 
-        public Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
+        public Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string requestorId)
         {
-            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
             var existing = cardCollectionRepository.GetById(model.Id);
             if (existing == null)
                 return null;
-            var entity = mapper.ToEntity(model, ownerId);
+            var ownerEntity = userRepository.GetById(existing.OwnerId);
+            var entity = mapper.ToEntity(model, ownerEntity!);
             entity.OwnerId = existing.OwnerId;
             return cardCollectionRepository.Update(entity);
         }
 
         public void Delete(Guid id, IList<string> userRoles, string? ownerId = null)
         {
-            ThrowIfWrongOwnerAndNotAdmin(id, userRoles, ownerId);
             cardCollectionRepository.Remove(id);
-        }
-
-        private void ThrowIfWrongOwnerAndNotAdmin(Guid? id, IList<string> userRoles, string? ownerId)
-        {
-            if (id is not null
-                && userRoles is not null
-                && !userRoles.Contains(RoleType.Admin.ToString())
-                && ownerId is not null
-                && cardCollectionRepository.GetById(id.Value)?.OwnerId != ownerId)
-            {
-                throw new UnauthorizedAccessException();
-            }
         }
     }
 }

@@ -1,32 +1,30 @@
 ﻿using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class CardFacade : ICardFacade
+    public class CardFacade(ICardRepository cardRepository, IUserRepository userRepository, CardMapper mapper)
+        : FacadeBase<ICardRepository, CardEntity>(cardRepository, userRepository),
+        ICardFacade
     {
-        private readonly ICardRepository cardRepository;
-        private readonly CardMapper mapper;
+        private readonly ICardRepository cardRepository = cardRepository;
 
-        public CardFacade(ICardRepository cardRepository, CardMapper mapper)
+        public Guid Create(CardCreateModel card, IList<string> userRoles, string requestorId)
         {
-            this.cardRepository = cardRepository;
-            this.mapper = mapper;
-        }
+            var requestorUserEntity = GetOwningEntity(requestorId);
 
-        public Guid Create(CardDetailModel card)
-        {
-            var cardEntity = mapper.ToEntity(card);
+            var cardEntity = mapper.ToEntity(card, requestorUserEntity);
             cardRepository.Insert(cardEntity);
             return cardEntity.Id;
         }
 
-        public Guid CreateOrUpdate(CardDetailModel card)
+        public Guid CreateOrUpdate(CardDetailModel card, IList<string> userRoles, string requestorId)
         {
             return cardRepository.Exists(card.Id)
-                ? Update(card)!.Value
-                : Create(card);
+                ? Update(card, userRoles, requestorId)!.Value
+                : Create(mapper.ToCreateModel(card), userRoles, requestorId);
         }
 
         public void Delete(Guid id)
@@ -66,9 +64,21 @@ namespace Flashcards.Api.BL.Facades
                 : mapper.ToDetailModel(cardEntity);
         }
 
-        public Guid? Update(CardDetailModel card)
+        public Guid? Update(CardDetailModel card, IList<string> userRoles, string requestorId)
         {
-            var cardEntity = mapper.ToEntity(card);
+            // existingCard.Owner == null && isAdmin(requestedId)  => allow update
+            // existingCard.Owner != null && isAdminOrOwner(requestedId, cardOwnerId) => allow update
+
+            var cardEntity = new CardEntity()
+            {
+                Id = card.Id,
+                QuestionType = card.QuestionType,
+                AnswerType = card.AnswerType,
+                QuestionContent = card.QuestionContent,
+                AnswerContent = card.AnswerContent,
+                Created = card.DateCreated,
+                Description = card.Description
+            };
             return cardRepository.Update(cardEntity);
         }
     }

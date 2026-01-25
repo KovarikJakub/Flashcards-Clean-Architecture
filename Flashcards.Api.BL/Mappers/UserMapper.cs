@@ -5,14 +5,37 @@ namespace Flashcards.Api.BL.Mappers
 {
     public class UserMapper
     {
-        public UserEntity ToEntity(UserDetailModel model, string? ownerId = null)
+        public UserEntity ToEntity(UserDetailModel model, string ownerId)
         {
             return new UserEntity
             {
                 Id = model.Id,
                 Name = model.Name,
-                PhotoUrl = model.PhotographyUrl,
-                Role = model.Role
+                PhotoUrl = model.PhotoUrl,
+                Role = model.Role,
+                IdentityOwnerId = ownerId
+            };
+        }
+
+        public UserEntity ToEntity(UserCreateModel model, string ownerId)
+        {
+            return new UserEntity
+            {
+                Id = Guid.NewGuid(),
+                Name = model.Name,
+                PhotoUrl = model.PhotoUrl,
+                Role = model.Role,
+                IdentityOwnerId = ownerId
+            };
+        }
+
+        public UserCreateModel ToCreateModel(UserDetailModel model)
+        {
+            return new UserCreateModel()
+            {
+                Name = model.Name,
+                PhotoUrl = model.PhotoUrl,
+                Role = model.Role,
             };
         }
 
@@ -22,19 +45,24 @@ namespace Flashcards.Api.BL.Mappers
             {
                 Id = model.Id,
                 Name = model.Name,
-                PhotographyUrl = model.PhotoUrl,
+                PhotoUrl = model.PhotoUrl,
                 Role = model.Role
             };
         }
 
         public List<UserListModel> ToListModel(IEnumerable<UserEntity> entities)
         {
-            return entities.Select(e => new UserListModel
+            return entities.Select(ToListModelSingle).ToList();
+        }
+
+        public UserListModel ToListModelSingle(UserEntity entity)
+        {
+            return new UserListModel()
             {
-                Id = e.Id,
-                Name = e.Name,
-                Role = e.Role
-            }).ToList();
+                Id = entity.Id,
+                Name = entity.Name,
+                Role = entity.Role
+            };
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Flashcards.Common.Models
         public required ContentType QuestionType { get; set; }
         public required string QuestionContent { get; set; }
         public required ContentType AnswerType { get; set; }
+        public string? OwnerName { get; set; } = null;
         public string? Description { get; set; } = null;
     }
 }

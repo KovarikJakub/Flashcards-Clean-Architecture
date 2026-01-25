@@ -1,50 +1,49 @@
 ﻿using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class LessonFacade : ILessonFacade
+    public class LessonFacade(LessonMapper mapper, ILessonRepository lessonRepository, IUserRepository userRepository, ICardCollectionRepository cardCollectionRepository) 
+        : FacadeBase<ILessonRepository, LessonEntity>(lessonRepository, userRepository),
+        ILessonFacade
     {
-        private readonly LessonMapper _mapper;
-        private readonly ILessonRepository _repository;
-        public LessonFacade(LessonMapper mapper, ILessonRepository repository)
+        public Guid Create(LessonCreateModel model, string requestorId)
         {
-            _mapper = mapper;
-            _repository = repository;
-        }
+            var collection = cardCollectionRepository.GetById(model.CardCollectionId);
+            if(collection is null)
+                throw new ArgumentException("Existing collection ID is required to create a lesson.");
 
-        public Guid Create(LessonDetailModel model)
-        {
-            return _repository.Insert(_mapper.ToEntity(model));
+            var requestorUserEntity = GetOwningEntity(requestorId);
+
+            var entity = mapper.ToEntity(model, requestorUserEntity, collection);
+            return lessonRepository.Insert(entity);
         }
 
         public LessonDetailModel? GetById(Guid id)
         {
-            var result = _repository.GetById(id);
+            var result = lessonRepository.GetById(id);
             if (result == null) return null;
-            return _mapper.ToDetailModel(result);
+            return mapper.ToDetailModel(result);
         }
 
         public List<LessonListModel> GetAll()
         {
-            var entities = _repository.GetAll();
-            return _mapper.ToListModel(entities);
+            var entities = lessonRepository.GetAll();
+            return mapper.ToListModel(entities);
         }
 
         public void Delete(Guid id)
         {
-            _repository.Remove(id);
+            lessonRepository.Remove(id);
         }
 
-        public List<LessonListModel>? GetByQuery(LessonQueryModel queryModel)
+        public List<LessonListModel> GetByQuery(LessonQueryModel queryModel)
         {
-            var query = _repository.GetAll().AsEnumerable();
+            var query = lessonRepository.GetAll().AsEnumerable();
 
-            if (queryModel.UserId is not null)
-            {
-                query = query.Where(lesson => lesson.User.Id == queryModel.UserId);
-            }
+            query = query.Where(lesson => lesson.User.Id == queryModel.UserId);
 
             if (queryModel.CardCollectionId is not null)
             {
@@ -55,13 +54,7 @@ namespace Flashcards.Api.BL.Facades
             var pageSize = queryModel.PageSize;
             var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return _mapper.ToListModel(items);
-        }
-
-        public List<LessonListModel> GetAllByOwner(string ownerId)
-        {
-            var entities = _repository.GetAll().Where(e => e.CardCollection != null && e.CardCollection.OwnerId != null && e.CardCollection.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
-            return _mapper.ToListModel(entities);
+            return mapper.ToListModel(items);
         }
     }
 }

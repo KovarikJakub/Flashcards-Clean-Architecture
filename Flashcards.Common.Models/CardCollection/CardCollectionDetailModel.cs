@@ -1,6 +1,4 @@
-﻿using Flashcards.Common.Enums;
-
-namespace Flashcards.Common.Models
+﻿namespace Flashcards.Common.Models
 {
     public class CardCollectionDetailModel : IWithGuid
     {
@@ -9,5 +7,6 @@ namespace Flashcards.Common.Models
         public IList<CardDetailModel> Cards { get; set; } = new List<CardDetailModel>();
         public DateTime? AnswerStart { get; set; } = null;
         public DateTime? AnswerEnd { get; set; } = null;
+        public UserDetailModel? Owner { get; set; } = null;
     }
 }

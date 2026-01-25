@@ -5,20 +5,14 @@ using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
-    public class CardCollectionRepository : ICardCollectionRepository
+    public class CardCollectionRepository(IStorage storage) : ICardCollectionRepository
     {
-        private readonly IStorage storage;
-        public CardCollectionRepository(IStorage storage)
-        {
-            this.storage = storage;
-        }
-
         public bool Exists(Guid id)
         {
             return storage.Collections.Any(collection => collection.Id == id);
         }
 
-        public CardCollectionEntity FirstOrDefault(Expression<Func<CardCollectionEntity, bool>> predicate)
+        public CardCollectionEntity? FirstOrDefault(Expression<Func<CardCollectionEntity, bool>> predicate)
         {
             return storage.Collections.AsQueryable().FirstOrDefault(predicate);
         }
@@ -47,17 +41,17 @@ namespace Flashcards.Api.DAL.Memory.Repositories
 
         public Guid? Update(CardCollectionEntity collection)
         {
-            var existingCollection = storage.Collections.Single(collectionInStorage => collectionInStorage.Id == collection.Id);
-            if (existingCollection is not null)
+            var existingCollection = storage.Collections.SingleOrDefault(collectionInStorage => collectionInStorage.Id == collection.Id);
+            if (existingCollection is null)
             {
-                existingCollection.AnswerStart = collection.AnswerStart;
-                existingCollection.AnswerEnd = collection.AnswerEnd;
-                existingCollection.Title = collection.Title;
-                existingCollection.Cards = collection.Cards;
-                return existingCollection.Id;
+                return null;
             }
 
-            return null;
+            existingCollection.AnswerStart = collection.AnswerStart;
+            existingCollection.AnswerEnd = collection.AnswerEnd;
+            existingCollection.Title = collection.Title;
+            existingCollection.Cards = collection.Cards;
+            return existingCollection.Id;
         }
 
         public IEnumerable<CardCollectionEntity> Where(Expression<Func<CardCollectionEntity, bool>> predicate)

@@ -70,7 +70,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCard = CreateCardDetailModel();
 
             // Act
-            var result = _facade.CreateOrUpdate(newCard);
+            var result = _facade.CreateOrUpdate(newCard, TODO);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardEntity>(card => card.Id == newCard.Id));
@@ -84,11 +84,11 @@ namespace Flashcards.Api.BL.UnitTests
             var existingCard = CreateCardDetailModel();
             _fakeRepo.Exists(existingCard.Id).Returns(true);
             existingCard.Description = "updated value";
-            var expectedEntity = _mapper.ToEntity(existingCard);
+            var expectedEntity = _mapper.ToEntity(existingCard, TODO);
             _fakeRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
 
             // Act
-            var result = _facade.CreateOrUpdate(existingCard);
+            var result = _facade.CreateOrUpdate(existingCard, TODO);
             
             // Assert
             _fakeRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
@@ -104,7 +104,7 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newCard = CreateCardDetailModel();
-            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(_mapper.ToEntity(newCard));
+            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(_mapper.ToEntity(newCard, TODO));
             
             // Act
             var result = _facade.GetById(newCard.Id);
@@ -149,7 +149,7 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newCard = CreateCardDetailModel();
-            var entities = new List<CardEntity>{ _mapper.ToEntity(newCard) };
+            var entities = new List<CardEntity>{ _mapper.ToEntity(newCard, TODO) };
             _fakeRepo.GetAll().Returns(entities);
 
             // Act
@@ -167,11 +167,11 @@ namespace Flashcards.Api.BL.UnitTests
             var existingCard = CreateCardDetailModel();
             _fakeRepo.Exists(existingCard.Id).Returns(true);
             existingCard.Description = "updated value";
-            var expectedEntity = _mapper.ToEntity(existingCard);
+            var expectedEntity = _mapper.ToEntity(existingCard, TODO);
             _fakeRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
 
             // Act
-            var result = _facade.Update(existingCard);
+            var result = _facade.Update(existingCard, TODO, TODO);
             
             // Assert
             _fakeRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
@@ -189,11 +189,11 @@ namespace Flashcards.Api.BL.UnitTests
             _fakeRepo.Exists(Arg.Any<Guid>()).Returns(false);
 
             // Act
-            var result = _facade.Update(card);
+            var result = _facade.Update(card, TODO, TODO);
             
             // Assert
             _fakeRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
-            _fakeRepo.Received(1).Update(_mapper.ToEntity(card));
+            _fakeRepo.Received(1).Update(_mapper.ToEntity(card, TODO));
             Assert.Null(result);
         }
 

@@ -1,18 +1,12 @@
 ﻿using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
-using System.Linq;
 using System.Linq.Expressions;
 using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
-    public class LessonRepository : ILessonRepository
+    public class LessonRepository(IStorage storage) : ILessonRepository
     {
-        private readonly IStorage storage;
-        public LessonRepository(IStorage storage)
-        {
-            this.storage = storage;
-        }
         public IList<LessonEntity> GetAll()
         {
             return storage.Lessons;
@@ -23,7 +17,7 @@ namespace Flashcards.Api.DAL.Memory.Repositories
             return storage.Lessons.SingleOrDefault(lesson => lesson.Id == id);
         }
 
-        public LessonEntity FirstOrDefault(Expression<Func<LessonEntity, bool>> predicate)
+        public LessonEntity? FirstOrDefault(Expression<Func<LessonEntity, bool>> predicate)
         {
             return storage.Lessons.AsQueryable().FirstOrDefault(predicate);
         }
@@ -41,19 +35,19 @@ namespace Flashcards.Api.DAL.Memory.Repositories
 
         public Guid? Update(LessonEntity entity)
         {
-            var existingEntity = storage.Lessons.Single(entityInStorage => entityInStorage.Id == entity.Id);
-            if (existingEntity is not null)
+            var existingEntity = storage.Lessons.SingleOrDefault(entityInStorage => entityInStorage.Id == entity.Id);
+            if (existingEntity is null)
             {
-                existingEntity.CardCollection = entity.CardCollection;
-                existingEntity.User = entity.User;
-                existingEntity.Start = entity.Start;
-                existingEntity.Seen = entity.Seen;
-                existingEntity.Correct = entity.Correct;
-                existingEntity.Wrong = entity.Wrong;
-                return existingEntity.Id;
+                return null;
             }
 
-            return null;
+            existingEntity.CardCollection = entity.CardCollection;
+            existingEntity.User = entity.User;
+            existingEntity.Start = entity.Start;
+            existingEntity.Seen = entity.Seen;
+            existingEntity.Correct = entity.Correct;
+            existingEntity.Wrong = entity.Wrong;
+            return existingEntity.Id;
         }
 
         public void Remove(Guid id)

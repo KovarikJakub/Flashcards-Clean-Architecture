@@ -29,7 +29,7 @@ namespace Flashcards.Api.BL.UnitTests
             {
                 Id = Guid.NewGuid(),
                 Name = "Albert",
-                PhotographyUrl = null,
+                PhotoUrl = null,
                 Role = RoleType.User
             };
 
