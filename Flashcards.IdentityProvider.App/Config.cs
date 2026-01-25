@@ -43,12 +43,14 @@ namespace Flashcards.IdentityProvider.App
                 {
                     "https://oauth.pstmn.io/v1/callback",
                     "https://localhost:44355/authentication/login-callback",
+                    "https://app-iw5-2025-team-xkovarj00-web-d3cxbtbdbkfrhpgz.germanywestcentral-01.azurewebsites.net/authentication/login-callback",
                 },
                 PostLogoutRedirectUris = new List<string>
                 {
-                    "https://localhost:44355"
+                    "https://localhost:44355",
+                    "https://app-iw5-2025-team-xkovarj00-web-d3cxbtbdbkfrhpgz.germanywestcentral-01.azurewebsites.net/",
                 },
-                // This is a public SPA client — use Authorization Code + PKCE
+                // This is a public SPA client ï¿½ use Authorization Code + PKCE
                 AllowedGrantTypes = [
                     GrantType.ResourceOwnerPassword,
                     GrantType.AuthorizationCode
@@ -58,7 +60,8 @@ namespace Flashcards.IdentityProvider.App
                 // Allow the browser to call the token endpoint from this origin
                 AllowedCorsOrigins = new List<string>
                 {
-                    "https://localhost:44355"
+                    "https://localhost:44355", 
+                    "https://app-iw5-2025-team-xkovarj00-web-d3cxbtbdbkfrhpgz.germanywestcentral-01.azurewebsites.net"
                 },
                 AllowedScopes = new List<string>
                 {
