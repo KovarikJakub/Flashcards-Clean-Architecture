@@ -99,17 +99,30 @@ namespace Flashcards.Api.DAL.IntegrationTests
         {
             // Arrange
             var lessonId = _fakeDb.LessonGuids[0];
-            var lesson = _repo.GetById(lessonId);
-            lesson.Seen = 10;
-            lesson.Correct = 8;
+            var stored = _repo.GetById(lessonId);
+            Assert.NotNull(stored);
+
+            var updatePayload = new LessonEntity
+            {
+                Id = stored.Id,
+                User = stored.User,
+                CardCollection = stored.CardCollection,
+                Start = stored.Start,
+                Seen = 10,
+                Correct = 8,
+                Wrong = stored.Wrong
+            };
 
             // Act
-            _repo.Update(lesson);
+            _repo.Update(updatePayload);
 
             // Assert
             var updated = _fakeDb.GetLessonById(lessonId);
             Assert.Equal(10u, updated.Seen);
             Assert.Equal(8u, updated.Correct);
+
+            var expected = _fakeDb.GetLessonById(lessonId);
+            Assert.True(AreLessonsEqual(updated, expected));
         }
 
         [Fact]

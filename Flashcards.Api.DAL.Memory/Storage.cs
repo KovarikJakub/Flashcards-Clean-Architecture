@@ -154,7 +154,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "General Knowledge Mix",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddMinutes(10),
-                OwnerId = Users[0].IdentityOwnerId,
+                OwnerId = Users[0].Id,
                 Cards = mixCards
             });
 
@@ -167,7 +167,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "C# Interview Prep",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddDays(1),
-                OwnerId = Users[0].IdentityOwnerId,
+                OwnerId = Users[0].Id,
                 Cards = csharpCards
             });
 
@@ -180,7 +180,7 @@ namespace Flashcards.Api.DAL.Memory
                 Title = "Biology 101",
                 AnswerStart = DateTime.UtcNow,
                 AnswerEnd = DateTime.UtcNow.AddHours(2),
-                OwnerId = Users[1].IdentityOwnerId,
+                OwnerId = Users[1].Id,
                 Cards = bioCards
             });
         }

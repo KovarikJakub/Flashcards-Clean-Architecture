@@ -132,7 +132,8 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Id = UserGuids[0],
                 Name = "Pavel",
                 PhotoUrl = null,
-                Role = RoleType.User
+                Role = RoleType.User,
+                IdentityOwnerId = "PavelId"
             });
             
             inMemoryStorage.Users.Add(new UserEntity
@@ -140,7 +141,8 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Id = UserGuids[1],
                 Name = "Oliver",
                 PhotoUrl = null,
-                Role = RoleType.User
+                Role = RoleType.User,
+                IdentityOwnerId = "OliverId"
             });
             
             inMemoryStorage.Users.Add(new UserEntity
@@ -148,7 +150,8 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Id = UserGuids[2],
                 Name = "Vit",
                 PhotoUrl = null,
-                Role = RoleType.User
+                Role = RoleType.User,
+                IdentityOwnerId = "VitId"
             });
             
             inMemoryStorage.Users.Add(new UserEntity
@@ -156,7 +159,8 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Id = UserGuids[3],
                 Name = "Adam",
                 PhotoUrl = null,
-                Role = RoleType.Admin
+                Role = RoleType.Admin,
+                IdentityOwnerId = "AdamId"
             });
 
             inMemoryStorage.Collections.Add(new CardCollectionEntity

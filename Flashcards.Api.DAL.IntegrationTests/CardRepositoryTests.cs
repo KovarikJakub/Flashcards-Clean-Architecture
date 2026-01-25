@@ -24,7 +24,9 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 card1.QuestionContent == card2.QuestionContent &&
                 card1.AnswerContent == card2.AnswerContent &&
                 card1.Description == card2.Description &&
-                card1.Created == card2.Created;
+                card1.Created == card2.Created &&
+                card1.Owner == card2.Owner &&
+                card1.OwnerId == card2.OwnerId;
         }
 
         [Fact]
@@ -97,15 +99,30 @@ namespace Flashcards.Api.DAL.IntegrationTests
         {
             // Arrange
             var cardId = _fakeDb.CardGuids[0];
-            var card = _repo.GetById(cardId);
-            card.QuestionContent = "Updated Question";
+            // Read the stored card (this returns the stored instance)
+            var stored = _repo.GetById(cardId);
+            Assert.NotNull(stored);
+
+            // Create a detached copy to simulate an incoming update payload.
+            var updatePayload = new CardEntity
+            {
+                Id = stored.Id,
+                QuestionType = stored.QuestionType,
+                AnswerType = stored.AnswerType,
+                QuestionContent = "Updated Question", // changed
+                AnswerContent = stored.AnswerContent,
+                Description = "New Description", // changed
+                Created = stored.Created,
+                Owner = stored.Owner,
+                OwnerId = stored.OwnerId
+            };
 
             // Act
-            _repo.Update(card);
+            _repo.Update(updatePayload);
 
             // Assert
             var updated = _fakeDb.GetCardById(cardId);
-            Assert.Equal("Updated Question", updated.QuestionContent);
+            Assert.True(AreCardsEqual(updated, updatePayload));
         }
     }
 }

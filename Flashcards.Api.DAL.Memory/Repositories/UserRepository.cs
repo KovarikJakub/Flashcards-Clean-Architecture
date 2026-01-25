@@ -12,6 +12,17 @@ namespace Flashcards.Api.DAL.Memory.Repositories
             return storage.Users.Any(user => user.Id == id);
         }
 
+        public UserEntity GetByIdentityId(string identityId)
+        {
+            var entity = FirstOrDefault(user => string.Equals(user.IdentityOwnerId, identityId));
+            if (entity is null)
+            {
+                throw new ArgumentException("This users identity does not exist!");
+            }
+
+            return entity;
+        }
+
         public UserEntity? FirstOrDefault(Expression<Func<UserEntity, bool>> predicate)
         {
             return storage.Users.AsQueryable().FirstOrDefault(predicate);
@@ -61,5 +72,6 @@ namespace Flashcards.Api.DAL.Memory.Repositories
         {
             return storage.Users.AsQueryable().Where(predicate);
         }
+
     }
 }
