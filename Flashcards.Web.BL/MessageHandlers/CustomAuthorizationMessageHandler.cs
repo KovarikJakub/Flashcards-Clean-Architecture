@@ -1,16 +1,29 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.Extensions.Configuration; 
 using Microsoft.Extensions.Logging;
 
 namespace Flashcards.Web.BL.MessageHandlers;
-
-public class CustomAuthorizationMessageHandler(
-    ILogger<CustomAuthorizationMessageHandler> logger,
-    IAccessTokenProvider provider,
-    NavigationManager navigation)
-    : AuthorizationMessageHandler(provider, navigation)
+public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
 {
-    private readonly IAccessTokenProvider _provider = provider;
+    private readonly IAccessTokenProvider _provider;
+    private readonly ILogger<CustomAuthorizationMessageHandler> _logger;
+    
+    public CustomAuthorizationMessageHandler(
+        ILogger<CustomAuthorizationMessageHandler> logger,
+        IAccessTokenProvider provider,
+        NavigationManager navigation,
+        IConfiguration configuration) 
+        : base(provider, navigation)
+    {
+        _provider = provider;
+        _logger = logger;
+        
+        ConfigureHandler(
+            authorizedUrls: new[] { configuration["ApiOptions:BaseUrl"] },
+            scopes: new[] { "flashcardsapi" }
+        );
+    }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -19,18 +32,16 @@ public class CustomAuthorizationMessageHandler(
 
         if (accessTokenResult.TryGetToken(out var token))
         {
-            logger.LogInformation("Access token: '{AccessToken}', expires: '{AcccessTokenExpires}', granted scopes: '{AccessTokenGrantedScopes}'",
-                token.Value,
-                token.Expires,
-                token.GrantedScopes);
-
-            // User is logged in, use base class implementation (with authorization)
+            _logger.LogInformation("Access token found. Expires: '{AcccessTokenExpires}'. Sending request to {Url}", 
+                token.Expires, request.RequestUri);
+            
             return await base.SendAsync(request, cancellationToken);
         }
         else
         {
+            _logger.LogWarning("No access token found. Sending anonymous request to {Url}", request.RequestUri);
+
             // User is not logged in, bypass authorization by not calling base implementation
-            // Instead, we'll create a simple HTTP request without authentication
             using var httpClient = new HttpClient();
 
             // Copy the request to avoid disposal issues
