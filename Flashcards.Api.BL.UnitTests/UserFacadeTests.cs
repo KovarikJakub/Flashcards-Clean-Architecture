@@ -22,6 +22,18 @@ namespace Flashcards.Api.BL.UnitTests
             _facade = new UserFacade(_fakeRepo, _mapper);
         }
 
+        private UserCreateModel CreateUserCreateModel()
+        {
+            var newUser = new UserCreateModel()
+            {
+                Name = "Petr",
+                PhotoUrl = null,
+                Role = RoleType.User
+            };
+
+            return newUser;
+        }
+
         private UserDetailModel CreateUserDetailModel(Guid id)
         {
             var newUser = new UserDetailModel()
@@ -34,8 +46,8 @@ namespace Flashcards.Api.BL.UnitTests
 
             return newUser;
         }
-        
-        
+
+
         [Fact]
         public void Delete_Calls_Correct_Method_On_Repository()
         {
@@ -43,7 +55,7 @@ namespace Flashcards.Api.BL.UnitTests
             var userId = Guid.NewGuid();
             
             // act
-            _facade.Delete(userId, []);
+            _facade.Delete(userId, new List<string>(), "abc");
             
             // assert
             _fakeRepo.Received(1).Remove(userId);       
@@ -53,19 +65,18 @@ namespace Flashcards.Api.BL.UnitTests
         public void Create_New_User()
         {
             // Arrange
-            var newUser = CreateUserDetailModel(Guid.NewGuid());
+            var newUser = CreateUserCreateModel();
             
             // Act
-            var id = _facade.Create(newUser, []);
+            var id = _facade.Create(newUser, new List<string>(), "abc");
             
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
-                user.Id == newUser.Id &&
+                user.Id == id &&
                 user.Name == newUser.Name &&
                 user.PhotoUrl == newUser.PhotoUrl &&
                 user.Role == newUser.Role));
 
-            Assert.Equal(id, newUser.Id);
         }
 
         [Fact]
@@ -75,16 +86,13 @@ namespace Flashcards.Api.BL.UnitTests
             var newUser = CreateUserDetailModel(Guid.NewGuid());
 
             // Act
-            var result = _facade.CreateOrUpdate(newUser, []);
+            var result = _facade.CreateOrUpdate(newUser, new List<string>(), "abc");
             
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
-                user.Id == newUser.Id &&
                 user.Name == newUser.Name &&
                 user.PhotoUrl == newUser.PhotoUrl &&
                 user.Role == newUser.Role));
-
-            Assert.Equal(result, newUser.Id);
         }
         
         [Fact]
@@ -93,13 +101,13 @@ namespace Flashcards.Api.BL.UnitTests
             // Arrange
             var existingUser = CreateUserDetailModel(Guid.NewGuid());
             _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
-            _fakeRepo.GetById(existingUser.Id).Returns(_mapper.ToEntity(existingUser));
+            _fakeRepo.GetById(existingUser.Id).Returns(_mapper.ToEntity(existingUser, "abc"));
             _fakeRepo.Update(Arg.Any<UserEntity>()).Returns(Guid.NewGuid());
             
             existingUser.Name = "Igor";
 
             // Act
-            _facade.CreateOrUpdate(existingUser, []);
+            _facade.CreateOrUpdate(existingUser, [], "abc");
     
             // Assert
             _fakeRepo.Received(1).Update(Arg.Is<UserEntity>(user =>
@@ -127,7 +135,7 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var existingUser = CreateUserDetailModel(Guid.NewGuid());
-            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(_mapper.ToEntity(existingUser));
+            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(_mapper.ToEntity(existingUser, "abc"));
             
             // Act
             var result = _facade.GetById(existingUser.Id);
@@ -144,8 +152,8 @@ namespace Flashcards.Api.BL.UnitTests
             var user1 = CreateUserDetailModel(Guid.NewGuid());
             var user2 = CreateUserDetailModel(Guid.NewGuid());
             List<UserEntity> list = new List<UserEntity>();
-            list.Add(_mapper.ToEntity(user1));
-            list.Add(_mapper.ToEntity(user2));
+            list.Add(_mapper.ToEntity(user1, "abc"));
+            list.Add(_mapper.ToEntity(user2, "abc"));
             _fakeRepo.GetAll().Returns(list);
             
             // Act
@@ -173,23 +181,6 @@ namespace Flashcards.Api.BL.UnitTests
             _fakeRepo.Received(1).GetAll();  
         }
 
-        [Fact]
-        public async Task CreateUserWithIdentity_Throws_NotImplementedException()
-        {
-            // Arrange
-            var facade = new UserFacade(_fakeRepo, _mapper);
-
-            // Act & Assert
-            await Assert.ThrowsAsync<NotImplementedException>(() => facade.CreateUserWithIdentityAsync(
-                userName: "test.user",
-                password: "Test123!",
-                email: "test@test.com",
-                name: "Test User",
-                photographyUrl: null,
-                role: RoleType.User,
-                userRoles: new List<string>(),
-                ownerId: null));
-        }
     }
 }
 

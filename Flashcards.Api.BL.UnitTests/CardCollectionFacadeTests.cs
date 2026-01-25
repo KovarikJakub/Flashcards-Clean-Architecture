@@ -2,6 +2,7 @@
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
+using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
 using NSubstitute;
 
@@ -10,14 +11,32 @@ namespace Flashcards.Api.BL.UnitTests
     public class CardCollectionFacadeTests
     {
         private readonly ICardCollectionRepository _fakeRepo;
+        private readonly IUserRepository _userRepo;
         private readonly CardCollectionMapper _mapper;
         private readonly CardCollectionFacade _facade;
+        private readonly UserEntity _ownerEntity;
 
         public CardCollectionFacadeTests()
         {
             _fakeRepo = Substitute.For<ICardCollectionRepository>();
-            _mapper = new CardCollectionMapper();
-            _facade = new CardCollectionFacade(_fakeRepo, _mapper);
+            _userRepo = Substitute.For<IUserRepository>();
+
+            var userMapper = new UserMapper();
+            var cardMapper = new CardMapper(userMapper);
+            _mapper = new CardCollectionMapper(cardMapper, userMapper);
+
+            _ownerEntity = new UserEntity
+            {
+                Id = Guid.NewGuid(),
+                IdentityOwnerId = "abc",
+                Name = "testuser",
+                Role = RoleType.User
+            };
+
+            _userRepo.GetByIdentityId(Arg.Any<string>()).Returns(_ownerEntity);
+            _userRepo.GetById(_ownerEntity.Id).Returns(_ownerEntity);
+
+            _facade = new CardCollectionFacade(_fakeRepo, _userRepo, _mapper);
         }
 
         private CardCollectionDetailModel CreateCardCollectionDetailModel(Guid id)
@@ -35,7 +54,6 @@ namespace Flashcards.Api.BL.UnitTests
         }
         
         
-        
         [Fact]
         public void Delete_Calls_Correct_Method_On_Repository()
         {
@@ -43,7 +61,7 @@ namespace Flashcards.Api.BL.UnitTests
             var collectionId = Guid.NewGuid();
 
             // Act
-            _facade.Delete(collectionId, []);
+            _facade.Delete(collectionId, new List<string>(), _ownerEntity.IdentityOwnerId);
 
             // Assert
             _fakeRepo.Received(1).Remove(collectionId);
@@ -54,18 +72,24 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
-            
+            var createModel = new CardCollectionCreateModel
+            {
+                Title = newCollection.Title,
+                AnswerStart = newCollection.AnswerStart,
+                AnswerEnd = newCollection.AnswerEnd,
+                Cards = new List<CardCreateModel>()
+            };
+
             // Act
-            var id = _facade.Create(newCollection, [], TODO);
+            var id = _facade.Create(createModel, new List<string>(), _ownerEntity.IdentityOwnerId);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
-                c.Id == newCollection.Id &&
                 c.Title == newCollection.Title &&
                 c.AnswerStart == newCollection.AnswerStart &&
                 c.AnswerEnd == newCollection.AnswerEnd));
 
-            Assert.Equal(id, newCollection.Id);
+            Assert.NotEqual(Guid.Empty, id);
         }
 
         [Fact]
@@ -73,16 +97,15 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newCollection = CreateCardCollectionDetailModel(Guid.NewGuid());
-            
+
             // Act
-            var id = _facade.CreateOrUpdate(TODO, []);
+            var id = _facade.CreateOrUpdate(newCollection, new List<string>(), _ownerEntity.IdentityOwnerId);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
-                c.Id == newCollection.Id &&
                 c.Title == newCollection.Title));
 
-            Assert.Equal(id, newCollection.Id);
+            Assert.NotEqual(Guid.Empty, id);
         }
 
         [Fact]
@@ -91,14 +114,14 @@ namespace Flashcards.Api.BL.UnitTests
             var existing = CreateCardCollectionDetailModel(Guid.NewGuid());
             // Arrange
             _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
-            _fakeRepo.GetById(existing.Id).Returns(_mapper.ToEntity(existing)); //added
+            _fakeRepo.GetById(existing.Id).Returns(_mapper.ToEntity(existing, _ownerEntity)); //added
             _fakeRepo.Update(Arg.Any<CardCollectionEntity>()).Returns(Guid.NewGuid());
 
             
             existing.Title = "Updated Science Deck";
 
             // Act
-           _facade.CreateOrUpdate(TODO, []);
+           _facade.CreateOrUpdate(existing, new List<string>(), _ownerEntity.IdentityOwnerId);
 
             // Assert
             _fakeRepo.Received(1).Update(Arg.Is<CardCollectionEntity>(c =>
@@ -126,7 +149,7 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var existing = CreateCardCollectionDetailModel(Guid.NewGuid());
-            _fakeRepo.GetById(existing.Id).Returns(_mapper.ToEntity(existing));
+            _fakeRepo.GetById(existing.Id).Returns(_mapper.ToEntity(existing, _ownerEntity));
             
             // Act
             var result = _facade.GetById(existing.Id);
@@ -146,7 +169,7 @@ namespace Flashcards.Api.BL.UnitTests
             var col1 = CreateCardCollectionDetailModel(Guid.NewGuid());
             var col2 = CreateCardCollectionDetailModel(Guid.NewGuid());
             
-            var list = new List<CardCollectionEntity> { _mapper.ToEntity(col1), _mapper.ToEntity(col2) };
+            var list = new List<CardCollectionEntity> { _mapper.ToEntity(col1, _ownerEntity), _mapper.ToEntity(col2, _ownerEntity) };
             _fakeRepo.GetAll().Returns(list);
 
             // Act
