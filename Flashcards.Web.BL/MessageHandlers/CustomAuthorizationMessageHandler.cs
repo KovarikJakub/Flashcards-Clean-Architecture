@@ -37,6 +37,15 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
         // Check if user is authenticated
         var accessTokenResult = await _provider.RequestAccessToken();
 
+        Console.WriteLine($"[DEBUG] Token Request Status: {accessTokenResult.Status}");
+        _logger.LogWarning("LOG: Token Request Status: {Status}", accessTokenResult.Status);
+        
+        if (accessTokenResult.Status == AccessTokenResultStatus.RequiresRedirect)
+        {
+            Console.WriteLine("[DEBUG]  Token expired or requires interaction. Redirecting to login");
+            _logger.LogInformation("DEBUG Access token requires redirect. Redirecting to login.");
+        }
+        
         if (accessTokenResult.TryGetToken(out var token))
         {
             _logger.LogInformation("Access token found. Expires: '{AcccessTokenExpires}'. Sending request to {Url}", 
