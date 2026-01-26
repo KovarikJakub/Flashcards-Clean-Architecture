@@ -14,6 +14,7 @@ steps:
   - template: CI_CD/build-WEB.yml
 
   - task: DotNetCoreCLI@2
+    displayName: 'Publish Web App'
     inputs:
       command: 'publish'
       publishWebProjects: false
@@ -21,8 +22,18 @@ steps:
       arguments: '--configuration $(buildConfiguration) --framework $(dotNetFramework) --output $(Build.ArtifactStagingDirectory)/web'
       modifyOutputPath: false
 
-  - task: PublishBuildArtifacts@1
+  - task: ArchiveFiles@2
+    displayName: 'Create Site Zip'
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/web'
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/web'
+      includeRootFolder: false 
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/site.zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/site.zip'
       ArtifactName: 'WEB'
       publishLocation: 'Container'
