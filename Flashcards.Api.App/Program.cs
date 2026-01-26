@@ -17,8 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
 
-builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<IStorage, Storage>();
+
+builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddTransient<ICardRepository, CardRepository>();
 builder.Services.AddScoped<ICardFacade, CardFacade>();
 
@@ -31,8 +32,8 @@ builder.Services.AddTransient<ICardCollectionRepository, CardCollectionRepositor
 builder.Services.AddScoped<ICardCollectionFacade, CardCollectionFacade>();
 
 builder.Services.AddSingleton<LessonMapper>();
-builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 
 var identityOpts = builder.Configuration.GetSection(nameof(IdentityOptions));
 if (identityOpts is null)
