@@ -3,6 +3,7 @@ using Flashcards.IdentityProvider.App.Services;
 using Serilog;
 using Serilog.Filters;
 using System.Globalization;
+using Microsoft.AspNetCore.HttpOverrides; 
 
 namespace Flashcards.IdentityProvider.App
 {
@@ -10,8 +11,6 @@ namespace Flashcards.IdentityProvider.App
     {
         public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
         {
-            // Set up logging to write regular entries to console, and diagnostics data to a file.
-            // See https://docs.duendesoftware.com/identityserver/diagnostics/data
             builder.Host.UseSerilog((ctx, lc) =>
             {
                 lc.WriteTo.Logger(consoleLogger =>
@@ -30,7 +29,7 @@ namespace Flashcards.IdentityProvider.App
                     {
                         fileLogger
                             .WriteTo.File("./diagnostics/diagnostic.log", rollingInterval: RollingInterval.Day,
-                                fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
+                                fileSizeLimitBytes: 1024 * 1024 * 10, 
                                 rollOnFileSizeLimit: true,
                                 outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
                                 formatProvider: CultureInfo.InvariantCulture)
@@ -44,24 +43,29 @@ namespace Flashcards.IdentityProvider.App
 
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
-            // uncomment if you want to add a UI
             builder.Services.AddRazorPages();
-
-            // Add CORS policy to allow the SPA client to access discovery and token endpoints
+            
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policy =>
                 {
-                    // Allow the client origin used in development. Adjust as needed for production.
-                    policy.WithOrigins("https://localhost:44355")
+                    policy.WithOrigins(
+                            "https://localhost:44355",
+                            "https://app-iw5-2025-team-xkovarj00-web-d3cxbtbdbkfrhpgz.germanywestcentral-01.azurewebsites.net"
+                          )
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
             });
+            
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
 
             builder.Services.AddIdentityServer(options =>
                 {
-                    // https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/api_scopes#authorization-based-on-scopes
                     options.EmitStaticAudienceClaim = true;
                 })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
@@ -76,8 +80,24 @@ namespace Flashcards.IdentityProvider.App
 
         public static WebApplication ConfigurePipeline(this WebApplication app)
         {
+            app.UseForwardedHeaders(); 
+
             app.UseSerilogRequestLogging();
 
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = SameSiteMode.Lax,
+                Secure = CookieSecurePolicy.Always 
+            });
+
+            app.UseStaticFiles();
+            app.UseRouting();
+            
             app.UseCors(policy =>
             {
                 policy.AllowAnyHeader();
@@ -85,17 +105,9 @@ namespace Flashcards.IdentityProvider.App
                 policy.AllowAnyOrigin();
             });
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseStaticFiles();
-            app.UseRouting();
-
             app.UseIdentityServer();
-
             app.UseAuthorization();
+            
             app.MapRazorPages().RequireAuthorization();
             app.UseUserEndpoints();
 
