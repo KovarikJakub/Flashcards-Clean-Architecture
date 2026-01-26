@@ -68,7 +68,7 @@ namespace Flashcards.Api.BL.UnitTests
             var cardGuid = Guid.NewGuid();
 
             // Act
-            _facade.Delete(cardGuid);
+            _facade.Delete(cardGuid, [], "abc");
 
             // Assert
             _cardRepo.Received().Remove(cardGuid);

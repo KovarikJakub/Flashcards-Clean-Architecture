@@ -132,7 +132,7 @@ namespace Flashcards.Api.BL.UnitTests
                 Wrong = newLesson.Wrong
             };
 
-            _facade.Create(createModel, _ownerEntity.IdentityOwnerId);
+            _facade.Create(createModel, [], _ownerEntity.IdentityOwnerId);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<LessonEntity>(lesson =>
@@ -178,7 +178,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newLesson = CreateNewLessonDetailModel();
             
             // Act
-            _facade.Delete(newLesson.Id);
+            _facade.Delete(newLesson.Id, [], "abc");
             
             // Assert
             _fakeRepo.Received(1).Remove(newLesson.Id);
@@ -191,7 +191,7 @@ namespace Flashcards.Api.BL.UnitTests
             var nonExistingId = Guid.NewGuid();
             
             // Act
-            _facade.Delete(nonExistingId);
+            _facade.Delete(nonExistingId, [], "abc");
             
             // Assert
             _fakeRepo.Received(1).Remove(nonExistingId);
