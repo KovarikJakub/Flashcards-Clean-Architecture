@@ -2,6 +2,7 @@ using Flashcards.Api.App.Endpoints;
 using Flashcards.Api.App.Extensions;
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
@@ -32,6 +33,20 @@ builder.Services.AddScoped<ICardCollectionFacade, CardCollectionFacade>();
 builder.Services.AddSingleton<LessonMapper>();
 builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
+
+var identityOpts = builder.Configuration.GetSection(nameof(IdentityOptions));
+if (identityOpts is null)
+{
+    throw new ArgumentNullException("Failed to load ApiOptions from configuration.");
+
+}
+builder.Services.Configure<IdentityOptions>(identityOpts);
+
+builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>(client =>
+{
+    var opts = identityOpts.Get<IdentityOptions>();
+    client.BaseAddress = new Uri(opts.Authority);
+});
 
 builder.Services.AddHttpContextAccessor();
 

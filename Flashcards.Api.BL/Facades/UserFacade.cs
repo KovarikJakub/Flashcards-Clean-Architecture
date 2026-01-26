@@ -1,4 +1,5 @@
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
@@ -8,6 +9,7 @@ namespace Flashcards.Api.BL.Facades
 {
     public class UserFacade(
         IUserRepository userRepository,
+        IIdentityService identityService,
         UserMapper mapper) : IUserFacade
     {
         public List<UserListModel> GetAll()
@@ -36,19 +38,16 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public Guid CreateOrUpdate(UserDetailModel user, IList<string> userRoles, string requestorId)
-        {
-            return userRepository.Exists(user.Id)
-                ? Update(user, userRoles, requestorId)!.Value
-                : Create(mapper.ToCreateModel(user), userRoles, requestorId);
-        }
-
         public Guid Create(UserCreateModel model, IList<string> userRoles, string requestorId)
         {
             if (string.IsNullOrWhiteSpace(requestorId))
                 throw new ArgumentException("ownerId is required to create user.", nameof(requestorId));
 
-            var entity = mapper.ToEntity(model, requestorId);
+            var subId = identityService.CreateIdentityAsync(model.IdentityName, model.Password).Result;
+            if (string.IsNullOrWhiteSpace(requestorId))
+                throw new InvalidOperationException("Failed to create identity for the user.");
+
+            var entity = mapper.ToEntity(model, subId);
             userRepository.Insert(entity);
             return entity.Id;
         }
@@ -66,6 +65,11 @@ namespace Flashcards.Api.BL.Facades
 
         public void Delete(Guid id, IList<string> userRoles, string requestorId)
         {
+            var deletedUserEntity = userRepository.GetById(id);
+            if (deletedUserEntity is null)
+                return;
+
+            identityService.DeleteIdentityAsync(deletedUserEntity.IdentityOwnerId);
             userRepository.Remove(id);
         }
     }

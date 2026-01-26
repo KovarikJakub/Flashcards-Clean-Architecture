@@ -1,4 +1,5 @@
-﻿using Flashcards.Common.Models.AppUser;
+﻿using Flashcards.Common.Models;
+using Flashcards.Common.Models.AppUser;
 using Flashcards.IdentityProvider.BL.Models;
 using Flashcards.IdentityProvider.DAL.Entities;
 

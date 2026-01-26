@@ -1,25 +1,28 @@
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
 
 namespace Flashcards.Api.BL.UnitTests
 {
     public class UserFacadeTests
     {
         private readonly IUserRepository _fakeRepo;
+        private readonly IIdentityService _fakeIdentityService;
         private readonly UserMapper _mapper;
         private readonly UserFacade _facade;
 
         public UserFacadeTests()
         {
             _fakeRepo = Substitute.For<IUserRepository>();
+            _fakeIdentityService = Substitute.For<IIdentityService>();
+
             _mapper = new UserMapper();
-            _facade = new UserFacade(_fakeRepo, _mapper);
+            _facade = new UserFacade(_fakeRepo, _fakeIdentityService, _mapper);
         }
 
         private UserCreateModel CreateUserCreateModel()
@@ -28,7 +31,9 @@ namespace Flashcards.Api.BL.UnitTests
             {
                 Name = "Petr",
                 PhotoUrl = null,
-                Role = RoleType.User
+                Role = RoleType.User,
+                IdentityName = "PetrId",
+                Password = "Petr123"
             };
 
             return newUser;
@@ -53,12 +58,22 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var userId = Guid.NewGuid();
-            
+
+            var user = new UserEntity()
+            {
+                Id = userId,
+                IdentityOwnerId = "PetrId",
+                Name = "Petr",
+                Role = RoleType.User
+            };
+            _fakeRepo.GetById(userId).Returns(user);
+
             // act
             _facade.Delete(userId, new List<string>(), "abc");
             
             // assert
-            _fakeRepo.Received(1).Remove(userId);       
+            _fakeIdentityService.Received(1).DeleteIdentityAsync("PetrId");
+            _fakeRepo.Received(1).Remove(Arg.Any<Guid>());       
         }
         
         [Fact]
@@ -66,7 +81,8 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newUser = CreateUserCreateModel();
-            
+            _fakeIdentityService.CreateIdentityAsync(Arg.Any<string>(), Arg.Any<string>())
+                .Returns("PetrId");
             // Act
             var id = _facade.Create(newUser, new List<string>(), "abc");
             
@@ -75,44 +91,9 @@ namespace Flashcards.Api.BL.UnitTests
                 user.Id == id &&
                 user.Name == newUser.Name &&
                 user.PhotoUrl == newUser.PhotoUrl &&
+                user.IdentityOwnerId == newUser.IdentityName &&
                 user.Role == newUser.Role));
-
-        }
-
-        [Fact]
-        public void CreateOrUpdate_On_New_User()
-        {
-            // Arrange
-            var newUser = CreateUserDetailModel(Guid.NewGuid());
-
-            // Act
-            var result = _facade.CreateOrUpdate(newUser, new List<string>(), "abc");
-            
-            // Assert
-            _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
-                user.Name == newUser.Name &&
-                user.PhotoUrl == newUser.PhotoUrl &&
-                user.Role == newUser.Role));
-        }
-        
-        [Fact]
-        public void CreateOrUpdate_On_Existing_User()
-        {
-            // Arrange
-            var existingUser = CreateUserDetailModel(Guid.NewGuid());
-            _fakeRepo.Exists(Arg.Any<Guid>()).Returns(true);
-            _fakeRepo.GetById(existingUser.Id).Returns(_mapper.ToEntity(existingUser, "abc"));
-            _fakeRepo.Update(Arg.Any<UserEntity>()).Returns(Guid.NewGuid());
-            
-            existingUser.Name = "Igor";
-
-            // Act
-            _facade.CreateOrUpdate(existingUser, [], "abc");
-    
-            // Assert
-            _fakeRepo.Received(1).Update(Arg.Is<UserEntity>(user =>
-                user.Id == existingUser.Id &&
-                user.Name == "Igor"));
+            _fakeIdentityService.Received(1).CreateIdentityAsync(newUser.IdentityName, newUser.Password);
         }
 
         [Fact]
@@ -180,7 +161,6 @@ namespace Flashcards.Api.BL.UnitTests
             Assert.Empty(result);       
             _fakeRepo.Received(1).GetAll();  
         }
-
     }
 }
 

@@ -51,17 +51,6 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 return TypedResults.Ok(id);
             });
 
-        userModifyingEndpoints.MapPost("upsert", 
-            (UserDetailModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
-            {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
-                var id = userFacade.CreateOrUpdate(user, userRoles, userId!);
-                return TypedResults.Ok(id);
-            });
-
         userModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
             (Guid id, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
             {

@@ -7,6 +7,8 @@ namespace Flashcards.Common.Models
         public required string Name { get; set; }
         public required RoleType Role { get; set; }
         public string? PhotoUrl { get; set; } = null;
-        // Identity owner id is managed by identity provider, not supplied here
+
+        public required string IdentityName { get; set; }
+        public required string Password { get; set; }
     }
 }

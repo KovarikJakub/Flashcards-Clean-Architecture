@@ -29,16 +29,6 @@ namespace Flashcards.Api.BL.Mappers
             };
         }
 
-        public UserCreateModel ToCreateModel(UserDetailModel model)
-        {
-            return new UserCreateModel()
-            {
-                Name = model.Name,
-                PhotoUrl = model.PhotoUrl,
-                Role = model.Role,
-            };
-        }
-
         public UserDetailModel ToDetailModel(UserEntity model)
         {
             return new UserDetailModel
