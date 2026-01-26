@@ -38,7 +38,6 @@ var identityOpts = builder.Configuration.GetSection(nameof(IdentityOptions));
 if (identityOpts is null)
 {
     throw new ArgumentNullException("Failed to load ApiOptions from configuration.");
-
 }
 builder.Services.Configure<IdentityOptions>(identityOpts);
 

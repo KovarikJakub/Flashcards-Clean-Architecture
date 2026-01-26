@@ -36,8 +36,7 @@ public class AppUserFacade(
             var roleResult = await userManager.AddToRoleAsync(createdUser, appUserModel.Role);
             if (!roleResult.Succeeded)
             {
-                // Log the error but don't fail the entire operation
-                // The user was created successfully, just role assignment failed
+                Console.Write($"Role '{appUserModel.Role}' assignment to user '{appUserModel.UserName}' failed. ");
             }
         }
 
