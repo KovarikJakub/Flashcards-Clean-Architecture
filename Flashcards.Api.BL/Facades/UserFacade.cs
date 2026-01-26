@@ -43,7 +43,8 @@ namespace Flashcards.Api.BL.Facades
             if (string.IsNullOrWhiteSpace(requestorId))
                 throw new ArgumentException("ownerId is required to create user.", nameof(requestorId));
 
-            var subId = identityService.CreateIdentityAsync(model.IdentityName, model.Password).Result;
+            var role = model.Role == RoleType.Admin ? "Admin" : "User";
+            var subId = identityService.CreateIdentityAsync(model.IdentityName, model.Password, role).Result;
             if (string.IsNullOrWhiteSpace(requestorId))
                 throw new InvalidOperationException("Failed to create identity for the user.");
 

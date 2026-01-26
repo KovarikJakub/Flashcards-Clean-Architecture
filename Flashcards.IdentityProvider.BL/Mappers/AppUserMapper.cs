@@ -11,7 +11,6 @@ public partial class AppUserMapper
     {
         if (appUserCreateModel is null) throw new ArgumentNullException(nameof(appUserCreateModel));
 
-        // Note: password must be set using UserManager (CreateAsync) so we don't set PasswordHash here.
         return new AppUserEntity
         {
             Id = Guid.NewGuid(),

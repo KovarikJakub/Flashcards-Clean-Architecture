@@ -4,10 +4,17 @@ namespace Flashcards.Api.BL.Services
 {
     public class DuendeIdentityService(HttpClient httpClient) : IIdentityService
     {
-        public async Task<string> CreateIdentityAsync(string username, string password)
+        public async Task<string> CreateIdentityAsync(string username, string password, string role)
         {
             // Prepare the payload required by your Duende Controller
-            var requestBody = new { Username = username, Password = password };
+            var requestBody = new
+            {
+                Username = username, 
+                Password = password,
+                Subject = username,
+                Email = $"{username}@email.com",
+                Role = role
+            };
 
             // Call the Duende Endpoint
             var response = await httpClient.PostAsJsonAsync("api/user", requestBody);
