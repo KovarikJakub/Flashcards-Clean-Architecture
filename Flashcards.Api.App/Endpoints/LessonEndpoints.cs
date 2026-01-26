@@ -14,22 +14,25 @@ public class LessonEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoi
             .MapGroup("lesson")
             .WithTags("lesson");
 
-        lessonEndpoints.MapGet("", (ILessonFacade lessonFacade) =>
-        {
-            var result = lessonFacade.GetAll();
-            return TypedResults.Ok(result);
-        });
+        lessonEndpoints.MapGet("", 
+            (ILessonFacade lessonFacade) =>
+            {
+                return TypedResults.Ok(lessonFacade.GetAll());
+            });
 
-        lessonEndpoints.MapPost("query", (LessonQueryModel query, ILessonFacade lessonFacade) =>
-        {
-            var result = lessonFacade.GetByQuery(query);
-            return TypedResults.Ok(result);
-        });
+        lessonEndpoints.MapPost("query", 
+            (LessonQueryModel query, ILessonFacade lessonFacade) =>
+            {
+                return TypedResults.Ok(lessonFacade.GetByQuery(query));
+            });
 
-        lessonEndpoints.MapGet("{id:guid}", Results<Ok<LessonDetailModel>, NotFound<string>> (Guid id, ILessonFacade lessonFacade)
-            => lessonFacade.GetById(id) is { } lesson
-                ? TypedResults.Ok(lesson)
-                : TypedResults.NotFound("This lesson was not found!"));
+        lessonEndpoints.MapGet("{id:guid}", Results<Ok<LessonDetailModel>, NotFound<string>> 
+            (Guid id, ILessonFacade lessonFacade) =>
+            {
+                return lessonFacade.GetById(id) is { } lesson
+                    ? TypedResults.Ok(lesson)
+                    : TypedResults.NotFound("This lesson was not found!");
+            });
 
         var lessonModifyingEndpoints = lessonEndpoints.MapGroup("");
         if (identityOptions.Value.IsIdentityEnabled)
@@ -42,17 +45,28 @@ public class LessonEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoi
             {
                 var userId = GetUserId(httpContextAccessor);
                 var userRoles = GetUserRoles(httpContextAccessor);
-                
-                return lessonFacade.Create(lesson, userRoles, userId);
+                ThrowIfUserIdIsNull(userId);
+
+                var id = lessonFacade.Create(lesson, userRoles, userId!);
+                return TypedResults.Ok(id);
             });
 
-        lessonModifyingEndpoints.MapDelete("{id:guid}", 
+        lessonModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
             (Guid id, ILessonFacade lessonFacade, IHttpContextAccessor httpContextAccessor) =>
             {
                 var userId = GetUserId(httpContextAccessor);
                 var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
 
-                lessonFacade.Delete(id, userRoles, userId);
+                try
+                {
+                    lessonFacade.Delete(id, userRoles, userId!);
+                    return TypedResults.Ok();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
             });
 
         return endpointRouteBuilder;

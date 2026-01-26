@@ -14,16 +14,25 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             .MapGroup("user")
             .WithTags("user");
 
-        userEndpoints.MapGet("", (IUserFacade userFacade) => userFacade.GetAll());
+        userEndpoints.MapGet("", 
+            (IUserFacade userFacade) =>
+            {
+                return TypedResults.Ok(userFacade.GetAll());
+            });
 
-        userEndpoints.MapPost("query",
+        userEndpoints.MapPost("query", 
             (UserQueryModel query, IUserFacade userFacade) =>
-                userFacade.GetByQuery(query));
+            {
+                return TypedResults.Ok(userFacade.GetByQuery(query));
+            });
 
-        userEndpoints.MapGet("{id:guid}", Results<Ok<UserDetailModel>, NotFound<string>> (Guid id, IUserFacade userFacade)
-            => userFacade.GetById(id) is { } user
-                ? TypedResults.Ok(user)
-                : TypedResults.NotFound("This user was not found!"));
+        userEndpoints.MapGet("{id:guid}", Results<Ok<UserDetailModel>, NotFound<string>> 
+            (Guid id, IUserFacade userFacade) =>
+            {
+                return userFacade.GetById(id) is { } user
+                    ? TypedResults.Ok(user)
+                    : TypedResults.NotFound("This user was not found!");
+            });
 
         var userModifyingEndpoints = userEndpoints.MapGroup("");
         if (identityOptions.Value.IsIdentityEnabled)
@@ -31,41 +40,45 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             userModifyingEndpoints.RequireAuthorization();
         }
 
-        userModifyingEndpoints.MapPost("", (UserCreateModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
-            ThrowIfUserIdIsNull(userId);
-
-            return userFacade.Create(user, userRoles, userId!);
-        });
-
-        userModifyingEndpoints.MapPost("upsert", (UserDetailModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
-            ThrowIfUserIdIsNull(userId);
-
-            var id = userFacade.CreateOrUpdate(user, userRoles, userId!);
-            return TypedResults.Ok(id);
-        });
-
-        userModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> (Guid id, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
-            ThrowIfUserIdIsNull(userId);
-
-            try
+        userModifyingEndpoints.MapPost("",
+            (UserCreateModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
             {
-                userFacade.Delete(id, userRoles, userId!);
-                return TypedResults.Ok();
-            }
-            catch (UnauthorizedAccessException)
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
+
+                var id = userFacade.Create(user, userRoles, userId!);
+                return TypedResults.Ok(id);
+            });
+
+        userModifyingEndpoints.MapPost("upsert", 
+            (UserDetailModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
             {
-                return TypedResults.Forbid();
-            }
-        });
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
+
+                var id = userFacade.CreateOrUpdate(user, userRoles, userId!);
+                return TypedResults.Ok(id);
+            });
+
+        userModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
+            (Guid id, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
+            {
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
+
+                try
+                {
+                    userFacade.Delete(id, userRoles, userId!);
+                    return TypedResults.Ok();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
+            });
         
         return endpointRouteBuilder;
     }

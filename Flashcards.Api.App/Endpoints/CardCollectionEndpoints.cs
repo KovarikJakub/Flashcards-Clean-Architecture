@@ -15,16 +15,25 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
             .MapGroup("cardCollection")
             .WithTags("cardCollection");
 
-        cardCollectionEndpoints.MapGet("", (ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.GetAll());
+        cardCollectionEndpoints.MapGet("", 
+            (ICardCollectionFacade cardCollectionFacade) =>
+            {
+                return TypedResults.Ok(cardCollectionFacade.GetAll());
+            });
 
-        cardCollectionEndpoints.MapPost("query",
+        cardCollectionEndpoints.MapPost("query", 
             (CardCollectionQueryModel query, ICardCollectionFacade cardCollectionFacade) =>
-                cardCollectionFacade.GetByQuery(query));
+            {
+                return TypedResults.Ok(cardCollectionFacade.GetByQuery(query));
+            });
 
-        cardCollectionEndpoints.MapGet("{id:guid}", Results<Ok<CardCollectionDetailModel>, NotFound<string>> (Guid id, ICardCollectionFacade cardCollectionFacade)
-            => cardCollectionFacade.GetById(id) is { } cardCollection
-                ? TypedResults.Ok(cardCollection)
-                : TypedResults.NotFound("This card collection was not found!"));
+        cardCollectionEndpoints.MapGet("{id:guid}", Results<Ok<CardCollectionDetailModel>, NotFound<string>> 
+            (Guid id, ICardCollectionFacade cardCollectionFacade) =>
+            {
+                return cardCollectionFacade.GetById(id) is { } cardCollection
+                    ? TypedResults.Ok(cardCollection)
+                    : TypedResults.NotFound("This card collection was not found!");
+            });
 
         var cardCollectionModifyingEndpoints = cardCollectionEndpoints.MapGroup("");
         if (identityOptions.Value.IsIdentityEnabled)
@@ -39,7 +48,8 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
                 var userRoles = GetUserRoles(httpContextAccessor);
                 ThrowIfUserIdIsNull(userId);
 
-                return cardCollectionFacade.Create(cardCollection, userRoles, userId!);
+                var id = cardCollectionFacade.Create(cardCollection, userRoles, userId!);
+                return TypedResults.Ok(id);
             });
 
         cardCollectionModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult> 

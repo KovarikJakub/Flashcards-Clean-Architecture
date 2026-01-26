@@ -15,14 +15,26 @@ public class CardEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             .MapGroup("card")
             .WithTags("card");
 
-        cardEndpoints.MapGet("", (ICardFacade cardFacade) => cardFacade.GetAll());
+        cardEndpoints.MapGet("",
+            (ICardFacade cardFacade) =>
+            {
+                return TypedResults.Ok(cardFacade.GetAll());
+            });
 
-        cardEndpoints.MapPost("query", (CardQueryModel query, ICardFacade cardFacade) => cardFacade.GetByQuery(query));
+        cardEndpoints.MapPost("query",
+            (CardQueryModel query, ICardFacade cardFacade) =>
+            {
+                return TypedResults.Ok(cardFacade.GetByQuery(query));
+            });
+        
 
-        cardEndpoints.MapGet("{id:guid}", Results<Ok<CardDetailModel>, NotFound<string>> (Guid id, ICardFacade cardFacade)
-            => cardFacade.GetById(id) is { } card
-                ? TypedResults.Ok(card)
-                : TypedResults.NotFound("This card was not found!"));
+        cardEndpoints.MapGet("{id:guid}", Results<Ok<CardDetailModel>, NotFound<string>>
+            (Guid id, ICardFacade cardFacade) =>
+            {
+                return cardFacade.GetById(id) is { } card
+                    ? TypedResults.Ok(card)
+                    : TypedResults.NotFound("This card was not found!");
+            });
 
         var cardModifyingEndpoints = cardEndpoints.MapGroup("");
         if (identityOptions.Value.IsIdentityEnabled)
@@ -37,17 +49,25 @@ public class CardEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 var userRoles = GetUserRoles(httpContextAccessor);
                 ThrowIfUserIdIsNull(userId);
 
-                return cardFacade.Create(card, userRoles, userId);
+                var id = cardFacade.Create(card, userRoles, userId!);
+                return TypedResults.Ok(id);
             });
 
-        cardModifyingEndpoints.MapPut("", 
+        cardModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult> 
             (CardDetailModel card, ICardFacade cardFacade, IHttpContextAccessor httpContextAccessor) =>
             {
                 var userId = GetUserId(httpContextAccessor);
                 var userRoles = GetUserRoles(httpContextAccessor);
                 ThrowIfUserIdIsNull(userId);
 
-                return cardFacade.Update(card, userRoles, userId);
+                try
+                {
+                    return TypedResults.Ok(cardFacade.Update(card, userRoles, userId!));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
             });
 
         cardModifyingEndpoints.MapPost("upsert",
@@ -57,17 +77,26 @@ public class CardEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 var userRoles = GetUserRoles(httpContextAccessor);
                 ThrowIfUserIdIsNull(userId);
 
-                return cardFacade.CreateOrUpdate(card, userRoles, userId);
+                var id = cardFacade.CreateOrUpdate(card, userRoles, userId!);
+                return TypedResults.Ok(id);
             });
 
-        cardModifyingEndpoints.MapDelete("{id:guid}",
+        cardModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
             (Guid id, ICardFacade cardFacade, IHttpContextAccessor httpContextAccessor) =>
             {
                 var userId = GetUserId(httpContextAccessor);
                 var userRoles = GetUserRoles(httpContextAccessor);
                 ThrowIfUserIdIsNull(userId);
 
-                cardFacade.Delete(id, userRoles, userId);
+                try
+                {
+                    cardFacade.Delete(id, userRoles, userId!);
+                    return TypedResults.Ok();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
             });
          
         return endpointRouteBuilder;
