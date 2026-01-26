@@ -16,19 +16,6 @@ namespace Flashcards.Web.BL.Facades
             this.httpClient = httpClient;
         }
         
-        public async Task<UserDetailModel?> GetByOwnerIdAsync(string ownerId)
-        {
-            try
-            {
-                var user = await apiClient.OwnerAsync(ownerId);
-                return user;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         public async Task<UserDetailModel?> GetByIdAsync(Guid id)
         {
             try
@@ -50,12 +37,6 @@ namespace Flashcards.Web.BL.Facades
         public async Task DeleteAsync(Guid id)
         {
             await apiClient.UserDeleteAsync(id);
-        }
-
-        public async Task<Guid> UpsertAsync(UserDetailModel model)
-        {
-            var id = await apiClient.UpsertAsync(model);
-            return id;
         }
 
         /// <summary>

@@ -42,10 +42,5 @@ namespace Flashcards.Web.BL.Facades
             }
         }
         
-        public async Task <List<CardCollectionListModel>> GetByOwnerAsync(string ownerId)
-        {
-            var cardCollections = await apiClient.UserAsync(ownerId);
-            return cardCollections.ToList();
-        }
     }
 }
