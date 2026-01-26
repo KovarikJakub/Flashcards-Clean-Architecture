@@ -51,6 +51,23 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                 return TypedResults.Ok(id);
             });
 
+        userModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult>
+            (UserDetailModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
+            {
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
+
+                try
+                {
+                    return TypedResults.Ok(userFacade.Update(user, userRoles, userId!));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
+            });
+
         userModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
             (Guid id, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
             {
