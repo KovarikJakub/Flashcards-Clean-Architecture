@@ -24,7 +24,12 @@ namespace Flashcards.IdentityProvider.App
 
         public static IEnumerable<ApiResource> ApiResources => new ApiResource[]
         {
-            new ApiResource("flashcardsclientaudience") { UserClaims = { JwtClaimTypes.Role } }
+            new ApiResource("flashcardsclientaudience", "Flashcards API")
+            {
+                Scopes = { "flashcardsapi" }, 
+
+                UserClaims = { JwtClaimTypes.Role } 
+            }
         };
 
         public static IEnumerable<ApiScope> ApiScopes => new ApiScope[]
