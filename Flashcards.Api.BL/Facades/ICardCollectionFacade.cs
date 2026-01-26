@@ -11,6 +11,6 @@ namespace Flashcards.Api.BL.Facades
         Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string requestorId);
         Guid Create(CardCollectionCreateModel model, IList<string> userRoles, string requestorId);
         Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string requestorId);
-        void Delete(Guid id, IList<string> userRoles, string? ownerId = null);
+        void Delete(Guid id, IList<string> userRoles, string requestorId);
     }
 }

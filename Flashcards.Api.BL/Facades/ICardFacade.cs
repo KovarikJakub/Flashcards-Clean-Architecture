@@ -12,6 +12,6 @@ namespace Flashcards.Api.BL.Facades
         Guid Create(CardCreateModel card, IList<string> userRoles, string requestorId);
         Guid CreateOrUpdate(CardDetailModel card, IList<string> userRoles, string requestorId);
         Guid? Update(CardDetailModel card, IList<string> userRoles, string requestorId);
-        void Delete(Guid id);
+        void Delete(Guid id, IList<string> userRoles, string requestorId);
     }
 }

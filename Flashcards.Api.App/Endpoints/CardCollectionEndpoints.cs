@@ -11,9 +11,9 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
 {
     public override IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var cardCollectionEndpoints = endpointRouteBuilder.MapGroup("cardCollection")
+        var cardCollectionEndpoints = endpointRouteBuilder
+            .MapGroup("cardCollection")
             .WithTags("cardCollection");
-        cardCollectionEndpoints.RequireAuthorization();
 
         cardCollectionEndpoints.MapGet("", (ICardCollectionFacade cardCollectionFacade) => cardCollectionFacade.GetAll());
 
@@ -26,72 +26,67 @@ public class CardCollectionEndpoints(IOptions<IdentityOptions> identityOptions) 
                 ? TypedResults.Ok(cardCollection)
                 : TypedResults.NotFound("This card collection was not found!"));
 
-        cardCollectionEndpoints.MapGet("user/{ownerId}", (string ownerId, ICardCollectionFacade cardCollectionFacade) =>
-        {
-            var result = cardCollectionFacade.GetByOwner(ownerId);
-            return TypedResults.Ok(result);
-        });
-
         var cardCollectionModifyingEndpoints = cardCollectionEndpoints.MapGroup("");
-
         if (identityOptions.Value.IsIdentityEnabled)
         {
             cardCollectionModifyingEndpoints.RequireAuthorization();
         }
 
-        cardCollectionModifyingEndpoints.MapPost("", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
-
-            return cardCollectionFacade.Create(cardCollection, userRoles, userId);
-        });
-
-        cardCollectionModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult> (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
-
-            try
+        cardCollectionModifyingEndpoints.MapPost("", 
+            (CardCollectionCreateModel cardCollection, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
             {
-                return TypedResults.Ok(cardCollectionFacade.Update(cardCollection, userRoles, userId));
-            }
-            catch (UnauthorizedAccessException)
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
+
+                return cardCollectionFacade.Create(cardCollection, userRoles, userId!);
+            });
+
+        cardCollectionModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult> 
+            (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
             {
-                return TypedResults.Forbid();
-            }
-        });
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
 
-        cardCollectionEndpoints.MapPost("upsert", (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
+                try
+                {
+                    return TypedResults.Ok(cardCollectionFacade.Update(cardCollection, userRoles, userId!));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
+            });
 
-            var id = cardCollectionFacade.CreateOrUpdate(cardCollection, userRoles, TODO);
-            return TypedResults.Ok(id);
-        });
-
-        var cardCollectionDeleteEndpoint = cardCollectionModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> (Guid id, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
-        {
-            var userId = GetUserId(httpContextAccessor);
-            var userRoles = GetUserRoles(httpContextAccessor);
-
-            try
+        cardCollectionEndpoints.MapPost("upsert", 
+            (CardCollectionDetailModel cardCollection, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
             {
-                cardCollectionFacade.Delete(id, userRoles, userId);
-                return TypedResults.Ok();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return TypedResults.Forbid();
-            }
-        });
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
 
-        if (identityOptions.Value.IsIdentityEnabled)
-        {
-            // // Uncomment this to only enable admins to delete card collections
-            // cardCollectionDeleteEndpoint.RequireAuthorization(ApiPolicies.CardCollectionAdmin);
-        }
+                var id = cardCollectionFacade.CreateOrUpdate(cardCollection, userRoles, userId!);
+                return TypedResults.Ok(id);
+            });
+
+        cardCollectionModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
+            (Guid id, ICardCollectionFacade cardCollectionFacade, IHttpContextAccessor httpContextAccessor) =>
+            {
+                var userId = GetUserId(httpContextAccessor);
+                var userRoles = GetUserRoles(httpContextAccessor);
+                ThrowIfUserIdIsNull(userId);
+                
+                try
+                {
+                    cardCollectionFacade.Delete(id, userRoles, userId!);
+                    return TypedResults.Ok();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return TypedResults.Forbid();
+                }
+            });
 
         return endpointRouteBuilder;
     }

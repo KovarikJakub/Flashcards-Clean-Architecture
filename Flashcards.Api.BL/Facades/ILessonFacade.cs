@@ -6,10 +6,10 @@ namespace Flashcards.Api.BL.Facades
 {
     public interface ILessonFacade : IFacade
     {
-        public Guid Create(LessonCreateModel model, string requestorId);
         public LessonDetailModel? GetById(Guid id);
         public List<LessonListModel> GetAll();
-        public void Delete(Guid id);
         List<LessonListModel> GetByQuery(LessonQueryModel query);
+        public Guid Create(LessonCreateModel model, IList<string> userRoles, string requestorId);
+        public void Delete(Guid id, IList<string> userRoles, string requestorId);
     }
 }

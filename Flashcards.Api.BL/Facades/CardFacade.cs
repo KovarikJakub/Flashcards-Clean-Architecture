@@ -27,7 +27,7 @@ namespace Flashcards.Api.BL.Facades
                 : Create(mapper.ToCreateModel(card), userRoles, requestorId);
         }
 
-        public void Delete(Guid id)
+        public void Delete(Guid id, IList<string> userRoles, string requestorId)
         {
             cardRepository.Remove(id);
         }

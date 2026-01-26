@@ -72,7 +72,7 @@ namespace Flashcards.Api.BL.Facades
             return cardCollectionRepository.Update(entity);
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string? ownerId = null)
+        public void Delete(Guid id, IList<string> userRoles, string requestorId)
         {
             cardCollectionRepository.Remove(id);
         }

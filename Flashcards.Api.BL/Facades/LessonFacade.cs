@@ -9,7 +9,7 @@ namespace Flashcards.Api.BL.Facades
         : FacadeBase<ILessonRepository, LessonEntity>(lessonRepository, userRepository),
         ILessonFacade
     {
-        public Guid Create(LessonCreateModel model, string requestorId)
+        public Guid Create(LessonCreateModel model, IList<string> userRoles, string requestorId)
         {
             var collection = cardCollectionRepository.GetById(model.CardCollectionId);
             if(collection is null)
@@ -34,7 +34,7 @@ namespace Flashcards.Api.BL.Facades
             return mapper.ToListModel(entities);
         }
 
-        public void Delete(Guid id)
+        public void Delete(Guid id, IList<string> userRoles, string requestorId)
         {
             lessonRepository.Remove(id);
         }

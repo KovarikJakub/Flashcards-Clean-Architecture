@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Web;
 
 public abstract class EndpointsBase
 {
@@ -17,4 +18,12 @@ public abstract class EndpointsBase
             .Select(c => c.Value)
             .ToList()
         ?? [];
+
+    protected void ThrowIfUserIdIsNull(string? userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new UnauthorizedAccessException("User Identity is required");
+        }
+    }
 }

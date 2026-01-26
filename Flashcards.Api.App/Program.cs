@@ -55,10 +55,10 @@ void UseEndpoints(WebApplication app)
 
     var identityOptions = app.Services.GetRequiredService<IOptions<IdentityOptions>>();
 
-    CardEndpoints.MapEndpoints(endpointsBase);
+    endpointsBase.UseCardEndpoints(identityOptions);
     endpointsBase.UseUserEndpoints(identityOptions);
     endpointsBase.UseCardCollectionEndpoints(identityOptions);
-    LessonEndpoints.MapEndpoints(endpointsBase);
+    endpointsBase.UseLessonEndpoints(identityOptions);
 }
 
 void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguration configuration)

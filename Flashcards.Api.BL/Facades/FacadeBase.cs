@@ -8,5 +8,12 @@ namespace Flashcards.Api.BL.Facades
         where TRepository : IApiRepository<TEntity>
         where TEntity : IEntity
     {
+        protected void ThrowIfUnauthorized(string requestorId)
+        {
+            if (string.IsNullOrEmpty(requestorId))
+            {
+                throw new UnauthorizedAccessException("Requestor identity is required.");
+            }
+        }
     }
 }
