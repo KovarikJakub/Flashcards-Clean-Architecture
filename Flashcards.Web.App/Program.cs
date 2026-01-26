@@ -41,7 +41,8 @@ builder.Services.AddOidcAuthentication(options =>
     }
     
     options.UserOptions.RoleClaim = "role";
-});
+})
+.AddAccountClaimsPrincipalFactory<ArrayClaimsPrincipalFactory>();
 
 // keep existing registration for fallback http client
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
