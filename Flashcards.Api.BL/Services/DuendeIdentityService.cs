@@ -25,8 +25,8 @@ namespace Flashcards.Api.BL.Services
                 throw new Exception($"Identity Creation Failed: {response.StatusCode} - {errorDetails}");
             }
 
-            var result = await response.Content.ReadFromJsonAsync<IdentityCreationResult>();
-            return result!.UserId;
+            var result = await response.Content.ReadFromJsonAsync<Guid>();
+            return result.ToString();
         }
 
         public async Task DeleteIdentityAsync(string userId)
