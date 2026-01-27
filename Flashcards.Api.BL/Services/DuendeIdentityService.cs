@@ -33,10 +33,5 @@ namespace Flashcards.Api.BL.Services
         {
             var response = await httpClient.DeleteAsync($"api/user/{userId}");
         }
-
-        private class IdentityCreationResult
-        {
-            public string UserId { get; set; }
-        }
     }
 }
