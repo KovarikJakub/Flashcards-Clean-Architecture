@@ -34,6 +34,14 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
                     : TypedResults.NotFound("This user was not found!");
             });
 
+        userEndpoints.MapGet("identity/{id}", Results<Ok<UserDetailModel>, NotFound<string>>
+            (string id, IUserFacade userFacade) =>
+            {
+                return userFacade.GetByIdentityId(id) is { } user
+                    ? TypedResults.Ok(user)
+                    : TypedResults.NotFound("This user was not found!");
+            });
+        
         var userModifyingEndpoints = userEndpoints.MapGroup("");
         if (identityOptions.Value.IsIdentityEnabled)
         {

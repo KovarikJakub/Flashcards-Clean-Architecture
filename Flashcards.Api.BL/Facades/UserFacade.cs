@@ -38,6 +38,12 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
+        public UserDetailModel? GetByIdentityId(string identityId)
+        {
+            var entity = userRepository.GetByIdentityId(identityId);
+            return entity == null ? null : mapper.ToDetailModel(entity);
+        }
+
         public Guid Create(UserCreateModel model, IList<string> userRoles, string requestorId)
         {
             if (string.IsNullOrWhiteSpace(requestorId))

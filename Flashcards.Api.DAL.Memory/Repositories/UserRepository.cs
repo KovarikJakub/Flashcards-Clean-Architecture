@@ -12,7 +12,7 @@ namespace Flashcards.Api.DAL.Memory.Repositories
             return storage.Users.Any(user => user.Id == id);
         }
 
-        public UserEntity GetByIdentityId(string identityId)
+        public UserEntity? GetByIdentityId(string identityId)
         {
             var entity = FirstOrDefault(user => string.Equals(user.IdentityOwnerId, identityId));
             if (entity is null)
