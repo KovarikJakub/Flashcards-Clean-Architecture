@@ -35,17 +35,17 @@ builder.Services.AddSingleton<LessonMapper>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 
-var identityOpts = builder.Configuration.GetSection(nameof(IdentityOptions));
-if (identityOpts is null)
-{
-    throw new ArgumentNullException("Failed to load ApiOptions from configuration.");
-}
-builder.Services.Configure<IdentityOptions>(identityOpts);
+var identityOptionsSection = builder.Configuration.GetSection(nameof(IdentityOptions));
+ArgumentNullException.ThrowIfNull(identityOptionsSection);
+
+builder.Services.Configure<IdentityOptions>(identityOptionsSection);
+
+var identityOptions = identityOptionsSection.Get<IdentityOptions>();
+ArgumentNullException.ThrowIfNull(identityOptions);
 
 builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>(client =>
 {
-    var opts = identityOpts.Get<IdentityOptions>();
-    client.BaseAddress = new Uri(opts.Authority);
+    client.BaseAddress = new Uri(identityOptions.Authority);
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -78,8 +78,6 @@ void UseEndpoints(WebApplication app)
 
 void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguration configuration)
 {
-    var identityOptions = configuration.GetSection("IdentityOptions").Get<IdentityOptions>();
-
     serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
