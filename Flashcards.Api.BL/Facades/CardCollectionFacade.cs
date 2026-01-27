@@ -26,12 +26,24 @@ namespace Flashcards.Api.BL.Facades
 
             if (!string.IsNullOrEmpty(query.SearchString))
             {
-                collection = collection.Where(c => c.Title.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
+                collection = collection.Where(c =>
+                    c.Title.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
             }
 
             if (query.OwnerId is not null)
             {
                 collection = collection.Where(c => c.OwnerId == query.OwnerId);
+            }
+
+            if (query.ExcludeOwnerId is not null)
+            {
+                collection = collection.Where(c => c.OwnerId != query.ExcludeOwnerId);
+            }
+
+            if (query.ShowCurrentlyAvailableOnly)
+            {
+                var now = DateTime.Now;
+                collection = collection.Where(c => c.AnswerStart <= now && now <= c.AnswerEnd);
             }
 
             collection = QueryHelper.PerformPagination(collection, query);

@@ -41,7 +41,7 @@ namespace Flashcards.Api.BL.Facades
         public List<CardListModel> GetByQuery(CardQueryModel query)
         {
             var collection = cardRepository.GetAll().AsEnumerable();
-            
+
             if (!string.IsNullOrEmpty(query.SearchString))
             {
                 var search = query.SearchString.Trim();
@@ -49,6 +49,21 @@ namespace Flashcards.Api.BL.Facades
                     (c.QuestionContent.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
                     (c.Description != null && c.Description.Contains(search, StringComparison.OrdinalIgnoreCase))
                 );
+            }
+
+            if (query.QuestionType is not null)
+            {
+                collection = collection.Where(c => c.QuestionType == query.QuestionType);
+            }
+
+            if (query.AnswerType is not null)
+            {
+                collection = collection.Where(c => c.AnswerType == query.AnswerType);
+            }
+
+            if (query.OwnerId is not null)
+            {
+                collection = collection.Where(c => c.Owner != null && c.Owner.Id == query.OwnerId);
             }
 
             collection = QueryHelper.PerformPagination(collection, query);

@@ -27,6 +27,12 @@ namespace Flashcards.Api.BL.Facades
                 collection = collection.Where(u => u.Role == query.Role);
             }
 
+            if (!string.IsNullOrEmpty(query.SearchString))
+            {
+                collection = collection.Where(u =>  
+                    u.Name.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
+            }
+
             collection = QueryHelper.PerformPagination(collection, query);
 
             return mapper.ToListModel(collection.ToList());

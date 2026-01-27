@@ -11,6 +11,8 @@ namespace Flashcards.Web.App.Pages
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
         [Inject]
+        private UserFacade UserFacade { get; set; } = null!;
+        [Inject]
         private NavigationManager NavigationManager { get; set; } = null!;
         [Inject]
         private IJSRuntime Js { get; set; } = null!; 
@@ -72,10 +74,19 @@ namespace Flashcards.Web.App.Pages
         {
             CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
 
-            var queryJustMine = new CardCollectionQueryModel()
+            if (string.IsNullOrEmpty(_userId))
             {
-                IncludeMine = true,
-                IncludeOthers = false
+                // No user logged in, show empty collection
+                CardCollectionsMine = Array.Empty<CardCollectionListModel>();
+                return;
+            }
+
+            // get currently signed user:
+            var currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
+            // return his cards:
+            var queryJustMine = new CardCollectionQueryModel
+            {
+                OwnerId = currentUser.Id
             };
             CardCollectionsMine = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
         }

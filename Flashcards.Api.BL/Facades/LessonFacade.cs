@@ -39,22 +39,20 @@ namespace Flashcards.Api.BL.Facades
             lessonRepository.Remove(id);
         }
 
-        public List<LessonListModel> GetByQuery(LessonQueryModel queryModel)
+        public List<LessonListModel> GetByQuery(LessonQueryModel query)
         {
-            var query = lessonRepository.GetAll().AsEnumerable();
+            var collection = lessonRepository.GetAll().AsEnumerable();
 
-            query = query.Where(lesson => lesson.User.Id == queryModel.UserId);
+            collection = collection.Where(lesson => lesson.User.Id == query.UserId);
 
-            if (queryModel.CardCollectionId is not null)
+            if (query.CardCollectionId is not null)
             {
-                query = query.Where(lesson => lesson.CardCollection.Id == queryModel.CardCollectionId);
+                collection = collection.Where(lesson => lesson.CardCollection.Id == query.CardCollectionId);
             }
 
-            var page = queryModel.Page;
-            var pageSize = queryModel.PageSize;
-            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            collection = QueryHelper.PerformPagination(collection, query);
 
-            return mapper.ToListModel(items);
+            return mapper.ToListModel(collection.ToList());
         }
     }
 }
