@@ -71,7 +71,13 @@ namespace Flashcards.Web.App.Pages
         private async Task LoadData()
         {
             CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
-            CardCollectionsMine = await CardCollectionFacade.GetByOwnerAsync(_userId);
+
+            var queryJustMine = new CardCollectionQueryModel()
+            {
+                IncludeMine = true,
+                IncludeOthers = false
+            };
+            CardCollectionsMine = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
         }
 
         private Task OnEditCollection(CardCollectionListModel collection)
@@ -133,9 +139,9 @@ namespace Flashcards.Web.App.Pages
 
         private bool IsCollectionActive(CardCollectionListModel collection)
         {
-            var now = DateTime.UtcNow;
-            var startUtc = collection.AnswerStart.ToUniversalTime();
-            var endUtc = collection.AnswerEnd.ToUniversalTime();
+            var now = DateTime.Now;
+            var startUtc = collection.AnswerStart;
+            var endUtc = collection.AnswerEnd;
             return now >= startUtc && now <= endUtc;
         }
         

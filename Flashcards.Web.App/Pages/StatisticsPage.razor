@@ -160,9 +160,11 @@
                 if (user.Identity?.IsAuthenticated == true)
                 {
                     _userId = user.FindFirst("sub")?.Value;
-                    var userModel = await UserFacade.GetByOwnerIdAsync(_userId);
+                    var userModel = await UserFacade.GetByIdentityIdAsync(_userId);
                     userName = userModel.Name;
-                    lessons = await LessonFacade.GetAllLessonsWiithOwnerIdAsync(_userId);
+
+                    var query = new LessonQueryModel { UserId = userModel.Id }; // get lessons just for this user
+                    lessons = await LessonFacade.GetByQueryAsync(query);
                 }
             }
             catch (Exception ex)

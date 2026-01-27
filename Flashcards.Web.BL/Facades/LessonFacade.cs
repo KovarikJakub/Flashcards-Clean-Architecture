@@ -3,37 +3,41 @@ using Flashcards.Web.BL.Api;
 
 namespace Flashcards.Web.BL.Facades
 {
-    public class LessonFacade
+    public class LessonFacade(ILessonApiClient apiClient)
     {
-            private readonly ILessonApiClient _apiClient;
-            
-            public LessonFacade(ILessonApiClient apiClient)
-            {
-                _apiClient = apiClient;
-            }
+        public async Task <ICollection<LessonListModel>> GetAllAsync()
+        {
+            var lessons = await apiClient.LessonGetAsync();
+            return lessons.ToList();
+        }
 
-            public async Task <ICollection<LessonListModel>> GetAllAsync()
+        public async Task<Guid> Create(LessonCreateModel lesson)
+        {
+            return await apiClient.LessonPostAsync(lesson);
+        }
+
+        public async Task<List<LessonListModel>> GetByQueryAsync(LessonQueryModel query)
+        {
+            var collection = await apiClient.QueryAsync(query);
+            return collection.ToList();
+        }
+
+        public async Task<LessonDetailModel?> GetByIdAsync(Guid id)
+        {
+            try
             {
-                var lessons = await _apiClient.LessonGetAsync();
-                return lessons.ToList();
+                var lesson = await apiClient.LessonGetAsync(id);
+                return lesson;
             }
-            
-            public async Task<LessonDetailModel?> GetByIdAsync(Guid id)
+            catch
             {
-                try
-                {
-                    var lesson = await _apiClient.LessonGetAsync(id);
-                    return lesson;
-                }
-                catch
-                {
-                    return null;
-                }
+                return null;
             }
-            
-            public async Task DeleteAsync(Guid id)
-            {
-                await _apiClient.LessonDeleteAsync(id);
-            }
+        }
+        
+        public async Task DeleteAsync(Guid id)
+        {
+            await apiClient.LessonDeleteAsync(id);
+        }
     }   
 }

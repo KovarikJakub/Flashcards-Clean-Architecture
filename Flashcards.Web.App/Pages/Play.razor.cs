@@ -27,7 +27,8 @@ namespace Flashcards.Web.App.Pages
         [Inject]
         private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
 
-        private LessonDetailModel? newLesson;
+
+        private LessonCreateModel? _newLesson = null;
         private UserDetailModel? _currentUser;
         private bool _showStats = false;
         private string? _userId;
@@ -42,17 +43,15 @@ namespace Flashcards.Web.App.Pages
                 {
                     _userId = user.FindFirst("sub")?.Value;
 
-                    _currentUser = await UserFacade.GetByOwnerIdAsync(_userId);
+                    _currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
 
-                    newLesson = new LessonDetailModel
+                    _newLesson = new()
                     {
-                        Id = Guid.NewGuid(),
-                        User = _currentUser,
-                        CardCollection = _cardCollection,
-                        Start = DateTime.Now,
-                        Correct = 0,
+                        CardCollectionId = _cardCollection.Id,
                         Seen = 0,
-                        Wrong = 0
+                        Wrong = 0,
+                        Correct = 0,
+                        Start = DateTime.Now
                     };
                 }
             }
@@ -89,11 +88,11 @@ namespace Flashcards.Web.App.Pages
 
             _answers[cardId] = state;
 
-            if (newLesson != null)
+            if (_newLesson != null)
             {
-                newLesson.Seen++;
-                if (state == AnswerState.Correct) newLesson.Correct++;
-                else if (state == AnswerState.Wrong) newLesson.Wrong++;
+                _newLesson.Seen++;
+                if (state == AnswerState.Correct) _newLesson.Correct++;
+                else if (state == AnswerState.Wrong) _newLesson.Wrong++;
             }
 
             InvokeAsync(StateHasChanged);
@@ -113,8 +112,8 @@ namespace Flashcards.Web.App.Pages
             {
                 try
                 {
-                        await LessonFacade.UpsertAsync(newLesson);
-                        _showStats = true;
+                    await LessonFacade.Create(_newLesson);
+                    _showStats = true;
                 }
                 catch (Exception e)
                 {
@@ -130,9 +129,9 @@ namespace Flashcards.Web.App.Pages
         
         private void HandlePlayAgain()
         {
-            newLesson.Correct = 0;
-            newLesson.Wrong = 0;
-            newLesson.Seen = 0;
+            _newLesson.Correct = 0;
+            _newLesson.Wrong = 0;
+            _newLesson.Seen = 0;
             _index = 0;
             _isFlipped = false;
             _showStats = false;

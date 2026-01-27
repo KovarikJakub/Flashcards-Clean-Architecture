@@ -152,7 +152,7 @@ public partial class UserList : PageBase
                     Role = u.Role
                 };
 
-                await UserFacadeService.UpsertAsync(detail);
+                await UserFacadeService.Update(detail);
             }
             await Load();
         }
