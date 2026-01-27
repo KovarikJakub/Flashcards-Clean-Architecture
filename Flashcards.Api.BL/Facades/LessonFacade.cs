@@ -39,9 +39,11 @@ namespace Flashcards.Api.BL.Facades
             lessonRepository.Remove(id);
         }
 
-        public List<LessonListModel> GetByQuery(LessonQueryModel query)
+        public PagedResponse<LessonListModel> GetByQuery(LessonQueryModel query)
         {
-            var collection = lessonRepository.GetAll().AsEnumerable();
+            var rawLessons = lessonRepository.GetAll();
+            var collection = rawLessons.AsEnumerable();
+            var totalCount = rawLessons.Count;
 
             collection = collection.Where(lesson => lesson.User.Id == query.UserId);
 
@@ -51,8 +53,9 @@ namespace Flashcards.Api.BL.Facades
             }
 
             collection = QueryHelper.PerformPagination(collection, query);
+            var result = mapper.ToListModel(collection.ToList());
 
-            return mapper.ToListModel(collection.ToList());
+            return new PagedResponse<LessonListModel>(result, totalCount, query.Page, query.PageSize);
         }
     }
 }

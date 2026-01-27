@@ -38,9 +38,11 @@ namespace Flashcards.Api.BL.Facades
             return mapper.ToListModel(entities);
         }
 
-        public List<CardListModel> GetByQuery(CardQueryModel query)
+        public PagedResponse<CardListModel> GetByQuery(CardQueryModel query)
         {
-            var collection = cardRepository.GetAll().AsEnumerable();
+            var rawCards = cardRepository.GetAll();
+            var collection = rawCards.AsEnumerable();
+            var totalCount = rawCards.Count;
 
             if (!string.IsNullOrEmpty(query.SearchString))
             {
@@ -67,8 +69,9 @@ namespace Flashcards.Api.BL.Facades
             }
 
             collection = QueryHelper.PerformPagination(collection, query);
-            
-            return mapper.ToListModel(collection.ToList());
+            var result = mapper.ToListModel(collection.ToList());
+
+            return new PagedResponse<CardListModel>(result, totalCount, query.Page, query.PageSize);
         }
 
         public CardDetailModel? GetById(Guid id)

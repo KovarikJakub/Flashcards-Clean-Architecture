@@ -6,7 +6,7 @@ namespace Flashcards.Api.BL.Facades
     public interface IUserFacade : IFacade
     {
         List<UserListModel> GetAll();
-        List<UserListModel> GetByQuery(UserQueryModel query);
+        PagedResponse<UserListModel> GetByQuery(UserQueryModel query);
         UserDetailModel? GetById(Guid id);
         UserDetailModel? GetByIdentityId(string identityId);
         Guid Create(UserCreateModel user, IList<string> userRoles, string requestorId);

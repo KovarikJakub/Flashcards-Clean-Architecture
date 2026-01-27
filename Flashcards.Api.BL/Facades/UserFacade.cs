@@ -18,9 +18,11 @@ namespace Flashcards.Api.BL.Facades
             return mapper.ToListModel(entities);
         }
 
-        public List<UserListModel> GetByQuery(UserQueryModel query)
+        public PagedResponse<UserListModel> GetByQuery(UserQueryModel query)
         {
-            var collection = userRepository.GetAll().AsEnumerable();
+            var rawUsers = userRepository.GetAll();
+            var collection = rawUsers.AsEnumerable();
+            var totalCount = rawUsers.Count;
 
             if (query.Role is not null)
             {
@@ -34,8 +36,9 @@ namespace Flashcards.Api.BL.Facades
             }
 
             collection = QueryHelper.PerformPagination(collection, query);
+            var result = mapper.ToListModel(collection.ToList());
 
-            return mapper.ToListModel(collection.ToList());
+            return new PagedResponse<UserListModel>(result, totalCount, query.Page, query.PageSize);
         }
 
         public UserDetailModel? GetById(Guid id)

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Flashcards.Api.BL.Facades;
+using Flashcards.Api.BL.Pagination;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.UnitTests
