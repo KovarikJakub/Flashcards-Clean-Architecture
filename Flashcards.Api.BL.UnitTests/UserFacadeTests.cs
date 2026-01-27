@@ -81,7 +81,7 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newUser = CreateUserCreateModel();
-            _fakeIdentityService.CreateIdentityAsync(Arg.Any<string>(), Arg.Any<string>())
+            _fakeIdentityService.CreateIdentityAsync(Arg.Any<string>(), Arg.Any<string>(), "User")
                 .Returns("PetrId");
             // Act
             var id = _facade.Create(newUser, new List<string>(), "abc");
@@ -93,7 +93,7 @@ namespace Flashcards.Api.BL.UnitTests
                 user.PhotoUrl == newUser.PhotoUrl &&
                 user.IdentityOwnerId == newUser.IdentityName &&
                 user.Role == newUser.Role));
-            _fakeIdentityService.Received(1).CreateIdentityAsync(newUser.IdentityName, newUser.Password);
+            _fakeIdentityService.Received(1).CreateIdentityAsync(newUser.IdentityName, newUser.Password, "User");
         }
 
         [Fact]
