@@ -4,68 +4,34 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Flashcards.Web.BL.MessageHandlers;
-public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
+
+public class CustomAuthorizationMessageHandler(
+    ILogger<CustomAuthorizationMessageHandler> logger,
+    IAccessTokenProvider provider,
+    NavigationManager navigation)
+    : AuthorizationMessageHandler(provider, navigation)
 {
-    private readonly IAccessTokenProvider _provider;
-    private readonly ILogger<CustomAuthorizationMessageHandler> _logger;
-    private readonly string _baseUrl;
-    
-    public CustomAuthorizationMessageHandler(
-        ILogger<CustomAuthorizationMessageHandler> logger,
-        IAccessTokenProvider provider,
-        NavigationManager navigation,
-        IConfiguration configuration) 
-        : base(provider, navigation)
-    {
-        _provider = provider;
-        _logger = logger;
-        _baseUrl =  configuration["ApiOptions:BaseUrl"];
-        
-        Console.WriteLine($"[DEBUG] Handler Constructor URL: '{_baseUrl}'");
-        
-        ConfigureHandler(
-            authorizedUrls: new[] { configuration["ApiOptions:BaseUrl"] },
-            scopes: new[] { "flashcardsapi" }
-        );
-    }
+    private readonly IAccessTokenProvider _provider = provider;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        
-        Console.WriteLine($"[DEBUG] SendAsync called for: {request.RequestUri}");
-        
         // Check if user is authenticated
         var accessTokenResult = await _provider.RequestAccessToken();
 
-        Console.WriteLine($"[DEBUG] Token Request Status: {accessTokenResult.Status}");
-        _logger.LogWarning("LOG: Token Request Status: {Status}", accessTokenResult.Status);
-        
-        if (accessTokenResult.Status == AccessTokenResultStatus.RequiresRedirect)
-        {
-            Console.WriteLine("[DEBUG]  Token expired or requires interaction. Redirecting to login");
-            _logger.LogInformation("DEBUG Access token requires redirect. Redirecting to login.");
-        }
-        
         if (accessTokenResult.TryGetToken(out var token))
         {
-            _logger.LogInformation("Access token found. Expires: '{AcccessTokenExpires}'. Sending request to {Url}", 
-                token.Expires, request.RequestUri);
-            
-            //TODO Remove debug logs 
-            Console.WriteLine($"[DEBUG]  Token found. Expiration: {token.Expires}");
-            Console.WriteLine($"[DEBUG] Token Value Prefix: {token.Value.Substring(0, 10)}...");
-            Console.WriteLine($"[DEBUG] Token Scopes: {token.GrantedScopes}");
-            
-            
+            logger.LogInformation("Access token: '{AccessToken}', expires: '{AcccessTokenExpires}', granted scopes: '{AccessTokenGrantedScopes}'",
+                token.Value,
+                token.Expires,
+                token.GrantedScopes);
+
+            // User is logged in, use base class implementation (with authorization)
             return await base.SendAsync(request, cancellationToken);
         }
         else
         {
-            _logger.LogWarning("No access token found. Sending anonymous request to {Url}", request.RequestUri);
-
-            Console.WriteLine("[DEBUG]  Token NOT found via RequestAccessToken.");
-            
             // User is not logged in, bypass authorization by not calling base implementation
+            // Instead, we'll create a simple HTTP request without authentication
             using var httpClient = new HttpClient();
 
             // Copy the request to avoid disposal issues
