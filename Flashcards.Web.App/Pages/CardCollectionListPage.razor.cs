@@ -88,7 +88,8 @@ namespace Flashcards.Web.App.Pages
             {
                 OwnerId = currentUser.Id
             };
-            CardCollectionsMine = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
+            // TODO: QUERY endpoints now return PagedResult<TEntity> and not IList<TEntity> !!!
+            //CardCollectionsMine = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
         }
 
         private Task OnEditCollection(CardCollectionListModel collection)
