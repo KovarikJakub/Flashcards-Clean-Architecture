@@ -3,7 +3,6 @@ using Flashcards.IdentityProvider.App.Services;
 using Serilog;
 using Serilog.Filters;
 using System.Globalization;
-using Microsoft.AspNetCore.HttpOverrides; 
 
 namespace Flashcards.IdentityProvider.App
 {
@@ -49,23 +48,16 @@ namespace Flashcards.IdentityProvider.App
             {
                 options.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.WithOrigins(
-                            "https://localhost:44355",
-                            "https://app-iw5-2025-team-xkovarj00-web-d3cxbtbdbkfrhpgz.germanywestcentral-01.azurewebsites.net"
-                          )
+                    // Allow the client origin used in development. Adjust as needed for production.
+                    policy.WithOrigins("https://localhost:44355")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
             });
-            
-            builder.Services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders =
-                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            });
 
             builder.Services.AddIdentityServer(options =>
                 {
+                    // https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/api_scopes#authorization-based-on-scopes
                     options.EmitStaticAudienceClaim = true;
                 })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
@@ -80,24 +72,8 @@ namespace Flashcards.IdentityProvider.App
 
         public static WebApplication ConfigurePipeline(this WebApplication app)
         {
-            app.UseForwardedHeaders(); 
-
             app.UseSerilogRequestLogging();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                MinimumSameSitePolicy = SameSiteMode.Lax,
-                Secure = CookieSecurePolicy.Always 
-            });
-
-            app.UseStaticFiles();
-            app.UseRouting();
-            
             app.UseCors(policy =>
             {
                 policy.AllowAnyHeader();
@@ -105,9 +81,17 @@ namespace Flashcards.IdentityProvider.App
                 policy.AllowAnyOrigin();
             });
 
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseStaticFiles();
+            app.UseRouting();
+
             app.UseIdentityServer();
+
             app.UseAuthorization();
-            
             app.MapRazorPages().RequireAuthorization();
             app.UseUserEndpoints();
 
