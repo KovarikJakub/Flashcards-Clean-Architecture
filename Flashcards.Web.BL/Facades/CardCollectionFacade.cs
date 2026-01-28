@@ -22,10 +22,10 @@ namespace Flashcards.Web.BL.Facades
             return cardCollections.ToList();
         }
 
-        public async Task<List<CardCollectionListModel>> GetByQueryAsync(CardCollectionQueryModel query)
+        public async Task<PagedResponse<CardCollectionListModel>> GetByQueryAsync(CardCollectionQueryModel query)
         {
             var collection = await apiClient.QueryAsync(query);
-            return collection.ToList();
+            return collection;
         }
 
         public async Task <CardCollectionDetailModel?> GetByIdAsync(Guid id)

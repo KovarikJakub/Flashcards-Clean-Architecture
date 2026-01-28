@@ -51,11 +51,11 @@ namespace Flashcards.Web.BL.Api
         System.Threading.Tasks.Task<System.Guid?> CardPutAsync(CardDetailModel card, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardListModel>> QueryAsync(CardQueryModel query);
+        System.Threading.Tasks.Task<PagedResponseOfCardListModel> QueryAsync(CardQueryModel query);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardListModel>> QueryAsync(CardQueryModel query, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<PagedResponseOfCardListModel> QueryAsync(CardQueryModel query, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<CardDetailModel> CardGetAsync(System.Guid id);
@@ -351,14 +351,14 @@ namespace Flashcards.Web.BL.Api
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardListModel>> QueryAsync(CardQueryModel query)
+        public virtual System.Threading.Tasks.Task<PagedResponseOfCardListModel> QueryAsync(CardQueryModel query)
         {
             return QueryAsync(query, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardListModel>> QueryAsync(CardQueryModel query, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedResponseOfCardListModel> QueryAsync(CardQueryModel query, System.Threading.CancellationToken cancellationToken)
         {
             if (query == null)
                 throw new System.ArgumentNullException("query");
@@ -406,7 +406,7 @@ namespace Flashcards.Web.BL.Api
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<CardListModel>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<PagedResponseOfCardListModel>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -837,11 +837,11 @@ namespace Flashcards.Web.BL.Api
         System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserDetailModel user, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<UserListModel>> QueryAsync(UserQueryModel query);
+        System.Threading.Tasks.Task<PagedResponseOfUserListModel> QueryAsync(UserQueryModel query);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<UserListModel>> QueryAsync(UserQueryModel query, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<PagedResponseOfUserListModel> QueryAsync(UserQueryModel query, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<UserDetailModel> UserGetAsync(System.Guid id);
@@ -1137,14 +1137,14 @@ namespace Flashcards.Web.BL.Api
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.ICollection<UserListModel>> QueryAsync(UserQueryModel query)
+        public virtual System.Threading.Tasks.Task<PagedResponseOfUserListModel> QueryAsync(UserQueryModel query)
         {
             return QueryAsync(query, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<UserListModel>> QueryAsync(UserQueryModel query, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedResponseOfUserListModel> QueryAsync(UserQueryModel query, System.Threading.CancellationToken cancellationToken)
         {
             if (query == null)
                 throw new System.ArgumentNullException("query");
@@ -1192,7 +1192,7 @@ namespace Flashcards.Web.BL.Api
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<UserListModel>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<PagedResponseOfUserListModel>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -1630,11 +1630,11 @@ namespace Flashcards.Web.BL.Api
         System.Threading.Tasks.Task<System.Guid?> CardCollectionPutAsync(CardCollectionDetailModel cardCollection, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardCollectionListModel>> QueryAsync(CardCollectionQueryModel query);
+        System.Threading.Tasks.Task<PagedResponseOfCardCollectionListModel> QueryAsync(CardCollectionQueryModel query);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardCollectionListModel>> QueryAsync(CardCollectionQueryModel query, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<PagedResponseOfCardCollectionListModel> QueryAsync(CardCollectionQueryModel query, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<CardCollectionDetailModel> CardCollectionGetAsync(System.Guid id);
@@ -1930,14 +1930,14 @@ namespace Flashcards.Web.BL.Api
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardCollectionListModel>> QueryAsync(CardCollectionQueryModel query)
+        public virtual System.Threading.Tasks.Task<PagedResponseOfCardCollectionListModel> QueryAsync(CardCollectionQueryModel query)
         {
             return QueryAsync(query, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CardCollectionListModel>> QueryAsync(CardCollectionQueryModel query, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedResponseOfCardCollectionListModel> QueryAsync(CardCollectionQueryModel query, System.Threading.CancellationToken cancellationToken)
         {
             if (query == null)
                 throw new System.ArgumentNullException("query");
@@ -1985,7 +1985,7 @@ namespace Flashcards.Web.BL.Api
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<CardCollectionListModel>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<PagedResponseOfCardCollectionListModel>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -2409,11 +2409,11 @@ namespace Flashcards.Web.BL.Api
         System.Threading.Tasks.Task<System.Guid> LessonPostAsync(LessonCreateModel lesson, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<LessonListModel>> QueryAsync(LessonQueryModel query);
+        System.Threading.Tasks.Task<PagedResponseOfLessonListModel> QueryAsync(LessonQueryModel query);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<LessonListModel>> QueryAsync(LessonQueryModel query, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<PagedResponseOfLessonListModel> QueryAsync(LessonQueryModel query, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<LessonDetailModel> LessonGetAsync(System.Guid id);
@@ -2623,14 +2623,14 @@ namespace Flashcards.Web.BL.Api
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.ICollection<LessonListModel>> QueryAsync(LessonQueryModel query)
+        public virtual System.Threading.Tasks.Task<PagedResponseOfLessonListModel> QueryAsync(LessonQueryModel query)
         {
             return QueryAsync(query, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<LessonListModel>> QueryAsync(LessonQueryModel query, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedResponseOfLessonListModel> QueryAsync(LessonQueryModel query, System.Threading.CancellationToken cancellationToken)
         {
             if (query == null)
                 throw new System.ArgumentNullException("query");
@@ -2678,7 +2678,7 @@ namespace Flashcards.Web.BL.Api
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<LessonListModel>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<PagedResponseOfLessonListModel>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);

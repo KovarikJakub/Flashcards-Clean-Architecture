@@ -16,10 +16,10 @@ namespace Flashcards.Web.BL.Facades
             return await apiClient.LessonPostAsync(lesson);
         }
 
-        public async Task<List<LessonListModel>> GetByQueryAsync(LessonQueryModel query)
+        public async Task<PagedResponse<LessonListModel>> GetByQueryAsync(LessonQueryModel query)
         {
             var collection = await apiClient.QueryAsync(query);
-            return collection.ToList();
+            return collection;
         }
 
         public async Task<LessonDetailModel?> GetByIdAsync(Guid id)
