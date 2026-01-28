@@ -30,19 +30,16 @@ builder.Services.AddInstaller<WebBLInstaller>(identityOptions, apiOptions);
 builder.Services.AddOidcAuthentication(options =>
 {
     builder.Configuration.Bind("IdentityOptions", options.ProviderOptions);
-    
-    options.ProviderOptions.DefaultScopes.Add("flashcardsapi");
-    
-    options.ProviderOptions.DefaultScopes.Add("offline_access");
-    
+
+    // ensure roles scope is requested so role claims are available
     if (!options.ProviderOptions.DefaultScopes.Contains("roles"))
     {
         options.ProviderOptions.DefaultScopes.Add("roles");
     }
-    
+
+    // map role claim type used by the identity server
     options.UserOptions.RoleClaim = "role";
-})
-.AddAccountClaimsPrincipalFactory<ArrayClaimsPrincipalFactory>();
+});
 
 // keep existing registration for fallback http client
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
