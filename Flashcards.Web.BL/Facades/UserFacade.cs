@@ -40,10 +40,5 @@ namespace Flashcards.Web.BL.Facades
             await apiClient.UserDeleteAsync(id);
         }
 
-        public async Task<Guid> UpsertAsync(UserDetailModel model)
-        {
-            var id = await apiClient.UpsertAsync(model);
-            return id;
-        }
     }
 }
