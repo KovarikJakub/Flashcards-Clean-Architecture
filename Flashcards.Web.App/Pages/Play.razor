@@ -15,7 +15,11 @@
     else
     { 
         <div>
-            <LessonStatistics Lesson="@newLesson" OnPlayAgain="@HandlePlayAgain" OnTryDifferent="@HandleTryDifferentCollection" />
+            <!--
+                TODO: _newLesson should only serve for creating a new lesson via API
+                      after creating a new lesson, we should obtain the lesson DetailModel by its ID via API
+                <LessonStatistics Lesson="@_newLesson" OnPlayAgain="@HandlePlayAgain" OnTryDifferent="@HandleTryDifferentCollection"/>
+            -->
         </div>
     }
 </div>

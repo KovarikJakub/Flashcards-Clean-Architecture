@@ -3,15 +3,8 @@ using Flashcards.Web.BL.Api;
 
 namespace Flashcards.Web.BL.Facades
 {
-    public class CardCollectionFacade
+    public class CardCollectionFacade(ICardCollectionApiClient apiClient)
     {
-        private readonly ICardCollectionApiClient apiClient;
-
-        public CardCollectionFacade(ICardCollectionApiClient apiClient)
-        {
-            this.apiClient = apiClient;
-        }
-
         public async Task<Guid> UpsertAsync(CardCollectionDetailModel model)
         {
             var id = await apiClient.UpsertAsync(model);
@@ -28,7 +21,13 @@ namespace Flashcards.Web.BL.Facades
             var cardCollections = await apiClient.CardCollectionGetAsync();
             return cardCollections.ToList();
         }
-        
+
+        public async Task<PagedResponse<CardCollectionListModel>> GetByQueryAsync(CardCollectionQueryModel query)
+        {
+            var collection = await apiClient.QueryAsync(query);
+            return collection;
+        }
+
         public async Task <CardCollectionDetailModel?> GetByIdAsync(Guid id)
         {
             try
@@ -42,10 +41,5 @@ namespace Flashcards.Web.BL.Facades
             }
         }
         
-        public async Task <List<CardCollectionListModel>> GetByOwnerAsync(string ownerId)
-        {
-            var cardCollections = await apiClient.UserAsync(ownerId);
-            return cardCollections.ToList();
-        }
     }
 }

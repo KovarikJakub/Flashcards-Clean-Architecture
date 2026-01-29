@@ -2,7 +2,9 @@
 {
     public record LessonEntity : EntityBase
     {
+        public Guid UserId { get; set; }
         public required UserEntity User { get; set; }
+        public Guid CardCollectionId { get; set; }
         public required CardCollectionEntity CardCollection { get; set; }
         public required DateTime Start { get; set; }
         public required uint Seen { get; set; }

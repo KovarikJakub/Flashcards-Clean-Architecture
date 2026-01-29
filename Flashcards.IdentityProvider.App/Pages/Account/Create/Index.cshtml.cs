@@ -1,6 +1,7 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Flashcards.Common.Models;
 using Flashcards.IdentityProvider.BL.Facades;
 using Flashcards.IdentityProvider.BL.Models;
 using Microsoft.AspNetCore.Authorization;

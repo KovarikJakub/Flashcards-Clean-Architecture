@@ -11,6 +11,8 @@ namespace Flashcards.Web.App.Pages
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
         [Inject]
+        private UserFacade UserFacade { get; set; } = null!;
+        [Inject]
         private NavigationManager NavigationManager { get; set; } = null!;
         [Inject]
         private IJSRuntime Js { get; set; } = null!; 
@@ -71,9 +73,27 @@ namespace Flashcards.Web.App.Pages
 
         private async Task LoadData()
         {
-            Console.WriteLine("LoadData");
+            // TODO: Do NOT use GetAll! Use Query endpoint instead !!!
             CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
-            CardCollectionsMine = await CardCollectionFacade.GetByOwnerAsync(_userId);
+
+            if (string.IsNullOrEmpty(_userId))
+            {
+                // No user logged in, show empty collection
+                CardCollectionsMine = Array.Empty<CardCollectionListModel>();
+                return;
+            }
+
+            // get currently signed user:
+            var currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
+            // create query to obtain his card collections:
+            var queryJustMine = new CardCollectionQueryModel
+            {
+                OwnerId = currentUser.Id
+            };
+
+            // QUERY endpoints now return PagedResult<TEntity> and not IList<TEntity>
+            var cardCollectionsOfCurrentUser = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
+            CardCollectionsMine = cardCollectionsOfCurrentUser.Items;
         }
 
         private Task OnEditCollection(CardCollectionListModel collection)
@@ -135,9 +155,9 @@ namespace Flashcards.Web.App.Pages
 
         private bool IsCollectionActive(CardCollectionListModel collection)
         {
-            var now = DateTime.UtcNow;
-            var startUtc = collection.AnswerStart.ToUniversalTime();
-            var endUtc = collection.AnswerEnd.ToUniversalTime();
+            var now = DateTime.Now;
+            var startUtc = collection.AnswerStart;
+            var endUtc = collection.AnswerEnd;
             return now >= startUtc && now <= endUtc;
         }
         

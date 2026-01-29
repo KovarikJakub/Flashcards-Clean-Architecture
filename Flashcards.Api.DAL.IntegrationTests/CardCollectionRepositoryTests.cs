@@ -18,11 +18,19 @@ namespace Flashcards.Api.DAL.IntegrationTests
 
         private bool AreCollectionsEqual(CardCollectionEntity c1, CardCollectionEntity c2)
         {
-            return c1.Id == c2.Id &&
-                   c1.Title == c2.Title &&
-                   c1.AnswerStart == c2.AnswerStart &&
-                   c1.Cards == c2.Cards &&
-                   c1.AnswerEnd == c2.AnswerEnd;
+            if (c1.Id != c2.Id) return false;
+            if (c1.Title != c2.Title) return false;
+            if (c1.AnswerStart != c2.AnswerStart) return false;
+            if (c1.AnswerEnd != c2.AnswerEnd) return false;
+
+            // compare card lists by ids and count
+            if ((c1.Cards == null) != (c2.Cards == null)) return false;
+            if (c1.Cards == null && c2.Cards == null) return true;
+
+            if (c1.Cards.Count != c2.Cards.Count) return false;
+            var ids1 = c1.Cards.Select(x => x.Id).OrderBy(x => x).ToList();
+            var ids2 = c2.Cards.Select(x => x.Id).OrderBy(x => x).ToList();
+            return ids1.SequenceEqual(ids2);
         }
 
         [Fact]
@@ -84,7 +92,11 @@ namespace Flashcards.Api.DAL.IntegrationTests
             var newId = _repo.Insert(newCollection);
 
             // Assert
-            Assert.NotNull(_fakeDb.GetCardCollectionById(newId));
+            var inserted = _fakeDb.GetCardCollectionById(newId);
+            Assert.NotNull(inserted);
+            Assert.Equal(newCollection.Title, inserted.Title);
+            Assert.Equal(newCollection.AnswerStart, inserted.AnswerStart);
+            Assert.Equal(newCollection.AnswerEnd, inserted.AnswerEnd);
         }
 
         [Fact]
@@ -92,16 +104,26 @@ namespace Flashcards.Api.DAL.IntegrationTests
         {
             // Arrange
             var collectionId = _fakeDb.CardCollectionGuids[0];
-            var collection = _repo.GetById(collectionId);
-            collection.Title = "Updated Collection Title";
+            var stored = _repo.GetById(collectionId);
+            Assert.NotNull(stored);
+
+            // create detached payload to simulate update from outside storage
+            var updatePayload = new CardCollectionEntity
+            {
+                Id = stored.Id,
+                Title = "Updated Collection Title",
+                AnswerStart = stored.AnswerStart,
+                AnswerEnd = stored.AnswerEnd,
+                Cards = stored.Cards
+            };
 
             // Act
-            _repo.Update(collection);
+            _repo.Update(updatePayload);
 
             // Assert
             var expectedCollection = _fakeDb.GetCardCollectionById(collectionId);
             Assert.NotNull(expectedCollection);
-            Assert.Equal(collection.Title, expectedCollection.Title);
+            Assert.Equal(updatePayload.Title, expectedCollection.Title);
         }
     }
 }

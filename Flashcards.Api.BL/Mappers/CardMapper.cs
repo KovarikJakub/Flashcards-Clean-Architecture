@@ -2,9 +2,24 @@ namespace Flashcards.Api.BL.Mappers;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Common.Models;
 
-public class CardMapper
+public class CardMapper(UserMapper userMapper)
 {
-    public CardEntity ToEntity(CardDetailModel model)
+    public CardEntity ToEntity(CardCreateModel model, UserEntity owner)
+    {
+        return new CardEntity
+        {
+            Id = Guid.NewGuid(),
+            QuestionType = model.QuestionType,
+            AnswerType = model.AnswerType,
+            QuestionContent = model.QuestionContent,
+            AnswerContent = model.AnswerContent,
+            Created = DateTime.UtcNow,
+            OwnerId = owner.Id,
+            Owner = owner,
+            Description = model.Description
+        };
+    }
+    public CardEntity ToEntity(CardDetailModel model, UserEntity owner)
     {
         return new CardEntity
         {
@@ -14,6 +29,20 @@ public class CardMapper
             QuestionContent = model.QuestionContent,
             AnswerContent = model.AnswerContent,
             Created = model.DateCreated,
+            OwnerId = owner.Id,
+            Owner = owner,
+            Description = model.Description
+        };
+    }
+
+    public CardCreateModel ToCreateModel(CardDetailModel model)
+    {
+        return new CardCreateModel
+        {
+            QuestionType = model.QuestionType,
+            AnswerType = model.AnswerType,
+            QuestionContent = model.QuestionContent,
+            AnswerContent = model.AnswerContent,
             Description = model.Description
         };
     }
@@ -28,7 +57,9 @@ public class CardMapper
             QuestionContent = entity.QuestionContent,
             AnswerContent = entity.AnswerContent,
             DateCreated = entity.Created,
-            Description = entity.Description
+            Owner = entity.Owner is not null ? 
+                userMapper.ToListModelSingle(entity.Owner) : 
+                null
         };
     }
 
@@ -38,7 +69,9 @@ public class CardMapper
         {
             Id = e.Id,
             QuestionContent = e.QuestionContent,
-            Description = e.Description
+            Description = e.Description,
+            QuestionType = e.QuestionType,
+            AnswerType = e.AnswerType
         }).ToList();
     }
 }

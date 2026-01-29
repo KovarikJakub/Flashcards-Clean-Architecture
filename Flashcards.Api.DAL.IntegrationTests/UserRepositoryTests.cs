@@ -15,12 +15,13 @@ namespace Flashcards.Api.DAL.IntegrationTests
             _repo = _fakeDb.GetUserRepository();
         }
 
-        private bool AreUserEqual(UserEntity user1, UserEntity user2)
+        private bool AreUsersEqual(UserEntity user1, UserEntity user2)
         {
             return user1.Id == user2.Id &&
                    user1.Name == user2.Name &&
                    user1.PhotoUrl == user2.PhotoUrl &&
-                   user1.Role == user2.Role;
+                   user1.IdentityOwnerId == user2.IdentityOwnerId &&
+                   user1.Role == user2.Role; 
         }
         
         [Fact]
@@ -36,7 +37,7 @@ namespace Flashcards.Api.DAL.IntegrationTests
             
             var expectedUser = _fakeDb.GetUserById(requestedId);
             Assert.NotNull(expectedUser);
-            Assert.True(AreUserEqual(user, expectedUser));
+            Assert.True(AreUsersEqual(user, expectedUser));
         }
 
         [Fact]
@@ -74,8 +75,8 @@ namespace Flashcards.Api.DAL.IntegrationTests
                 Id = Guid.NewGuid(),
                 Name = "Kuba",
                 PhotoUrl = null,
-                Role = RoleType.User
-
+                Role = RoleType.User,
+                IdentityOwnerId = "KubaId"
             };
 
             // Act
@@ -90,17 +91,26 @@ namespace Flashcards.Api.DAL.IntegrationTests
         {
             // Arrange
             var userId = _fakeDb.UserGuids[0];
-            var user = _repo.GetById(userId);
-            user!.Name = "Ondra";
-            
+            var stored = _repo.GetById(userId);
+            Assert.NotNull(stored);
+
+            var updatePayload = new UserEntity
+            {
+                Id = stored.Id,
+                Name = "Ondra",
+                PhotoUrl = stored.PhotoUrl,
+                Role = stored.Role,
+                IdentityOwnerId = stored.IdentityOwnerId
+            };
+
             // Act
-            var result = _repo.Update(user);
-            
+            var result = _repo.Update(updatePayload);
+
             // Assert
             var expectedUser = _fakeDb.GetUserById(userId);
             Assert.NotNull(result);
             Assert.NotNull(expectedUser);
-            Assert.Equal(user.Name, expectedUser.Name);
+            Assert.True(AreUsersEqual(updatePayload, expectedUser));
         }
     }
 }

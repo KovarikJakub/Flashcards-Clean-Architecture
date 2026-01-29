@@ -1,4 +1,5 @@
-﻿using Flashcards.Common.BL.Facades;
+﻿using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Common.BL.Facades;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
@@ -6,10 +7,11 @@ namespace Flashcards.Api.BL.Facades
     public interface ICardFacade : IFacade
     {
         List<CardListModel> GetAll();
+        PagedResponse<CardListModel> GetByQuery(CardQueryModel query);
         CardDetailModel? GetById(Guid id);
-        Guid Create(CardDetailModel card);
-        Guid CreateOrUpdate(CardDetailModel card);
-        Guid? Update(CardDetailModel card);
-        void Delete(Guid id);
+        Guid Create(CardCreateModel card, IList<string> userRoles, string requestorId);
+        Guid CreateOrUpdate(CardDetailModel card, IList<string> userRoles, string requestorId);
+        Guid? Update(CardDetailModel card, IList<string> userRoles, string requestorId);
+        void Delete(Guid id, IList<string> userRoles, string requestorId);
     }
 }

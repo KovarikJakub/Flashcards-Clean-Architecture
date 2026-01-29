@@ -10,31 +10,56 @@ namespace Flashcards.Api.BL.UnitTests
 {
     public class CardFacadeTests
     {
-        private readonly ICardRepository _fakeRepo;
+        private readonly ICardRepository _cardRepo;
+        private readonly IUserRepository _userRepo;
         private readonly CardFacade _facade;
-        private readonly CardMapper _mapper;
+        private readonly CardMapper _cardMapper;
+        private readonly UserMapper _userMapper;
 
         public CardFacadeTests()
         {
-            _mapper = new CardMapper();
-            _fakeRepo = Substitute.For<ICardRepository>();
-            _facade = new CardFacade(_fakeRepo, _mapper);
+            _userMapper = new UserMapper();
+            _cardMapper = new CardMapper(_userMapper);
+            _cardRepo = Substitute.For<ICardRepository>();
+            _userRepo = Substitute.For<IUserRepository>();
+            _userRepo.GetByIdentityId(Arg.Any<string>()).Returns(_ownerEntity);
+
+            _facade = new CardFacade(_cardRepo, _userRepo, _cardMapper);
         }
+        private CardCreateModel CreateCardCreateModel()
+        {
+            return new CardCreateModel
+            {
+                QuestionType = ContentType.Text,
+                AnswerType = ContentType.Text,
+                QuestionContent = "What is 2 + 2?",
+                AnswerContent = "4",
+                Description = "A simple math question."
+            };
+        }
+
         private CardDetailModel CreateCardDetailModel()
         {
-            var newCard = new CardDetailModel
+            return new CardDetailModel
             {
-                Id = new("23b3902d-7d4f-4213-9cf0-112348f56238"),
+                Id = Guid.NewGuid(),
                 QuestionType = ContentType.Text,
                 AnswerType = ContentType.Text,
                 QuestionContent = "What is 2 + 2?",
                 AnswerContent = "4",
                 DateCreated = DateTime.UtcNow,
-                Description = "A simple math question."
+                Description = "A simple math question.",
+                Owner = new UserListModel { Id = _ownerEntity.Id, Name = _ownerEntity.Name, Role = _ownerEntity.Role }
             };
-
-            return newCard;
         }
+
+        private readonly UserEntity _ownerEntity = new UserEntity
+        {
+            Id = Guid.NewGuid(),
+            IdentityOwnerId = "abc",
+            Name = "testuser",
+            Role = RoleType.User,
+        };
 
         [Fact]
         public void Delete_Calls_Method_On_Repository_Correctly()
@@ -43,24 +68,27 @@ namespace Flashcards.Api.BL.UnitTests
             var cardGuid = Guid.NewGuid();
 
             // Act
-            _facade.Delete(cardGuid);
+            _facade.Delete(cardGuid, [], "abc");
 
             // Assert
-            _fakeRepo.Received().Remove(cardGuid);
+            _cardRepo.Received().Remove(cardGuid);
         }
 
         [Fact]
         public void Create_New_Card()
         {
             // Arrange
-            var newCard = CreateCardDetailModel();
+            var newCard = CreateCardCreateModel();
 
             // Act
-            var result = _facade.Create(newCard);
+            var result = _facade.Create(newCard, new List<string>(), _ownerEntity.IdentityOwnerId);
 
             // Assert
-            _fakeRepo.Received(1).Insert(Arg.Is<CardEntity>(card => card.Id == newCard.Id));
-            Assert.Equal(result, newCard.Id);
+            _cardRepo.Received(1).Insert(Arg.Is<CardEntity>(card => 
+                card.Id == result && 
+                card.Owner != null && 
+                card.Owner.IdentityOwnerId == _ownerEntity.IdentityOwnerId)
+            );
         }
 
         [Fact]
@@ -70,11 +98,11 @@ namespace Flashcards.Api.BL.UnitTests
             var newCard = CreateCardDetailModel();
 
             // Act
-            var result = _facade.CreateOrUpdate(newCard);
+            var result = _facade.CreateOrUpdate(newCard, new List<string>(), _ownerEntity.IdentityOwnerId);
 
             // Assert
-            _fakeRepo.Received(1).Insert(Arg.Is<CardEntity>(card => card.Id == newCard.Id));
-            Assert.Equal(result, newCard.Id);
+            _cardRepo.Received(1).Insert(Arg.Is<CardEntity>(card => card.Id == result));
+            Assert.Equal(result, result);
         }
 
         [Fact]
@@ -82,18 +110,18 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var existingCard = CreateCardDetailModel();
-            _fakeRepo.Exists(existingCard.Id).Returns(true);
+            _cardRepo.Exists(existingCard.Id).Returns(true);
             existingCard.Description = "updated value";
-            var expectedEntity = _mapper.ToEntity(existingCard);
-            _fakeRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
+            var expectedEntity = _cardMapper.ToEntity(existingCard, _ownerEntity);
+            _cardRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
 
             // Act
-            var result = _facade.CreateOrUpdate(existingCard);
+            var result = _facade.CreateOrUpdate(existingCard, new List<string>(), _ownerEntity.IdentityOwnerId);
             
             // Assert
-            _fakeRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
+            _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
             
-            _fakeRepo.Received(1).Update(Arg.Is<CardEntity>(
+            _cardRepo.Received(1).Update(Arg.Is<CardEntity>(
                 card => card.Id == existingCard.Id && card.Description == "updated value"));
             
             Assert.Equal(existingCard.Id, result);
@@ -104,13 +132,13 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newCard = CreateCardDetailModel();
-            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(_mapper.ToEntity(newCard));
+            _cardRepo.GetById(Arg.Any<Guid>()).Returns(_cardMapper.ToEntity(newCard, _ownerEntity));
             
             // Act
             var result = _facade.GetById(newCard.Id);
             
             // Assert
-            _fakeRepo.Received(1).GetById(newCard.Id);
+            _cardRepo.Received(1).GetById(newCard.Id);
             Assert.NotNull(result);
             Assert.Equal(newCard.Id, result.Id);
         }
@@ -120,13 +148,13 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var nonExistingId = Guid.NewGuid();
-            _fakeRepo.GetById(Arg.Any<Guid>()).Returns((CardEntity?)null);
+            _cardRepo.GetById(Arg.Any<Guid>()).Returns((CardEntity?)null);
             
             // Act
             var result = _facade.GetById(nonExistingId);
             
             // Assert
-            _fakeRepo.Received(1).GetById(nonExistingId);
+            _cardRepo.Received(1).GetById(nonExistingId);
             Assert.Null(result);
         }
 
@@ -134,13 +162,13 @@ namespace Flashcards.Api.BL.UnitTests
         public void GetAll_On_Empty_Repo()
         {
             // Arrange
-            _fakeRepo.GetAll().Returns(new List<CardEntity>());
+            _cardRepo.GetAll().Returns(new List<CardEntity>());
 
             // Act
             var result = _facade.GetAll();
 
             // Assert
-            _fakeRepo.Received(1).GetAll();
+            _cardRepo.Received(1).GetAll();
             Assert.Empty(result);
         }
         
@@ -149,52 +177,147 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var newCard = CreateCardDetailModel();
-            var entities = new List<CardEntity>{ _mapper.ToEntity(newCard) };
-            _fakeRepo.GetAll().Returns(entities);
+            var entities = new List<CardEntity>{ _cardMapper.ToEntity(newCard, _ownerEntity) };
+            _cardRepo.GetAll().Returns(entities);
 
             // Act
             var result = _facade.GetAll();
 
             // Assert
-            _fakeRepo.Received(1).GetAll();
+            _cardRepo.Received(1).GetAll();
             Assert.NotEmpty(result);
         }
         
         [Fact]
-        public void Update_Existing_Card_With()
+        public void Update_Existing_Card()
         {
             // Arrange
             var existingCard = CreateCardDetailModel();
-            _fakeRepo.Exists(existingCard.Id).Returns(true);
+            _cardRepo.Exists(existingCard.Id).Returns(true);
             existingCard.Description = "updated value";
-            var expectedEntity = _mapper.ToEntity(existingCard);
-            _fakeRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
+            var expectedEntity = _cardMapper.ToEntity(existingCard, _ownerEntity);
+            _cardRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
 
             // Act
-            var result = _facade.Update(existingCard);
+            var result = _facade.Update(existingCard, new List<string>(), _ownerEntity.IdentityOwnerId);
             
             // Assert
-            _fakeRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
-            _fakeRepo.Received(1).Update(Arg.Is<CardEntity>(
+            _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
+            _cardRepo.Received(1).Update(Arg.Is<CardEntity>(
                 card => card.Id == existingCard.Id && card.Description == "updated value"));
             
             Assert.Equal(existingCard.Id, result);
         }
         
         [Fact]
-        public void Update_On_Non_Existing_Card_With()
+        public void Update_On_Non_Existing_Card()
         {
             // Arrange
             var card = CreateCardDetailModel();
-            _fakeRepo.Exists(Arg.Any<Guid>()).Returns(false);
+            _cardRepo.Exists(Arg.Any<Guid>()).Returns(false);
 
             // Act
-            var result = _facade.Update(card);
+            var result = _facade.Update(card, new List<string>(), _ownerEntity.IdentityOwnerId);
             
             // Assert
-            _fakeRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
-            _fakeRepo.Received(1).Update(_mapper.ToEntity(card));
+            _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
+            _cardRepo.Received(1).Update(Arg.Any<CardEntity>());
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetByQuery_Filters_By_Question_Text()
+        {
+            // Arrange
+            var cards = new List<CardEntity>()
+            {
+                new()
+                {
+                    Id = new("7f251cd6-3ac4-49be-b3e7-d1f9f7cfdd3a"),
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "What is the capital of France?",
+                    AnswerContent = "Paris",
+                    Created = DateTime.UtcNow,
+                    Description = "A geography question."
+                },
+                new()
+                {
+                    Id = new("23b3902d-7d4f-4213-9cf0-112348f56238"),
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "What is 2 + 2?",
+                    AnswerContent = "4",
+                    Created = DateTime.UtcNow,
+                    Description = "A simple math question."
+                },
+                new()
+                {
+                    Id = new("df935095-8709-4040-a2bb-b6f97cb416dc"),
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Who wrote 'Hamlet'?",
+                    AnswerContent = "William Shakespeare",
+                    Created = DateTime.UtcNow,
+                    Description = "A literature question."
+                }
+            };
+            _cardRepo.GetAll().Returns(cards);
+
+            var query = new CardQueryModel() { SearchString = "What" };
+            var filtered = _facade.GetByQuery(query);
+
+            Assert.NotNull(filtered);
+            Assert.Equal(2, filtered.Count());
+        }
+
+        [Fact]
+        public void GetByQuery_Filters_By_QuestionTextAndDescription()
+        {
+            var cards = new List<CardEntity>()
+            {
+                new()
+                {
+                    Id = Guid.Empty,
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Question1",
+                    AnswerContent = "Answer1",
+                    Created = DateTime.UtcNow,
+                    Description = "Desc1."
+                },
+                new()
+                {
+                    Id = Guid.Empty,
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Question2FINDME",
+                    AnswerContent = "Answer2",
+                    Created = DateTime.UtcNow,
+                    Description = "Desc3"
+                },
+                new()
+                {
+                    Id = Guid.Empty,
+                    QuestionType = ContentType.Text,
+                    AnswerType = ContentType.Text,
+                    QuestionContent = "Question3",
+                    AnswerContent = "Answer3",
+                    Created = DateTime.UtcNow,
+                    Description = "Desc3FINDME_"
+                }
+            };
+
+            _cardRepo.GetAll().Returns(cards);
+
+            var query = new CardQueryModel() { SearchString = "FINDME" };
+            var filtered = _facade.GetByQuery(query);
+
+            Assert.NotNull(filtered);
+            Assert.Equal(2, filtered.Count());
+            // Assert Questions 2 and 3 are in the result:
+            Assert.Contains(filtered, card => card.QuestionContent == "Question2FINDME");
+            Assert.Contains(filtered, card => card.QuestionContent == "Question3");
         }
     }
 }

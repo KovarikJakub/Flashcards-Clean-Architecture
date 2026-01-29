@@ -5,12 +5,8 @@ namespace Flashcards.Api.DAL.Common.Entities
     public record UserEntity : EntityBase
     {
         public required string Name { get; set; }
-
-        public string? PhotoUrl { get; set; }
-        
         public required RoleType Role { get; set; }
-
-        public string? OwnerId { get; set; }
+        public required string IdentityOwnerId { get; set; }
+        public string? PhotoUrl { get; set; } = null;
     }
 }
-

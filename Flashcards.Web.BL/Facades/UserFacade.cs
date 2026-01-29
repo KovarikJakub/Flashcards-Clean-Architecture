@@ -5,28 +5,8 @@ using Flashcards.Web.BL.Extensions;
 
 namespace Flashcards.Web.BL.Facades
 {
-    public class UserFacade
+    public class UserFacade(IUserApiClient apiClient, HttpClient httpClient)
     {
-        private readonly IUserApiClient apiClient;
-
-        public UserFacade(IUserApiClient apiClient)
-        {
-            this.apiClient = apiClient;
-        }
-        
-        public async Task<UserDetailModel?> GetByOwnerIdAsync(string ownerId)
-        {
-            try
-            {
-                var user = await apiClient.OwnerAsync(ownerId);
-                return user;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         public async Task<UserDetailModel?> GetByIdAsync(Guid id)
         {
             try
@@ -45,15 +25,20 @@ namespace Flashcards.Web.BL.Facades
             return users.ToList();
         }
 
+        public async Task<UserDetailModel> GetByIdentityIdAsync(string id)
+        {
+            return await apiClient.IdentityAsync(id);
+        }
+
+        public async Task<Guid?> Update(UserDetailModel user)
+        {
+            return await apiClient.UserPutAsync(user);
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             await apiClient.UserDeleteAsync(id);
         }
 
-        public async Task<Guid> UpsertAsync(UserDetailModel model)
-        {
-            var id = await apiClient.UpsertAsync(model);
-            return id;
-        }
     }
 }

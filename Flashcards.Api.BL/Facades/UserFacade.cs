@@ -1,4 +1,5 @@
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
@@ -6,23 +7,38 @@ using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class UserFacade : IUserFacade
+    public class UserFacade(
+        IUserRepository userRepository,
+        IIdentityService identityService,
+        UserMapper mapper) : IUserFacade
     {
-        private readonly IUserRepository userRepository;
-        private readonly UserMapper mapper;
-
-        public UserFacade(
-            IUserRepository userRepository,
-            UserMapper mapper)
-        {
-            this.userRepository = userRepository;
-            this.mapper = mapper;
-        }
-
         public List<UserListModel> GetAll()
         {
             var entities = userRepository.GetAll();
             return mapper.ToListModel(entities);
+        }
+
+        public PagedResponse<UserListModel> GetByQuery(UserQueryModel query)
+        {
+            var rawUsers = userRepository.GetAll();
+            var collection = rawUsers.AsEnumerable();
+            var totalCount = rawUsers.Count;
+
+            if (query.Role is not null)
+            {
+                collection = collection.Where(u => u.Role == query.Role);
+            }
+
+            if (!string.IsNullOrEmpty(query.SearchString))
+            {
+                collection = collection.Where(u =>  
+                    u.Name.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
+            }
+
+            collection = QueryHelper.PerformPagination(collection, query);
+            var result = mapper.ToListModel(collection.ToList());
+
+            return new PagedResponse<UserListModel>(result, totalCount, query.Page, query.PageSize);
         }
 
         public UserDetailModel? GetById(Guid id)
@@ -31,85 +47,46 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public Guid CreateOrUpdate(UserDetailModel model, IList<string> userRoles, string? ownerId = null)
+        public UserDetailModel? GetByIdentityId(string identityId)
         {
-            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
-            return userRepository.Exists(model.Id)
-                ? Update(model, userRoles, ownerId)!.Value
-                : Create(model, userRoles, ownerId);
+            var entity = userRepository.GetByIdentityId(identityId);
+            return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public Guid Create(UserDetailModel model, IList<string> userRoles, string? ownerId = null)
+        public Guid Create(UserCreateModel model, IList<string> userRoles, string requestorId)
         {
-            var entity = mapper.ToEntity(model, ownerId);
+            if (string.IsNullOrWhiteSpace(requestorId))
+                throw new ArgumentException("ownerId is required to create user.", nameof(requestorId));
+
+            var role = model.Role == RoleType.Admin ? "Admin" : "User";
+            var subId = identityService.CreateIdentityAsync(model.IdentityName, model.Password, role).Result;
+            if (string.IsNullOrWhiteSpace(requestorId))
+                throw new InvalidOperationException("Failed to create identity for the user.");
+
+            var entity = mapper.ToEntity(model, subId);
             userRepository.Insert(entity);
             return entity.Id;
         }
 
-        /// <summary>
-        /// Creates both Identity user and API user in one operation
-        /// </summary>
-        public async Task<Guid> CreateUserWithIdentityAsync(
-            string userName,
-            string password,
-            string email,
-            string name,
-            string? photographyUrl,
-            RoleType role,
-            IList<string> userRoles,
-            string? ownerId = null)
+        public Guid? Update(UserDetailModel model, IList<string> userRoles, string requestorId)
         {
-            throw new NotImplementedException("Identity Server integration is temporarily disabled.");
-        }
-
-        public Guid? Update(UserDetailModel model, IList<string> userRoles, string? ownerId = null)
-        {
-            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
-
             var existing = userRepository.GetById(model.Id);
             if (existing == null)
                 return null;
 
-            var entity = mapper.ToEntity(model, ownerId);
-
+            var entity = mapper.ToEntity(model, requestorId);
 
             return userRepository.Update(entity);
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string? ownerId = null)
+        public void Delete(Guid id, IList<string> userRoles, string requestorId)
         {
-            ThrowIfWrongOwnerAndNotAdmin(id, userRoles, ownerId);
+            var deletedUserEntity = userRepository.GetById(id);
+            if (deletedUserEntity is null)
+                return;
+
+            identityService.DeleteIdentityAsync(deletedUserEntity.IdentityOwnerId);
             userRepository.Remove(id);
-        }
-
-        /// <summary>
-        /// Deletes both API user and Identity user
-        /// </summary>
-        public async Task DeleteUserWithIdentityAsync(Guid id, IList<string> userRoles, string? ownerId = null)
-        {
-            throw new NotImplementedException("Identity Server integration is temporarily disabled.");
-        }
-
-        public UserDetailModel? GetByOwnerId(string ownerId)
-        {
-            if (string.IsNullOrWhiteSpace(ownerId)) return null;
-            var userEntity = userRepository.GetAll().FirstOrDefault(u => u.OwnerId != null && u.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
-            return userEntity == null ? null : mapper.ToDetailModel(userEntity);
-        }
-
-        private void ThrowIfWrongOwnerAndNotAdmin(Guid? id, IList<string> userRoles, string? ownerId)
-        {
-            if (id is not null
-                && userRoles is not null
-                && !userRoles.Contains(RoleType.Admin.ToString())  // Changed from Administrator
-                && ownerId is not null)
-            {
-                var existingUser = userRepository.GetById(id.Value);
-                if (existingUser != null && existingUser.Id.ToString() != ownerId)
-                {
-                    throw new UnauthorizedAccessException();
-                }
-            }
         }
     }
 }

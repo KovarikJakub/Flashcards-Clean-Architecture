@@ -5,9 +5,6 @@ using Flashcards.IdentityProvider.App.Endpoints;
 using Flashcards.IdentityProvider.App.Installers;
 using Flashcards.IdentityProvider.BL.Installers;
 using Flashcards.IdentityProvider.DAL.Installers;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Flashcards.IdentityProvider.DAL.Entities;
 using Serilog;
 using System.Globalization;
 using System.Text;
@@ -18,16 +15,12 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Information("Starting up");
 
-
 try
 {
     var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddInstaller<IdentityProviderDALInstaller>();
     builder.Services.AddInstaller<IdentityProviderBLInstaller>();
     builder.Services.AddInstaller<IdentityProviderAppInstaller>();
-
-    // TODO: this should be in Api.App
-    builder.Services.AddAuthorizationBuilder();
 
     var app = builder
         .ConfigureLogging()

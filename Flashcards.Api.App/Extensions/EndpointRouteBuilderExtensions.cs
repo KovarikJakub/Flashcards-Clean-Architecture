@@ -13,8 +13,20 @@ public static class EndpointRouteBuilderExtensions
         .MapEndpoints(endpointRouteBuilder);
 
     public static IEndpointRouteBuilder UseUserEndpoints(
-    this IEndpointRouteBuilder endpointRouteBuilder,
-    IOptions<IdentityOptions> identityOptions)
-    => new UserEndpoints(identityOptions)
-    .MapEndpoints(endpointRouteBuilder);
+        this IEndpointRouteBuilder endpointRouteBuilder,
+        IOptions<IdentityOptions> identityOptions)
+        => new UserEndpoints(identityOptions)
+        .MapEndpoints(endpointRouteBuilder);
+
+    public static IEndpointRouteBuilder UseCardEndpoints(
+        this IEndpointRouteBuilder endpointRouteBuilder,
+        IOptions<IdentityOptions> identityOptions)
+        => new CardEndpoints(identityOptions)
+            .MapEndpoints(endpointRouteBuilder);
+
+    public static IEndpointRouteBuilder UseLessonEndpoints(
+        this IEndpointRouteBuilder endpointRouteBuilder,
+        IOptions<IdentityOptions> identityOptions)
+        => new LessonEndpoints(identityOptions)
+            .MapEndpoints(endpointRouteBuilder);
 }

@@ -3,26 +3,55 @@ using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
+using System;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class CardCollectionFacade : ICardCollectionFacade
+    public class CardCollectionFacade(
+        ICardCollectionRepository cardCollectionRepository,
+        IUserRepository userRepository,
+        CardCollectionMapper mapper)
+        : FacadeBase<ICardCollectionRepository, CardCollectionEntity>(cardCollectionRepository, userRepository),
+        ICardCollectionFacade
     {
-        private readonly ICardCollectionRepository cardCollectionRepository;
-        private readonly CardCollectionMapper mapper;
-
-        public CardCollectionFacade(
-            ICardCollectionRepository cardCollectionRepository,
-            CardCollectionMapper mapper)
-        {
-            this.cardCollectionRepository = cardCollectionRepository;
-            this.mapper = mapper;
-        }
-
         public List<CardCollectionListModel> GetAll()
         {
             var entities = cardCollectionRepository.GetAll();
             return mapper.ToListModel(entities);
+        }
+
+        public PagedResponse<CardCollectionListModel> GetByQuery(CardCollectionQueryModel query)
+        {
+            var rawCollections = cardCollectionRepository.GetAll();
+            var collection = rawCollections.AsEnumerable();
+            var totalCount = rawCollections.Count;
+
+            if (!string.IsNullOrEmpty(query.SearchString))
+            {
+                collection = collection.Where(c =>
+                    c.Title.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (query.OwnerId is not null)
+            {
+                collection = collection.Where(c => c.OwnerId == query.OwnerId);
+            }
+
+            if (query.ExcludeOwnerId is not null)
+            {
+                collection = collection.Where(c => c.OwnerId != query.ExcludeOwnerId);
+            }
+
+            if (query.ShowCurrentlyAvailableOnly)
+            {
+                var now = DateTime.Now;
+                collection = collection.Where(c => c.AnswerStart <= now && now <= c.AnswerEnd);
+            }
+
+            collection = QueryHelper.PerformPagination(collection, query);
+            var result = mapper.ToListModel(collection.ToList());
+
+            return new PagedResponse<CardCollectionListModel>(result, totalCount, query.Page, query.PageSize);
         }
 
         public CardCollectionDetailModel? GetById(Guid id)
@@ -31,54 +60,36 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public List<CardCollectionListModel> GetByOwner(string ownerId)
+        public Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string requestorId)
         {
-            var entities = cardCollectionRepository.GetAll().Where(e => e.OwnerId != null && e.OwnerId.Equals(ownerId, StringComparison.OrdinalIgnoreCase));
-            return mapper.ToListModel(entities);
-        }
-
-        public Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
-        {
-            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
             return cardCollectionRepository.Exists(model.Id)
-                ? Update(model, userRoles, ownerId)!.Value
-                : Create(model, userRoles, ownerId);
+                ? Update(model, userRoles, requestorId)!.Value
+                : Create(mapper.ToCreateModel(model), userRoles, requestorId);
         }
 
-        public Guid Create(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
+        public Guid Create(CardCollectionCreateModel model, IList<string> userRoles, string requestorId)
         {
-            var entity = mapper.ToEntity(model, ownerId);
+            var requestorUserEntity = userRepository.GetByIdentityId(requestorId);
+
+            var entity = mapper.ToEntity(model, requestorUserEntity);
             cardCollectionRepository.Insert(entity);
             return entity.Id;
         }
 
-        public Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string? ownerId = null)
+        public Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string requestorId)
         {
-            ThrowIfWrongOwnerAndNotAdmin(model.Id, userRoles, ownerId);
             var existing = cardCollectionRepository.GetById(model.Id);
             if (existing == null)
                 return null;
-            var entity = mapper.ToEntity(model, ownerId);
+            var ownerEntity = userRepository.GetById(existing.OwnerId);
+            var entity = mapper.ToEntity(model, ownerEntity!);
             entity.OwnerId = existing.OwnerId;
             return cardCollectionRepository.Update(entity);
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string? ownerId = null)
+        public void Delete(Guid id, IList<string> userRoles, string requestorId)
         {
-            ThrowIfWrongOwnerAndNotAdmin(id, userRoles, ownerId);
             cardCollectionRepository.Remove(id);
-        }
-
-        private void ThrowIfWrongOwnerAndNotAdmin(Guid? id, IList<string> userRoles, string? ownerId)
-        {
-            if (id is not null
-                && userRoles is not null
-                && !userRoles.Contains(RoleType.Admin.ToString())
-                && ownerId is not null
-                && cardCollectionRepository.GetById(id.Value)?.OwnerId != ownerId)
-            {
-                throw new UnauthorizedAccessException();
-            }
         }
     }
 }

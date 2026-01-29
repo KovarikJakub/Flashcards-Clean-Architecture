@@ -2,6 +2,7 @@ using Flashcards.Api.App.Endpoints;
 using Flashcards.Api.App.Extensions;
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
@@ -16,8 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
 
-builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<IStorage, Storage>();
+
+builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddTransient<ICardRepository, CardRepository>();
 builder.Services.AddScoped<ICardFacade, CardFacade>();
 
@@ -30,8 +32,21 @@ builder.Services.AddTransient<ICardCollectionRepository, CardCollectionRepositor
 builder.Services.AddScoped<ICardCollectionFacade, CardCollectionFacade>();
 
 builder.Services.AddSingleton<LessonMapper>();
-builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<ILessonFacade, LessonFacade>();
+
+var identityOptionsSection = builder.Configuration.GetSection(nameof(IdentityOptions));
+ArgumentNullException.ThrowIfNull(identityOptionsSection);
+
+builder.Services.Configure<IdentityOptions>(identityOptionsSection);
+
+var identityOptions = identityOptionsSection.Get<IdentityOptions>();
+ArgumentNullException.ThrowIfNull(identityOptions);
+
+builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>(client =>
+{
+    client.BaseAddress = new Uri(identityOptions.Authority);
+});
 
 builder.Services.AddHttpContextAccessor();
 
@@ -55,16 +70,14 @@ void UseEndpoints(WebApplication app)
 
     var identityOptions = app.Services.GetRequiredService<IOptions<IdentityOptions>>();
 
-    CardEndpoints.MapEndpoints(endpointsBase);
+    endpointsBase.UseCardEndpoints(identityOptions);
     endpointsBase.UseUserEndpoints(identityOptions);
     endpointsBase.UseCardCollectionEndpoints(identityOptions);
-    LessonEndpoints.MapEndpoints(endpointsBase);
+    endpointsBase.UseLessonEndpoints(identityOptions);
 }
 
 void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguration configuration)
 {
-    var identityOptions = configuration.GetSection("IdentityOptions").Get<IdentityOptions>();
-
     serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {

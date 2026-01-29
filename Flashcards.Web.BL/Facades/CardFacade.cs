@@ -36,9 +36,5 @@ namespace Flashcards.Web.BL.Facades
             await _apiClient.CardDeleteAsync(id);
         }
         
-        public async Task<Guid> UpsertAsync(CardDetailModel model)
-        {
-            return await _apiClient.CardPostAsync(model);
-        }
     }    
 }

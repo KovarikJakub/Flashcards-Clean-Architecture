@@ -5,64 +5,73 @@ using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository(IStorage storage) : IUserRepository
     {
-        private readonly IStorage _storage;
-
-        public UserRepository(IStorage storage)
-        {
-            _storage = storage;
-        }
-
         public bool Exists(Guid id)
         {
-            return _storage.Users.Any(user => user.Id == id);
+            return storage.Users.Any(user => user.Id == id);
         }
 
-        public UserEntity FirstOrDefault(Expression<Func<UserEntity, bool>> predicate)
+        public UserEntity? GetByIdentityId(string identityId)
         {
-            return _storage.Users.AsQueryable().FirstOrDefault(predicate);
+            var entity = FirstOrDefault(user => string.Equals(user.IdentityOwnerId, identityId));
+            if (entity is null)
+            {
+                throw new ArgumentException("This users identity does not exist!");
+            }
+
+            return entity;
+        }
+
+        public UserEntity? FirstOrDefault(Expression<Func<UserEntity, bool>> predicate)
+        {
+            return storage.Users.AsQueryable().FirstOrDefault(predicate);
         }
 
         public IList<UserEntity> GetAll()
         {
-            return _storage.Users.ToList();
+            return storage.Users.ToList();
         }
 
         public UserEntity? GetById(Guid id)
         {
-            return _storage.Users.SingleOrDefault(user => user.Id == id);
+            return storage.Users.SingleOrDefault(user => user.Id == id);
         }
 
         public Guid Insert(UserEntity user)
         {
-            _storage.Users.Add(user);
+            storage.Users.Add(user);
             return user.Id;
         }
 
         public void Remove(Guid id)
         {
-            var userToRemove = _storage.Users.Single(user => user.Id == id);
-            _storage.Users.Remove(userToRemove);
+            var userToRemove = storage.Users.SingleOrDefault(user => user.Id == id);
+            if (userToRemove is null)
+            {
+                return;
+            }
+            storage.Users.Remove(userToRemove);
         }
 
         public Guid? Update(UserEntity user)
         {
-            var existingUser = _storage.Users.Single(userInStorage => userInStorage.Id == user.Id);
-            if (existingUser is not null)
+            var existingUser = storage.Users.SingleOrDefault(userInStorage => userInStorage.Id == user.Id);
+            if (existingUser is null)
             {
-                existingUser.Name = user.Name;
-                existingUser.Role = user.Role;
-                existingUser.PhotoUrl = user.PhotoUrl;
-                return existingUser.Id;
+                return null; // User is not in storage -> can not be updated
             }
 
-            return null; // User is not in storage -> can not be updated
+            existingUser.Name = user.Name;
+            existingUser.Role = user.Role;
+            existingUser.PhotoUrl = user.PhotoUrl;
+            return existingUser.Id;
         }
 
         public IEnumerable<UserEntity> Where(Expression<Func<UserEntity, bool>> predicate)
         {
-            return _storage.Users.AsQueryable().Where(predicate);
+            return storage.Users.AsQueryable().Where(predicate);
         }
+
     }
 }

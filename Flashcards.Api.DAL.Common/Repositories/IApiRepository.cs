@@ -7,7 +7,7 @@ namespace Flashcards.Api.DAL.Common.Repositories
     {
         IList<TEntity> GetAll();
         TEntity? GetById(Guid id);
-        TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
+        TEntity? FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
         IEnumerable<TEntity> Where(Expression<Func<TEntity, bool>> predicate);
         Guid Insert(TEntity entity);
         Guid? Update(TEntity entity);

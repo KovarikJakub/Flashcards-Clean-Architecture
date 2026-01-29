@@ -1,4 +1,5 @@
-﻿using Flashcards.IdentityProvider.BL.Facades;
+﻿using Flashcards.Common.Models;
+using Flashcards.IdentityProvider.BL.Facades;
 using Flashcards.IdentityProvider.BL.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

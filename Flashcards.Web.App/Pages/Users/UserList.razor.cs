@@ -45,7 +45,7 @@ public partial class UserList : PageBase
 
                 if (detail != null)
                 {
-                    UserPhotos[user.Id] = detail.PhotographyUrl;
+                    UserPhotos[user.Id] = detail.PhotoUrl;
                     StateHasChanged();
                 }
             }
@@ -142,11 +142,11 @@ public partial class UserList : PageBase
                 {
                     Id = u.Id,
                     Name = u.Name,
-                    PhotographyUrl = currentPhoto,
+                    PhotoUrl = currentPhoto,
                     Role = u.Role
                 };
 
-                await UserFacadeService.UpsertAsync(detail);
+                await UserFacadeService.Update(detail);
             }
             await Load();
         }

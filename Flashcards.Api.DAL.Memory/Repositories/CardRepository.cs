@@ -5,20 +5,14 @@ using Flashcards.Api.DAL.Common.Interfaces;
 
 namespace Flashcards.Api.DAL.Memory.Repositories
 {
-    public class CardRepository : ICardRepository
+    public class CardRepository(IStorage storage) : ICardRepository
     {
-        private readonly IStorage storage;
-        public CardRepository(IStorage storage) 
-        {
-            this.storage = storage;
-        }
-
         public bool Exists(Guid id)
         {
             return storage.Cards.Any(card => card.Id == id);
         }
 
-        public CardEntity FirstOrDefault(Expression<Func<CardEntity, bool>> predicate)
+        public CardEntity? FirstOrDefault(Expression<Func<CardEntity, bool>> predicate)
         {
             return storage.Cards.AsQueryable().FirstOrDefault(predicate);
         }
@@ -47,18 +41,19 @@ namespace Flashcards.Api.DAL.Memory.Repositories
 
         public Guid? Update(CardEntity card)
         {
-            var existingCard = storage.Cards.Single(cardInStorage => cardInStorage.Id == card.Id);
-            if(existingCard is not null)
+            var existingCard = storage.Cards.SingleOrDefault(cardInStorage => cardInStorage.Id == card.Id);
+            if (existingCard is null)
             {
-                existingCard.AnswerContent = card.AnswerContent;
-                existingCard.QuestionContent = card.QuestionContent;
-                existingCard.Created = card.Created;
-                existingCard.AnswerType = card.AnswerType;
-                existingCard.QuestionType = card.QuestionType;
-                return existingCard.Id;
+                return null;
             }
 
-            return null;
+            existingCard.AnswerContent = card.AnswerContent;
+            existingCard.QuestionContent = card.QuestionContent;
+            existingCard.Created = card.Created;
+            existingCard.AnswerType = card.AnswerType;
+            existingCard.QuestionType = card.QuestionType;
+            existingCard.Description = card.Description;
+            return existingCard.Id;
         }
 
         public IEnumerable<CardEntity> Where(Expression<Func<CardEntity, bool>> predicate)
