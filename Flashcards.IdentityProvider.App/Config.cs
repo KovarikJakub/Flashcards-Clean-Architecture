@@ -48,14 +48,12 @@ namespace Flashcards.IdentityProvider.App
                 {
                     "https://localhost:44355"
                 },
-                // This is a public SPA client — use Authorization Code + PKCE
                 AllowedGrantTypes = [
                     GrantType.ResourceOwnerPassword,
                     GrantType.AuthorizationCode
                 ],
                 RequirePkce = true,
                 RequireClientSecret = false,
-                // Allow the browser to call the token endpoint from this origin
                 AllowedCorsOrigins = new List<string>
                 {
                     "https://localhost:44355"

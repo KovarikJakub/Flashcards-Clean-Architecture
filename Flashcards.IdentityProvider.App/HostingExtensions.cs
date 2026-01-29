@@ -10,8 +10,6 @@ namespace Flashcards.IdentityProvider.App
     {
         public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
         {
-            // Set up logging to write regular entries to console, and diagnostics data to a file.
-            // See https://docs.duendesoftware.com/identityserver/diagnostics/data
             builder.Host.UseSerilog((ctx, lc) =>
             {
                 lc.WriteTo.Logger(consoleLogger =>
@@ -30,7 +28,7 @@ namespace Flashcards.IdentityProvider.App
                     {
                         fileLogger
                             .WriteTo.File("./diagnostics/diagnostic.log", rollingInterval: RollingInterval.Day,
-                                fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
+                                fileSizeLimitBytes: 1024 * 1024 * 10, 
                                 rollOnFileSizeLimit: true,
                                 outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
                                 formatProvider: CultureInfo.InvariantCulture)
@@ -44,10 +42,8 @@ namespace Flashcards.IdentityProvider.App
 
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
-            // uncomment if you want to add a UI
             builder.Services.AddRazorPages();
-
-            // Add CORS policy to allow the SPA client to access discovery and token endpoints
+            
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policy =>

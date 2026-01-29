@@ -89,13 +89,7 @@ public partial class UserList : PageBase
                 return;
             }
 
-            await UserFacadeService.CreateUserWithIdentityAsync(
-                userName: NewUser.UserName,
-                password: NewUser.Password,
-                email: NewUser.Email,
-                name: NewUser.FullName,
-                photographyUrl: string.IsNullOrWhiteSpace(NewUser.ProfilePicUrl) ? null : NewUser.ProfilePicUrl,
-                role: NewUser.Role);
+            // TODO: create user with identity
 
             IsCreating = false;
             NewUser = new NewUserModel();
@@ -119,7 +113,7 @@ public partial class UserList : PageBase
         {
             try
             {
-                await UserFacadeService.DeleteUserWithIdentityAsync(user.Id);
+                // TODO: Delete user
             }
             catch (Exception ex)
             {

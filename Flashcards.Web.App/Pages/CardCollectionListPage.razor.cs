@@ -52,6 +52,7 @@ namespace Flashcards.Web.App.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            Console.WriteLine("OnInitializedAsync()!");
             try
             {
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();

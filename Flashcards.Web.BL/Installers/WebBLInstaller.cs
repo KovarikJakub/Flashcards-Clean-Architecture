@@ -24,15 +24,7 @@ public class WebBLInstaller
         serviceCollection.AddTransient<CardCollectionFacade>();
         serviceCollection.AddTransient<LessonFacade>();
         serviceCollection.AddTransient<CardFacade>();
-        
-        // UserFacade needs both IUserApiClient and HttpClient (for auth)
-        serviceCollection.AddTransient<UserFacade>(sp =>
-        {
-            var userApiClient = sp.GetRequiredService<IUserApiClient>();
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient(nameof(IUserApiClient));
-            return new UserFacade(userApiClient, httpClient);
-        });
+        serviceCollection.AddTransient<UserFacade>();
     }
 
     private void AddApiClient<TInterface, TImplementation>(

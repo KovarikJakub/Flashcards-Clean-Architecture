@@ -40,36 +40,10 @@ namespace Flashcards.Web.BL.Facades
             await apiClient.UserDeleteAsync(id);
         }
 
-        /// <summary>
-        /// Creates a new user in both Identity Server and API
-        /// Uses the authenticated HttpClient from IUserApiClient's configuration
-        /// </summary>
-        public async Task<Guid> CreateUserWithIdentityAsync(
-            string userName,
-            string password,
-            string email,
-            string name,
-            string? photographyUrl,
-            RoleType role,
-            CancellationToken cancellationToken = default)
+        public async Task<Guid> UpsertAsync(UserDetailModel model)
         {
-            return await apiClient.CreateUserWithIdentityAsync(
-                httpClient,
-                userName,
-                password,
-                email,
-                name,
-                photographyUrl,
-                role,
-                cancellationToken);
-        }
-
-        /// <summary>
-        /// Deletes user from both Identity Server and API
-        /// </summary>
-        public async Task DeleteUserWithIdentityAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            await apiClient.DeleteUserWithIdentityAsync(httpClient, id, cancellationToken);
+            var id = await apiClient.UpsertAsync(model);
+            return id;
         }
     }
 }
