@@ -72,6 +72,7 @@ namespace Flashcards.Web.App.Pages
 
         private async Task LoadData()
         {
+            // TODO: Do NOT use GetAll! Use Query endpoint instead !!!
             CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
 
             if (string.IsNullOrEmpty(_userId))
@@ -83,13 +84,15 @@ namespace Flashcards.Web.App.Pages
 
             // get currently signed user:
             var currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
-            // return his cards:
+            // create query to obtain his card collections:
             var queryJustMine = new CardCollectionQueryModel
             {
                 OwnerId = currentUser.Id
             };
-            // TODO: QUERY endpoints now return PagedResult<TEntity> and not IList<TEntity> !!!
-            //CardCollectionsMine = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
+
+            // QUERY endpoints now return PagedResult<TEntity> and not IList<TEntity>
+            var cardCollectionsOfCurrentUser = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
+            CardCollectionsMine = cardCollectionsOfCurrentUser.Items;
         }
 
         private Task OnEditCollection(CardCollectionListModel collection)

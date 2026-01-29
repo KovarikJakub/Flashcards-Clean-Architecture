@@ -164,8 +164,8 @@
                     userName = userModel.Name;
 
                     var query = new LessonQueryModel { UserId = userModel.Id }; // get lessons just for this user 
-                    // TODO: QUERY endpoints now return PagedResult<TEntity> and not IList<TEntity> !!!
-                    //lessons = await LessonFacade.GetByQueryAsync(query);
+                    var lessonsPagedResult = await LessonFacade.GetByQueryAsync(query);
+                    lessons = lessonsPagedResult.Items.ToList();
                 }
             }
             catch (Exception ex)
