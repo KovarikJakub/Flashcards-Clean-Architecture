@@ -50,6 +50,7 @@ namespace Flashcards.Web.App.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            Console.WriteLine("OnInitializedAsync()!");
             try
             {
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -70,6 +71,7 @@ namespace Flashcards.Web.App.Pages
 
         private async Task LoadData()
         {
+            Console.WriteLine("LoadData");
             CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
             CardCollectionsMine = await CardCollectionFacade.GetByOwnerAsync(_userId);
         }
