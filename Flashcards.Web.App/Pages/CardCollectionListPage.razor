@@ -3,7 +3,7 @@
 @layout ListLayout
 @inherits PageBase
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+
 
 <div class="w-[95%] max-w-[1800px] mx-auto py-12 space-y-16">
 
@@ -25,76 +25,74 @@
                 <input class="w-[350px] pl-10 pr-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm outline-none text-slate-700 placeholder-slate-400"
                        placeholder="Filter by title..."
                        @bind="FilterMy"
-                       @bind:event="oninput" />
+                       @bind:event="oninput"/>
             </div>
         </div>
 
         @if (CardCollectionsMine.Count != 0)
         {
-        <div class="flex gap-4 items-start w-full">
+            <div class="flex gap-4 items-start w-full">
+                <div class="relative flex-1 min-w-0 group/carousel">
+                    <button class="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-indigo-50 hover:text-indigo-600 transition opacity-0 group-hover/carousel:opacity-100"
+                            @onclick="() => ScrollLeft(_scrollContainerMy)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
 
-            <div class="relative flex-1 min-w-0 group/carousel">
-
-                <button class="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-indigo-50 hover:text-indigo-600 transition opacity-0 group-hover/carousel:opacity-100"
-                        @onclick="() => ScrollLeft(_scrollContainerMy)">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                </button>
-
-                <div class="overflow-hidden rounded-2xl py-2 px-1">
-                    <div class="flex gap-4 w-full h-[380px] overflow-x-auto scroll-smooth hide-scrollbar p-2" @ref="_scrollContainerMy">
-                        @if (FilteredMyCollections.Any())
-                        {
-                        @foreach (var collection in FilteredMyCollections)
-                        {
-                        <div class="flex-shrink-0 w-[340px] h-full">
-                            <CardCollectionCard Class="h-full w-full" Collection="collection" IsOwner="true" IsActive="@IsCollectionActive(collection)"
-                                                onPlay="@(() => HandlePlayCollection(collection))"
-                                                OnEdit="@(() => OnEditCollection(collection))"
-                                                OnDelete="@(() => OnDeleteCollection(collection))" />
+                    <div class="overflow-hidden rounded-2xl py-2 px-1">
+                        <div class="flex gap-4 w-full h-[380px] overflow-x-auto scroll-smooth hide-scrollbar p-2" @ref="_scrollContainerMy">
+                            @if (CardCollectionsMine.Any())
+                            {
+                                @foreach (var collection in CardCollectionsMine)
+                                {
+                                    <div class="flex-shrink-0 w-[340px] h-full">
+                                        <CardCollectionCard Class="h-full w-full" Collection="collection" IsOwner="true" IsActive="@IsCollectionActive(collection)"
+                                                            onPlay="@(() => HandlePlayCollection(collection))"
+                                                            OnEdit="@(() => OnEditCollection(collection))"
+                                                            OnDelete="@(() => OnDeleteCollection(collection))" />
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="flex flex-col items-center justify-center w-full h-[350px] text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 mb-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                    </svg>
+                                    No collections match your filter.
+                                </div>
+                            }
                         </div>
-                        }
-                        }
-                        else
-                        {
-                        <div class="flex flex-col items-center justify-center w-full h-[350px] text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 mb-2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                            </svg>
-                            No collections match your filter.
-                        </div>
-                        }
                     </div>
+
+                    <button class="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-indigo-50 hover:text-indigo-600 transition opacity-0 group-hover/carousel:opacity-100"
+                            @onclick="() => ScrollRight(_scrollContainerMy)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
                 </div>
 
-                <button class="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-indigo-50 hover:text-indigo-600 transition opacity-0 group-hover/carousel:opacity-100"
-                        @onclick="() => ScrollRight(_scrollContainerMy)">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                </button>
+                <div class="w-[340px] flex-shrink-0 h-[380px] pt-4">
+                    @if (!_showCreateForm)
+                    {
+                        <button class="w-full h-[350px] border-2 border-dashed border-indigo-200 rounded-2xl flex flex-col items-center justify-center gap-4 text-indigo-400 hover:bg-indigo-50/50 hover:border-indigo-400 hover:text-indigo-600 transition duration-300 group"
+                                @onclick="HandleOpenForm">
+                            <div class="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-lg">Create new</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <CardCollectionForm Model="@_model" Submit="@HandleSubmit" Cancel="@HandleCancel" Class="h-[350px] w-full shadow-xl" />
+                    }
+                </div>
             </div>
-
-            <div class="w-[340px] flex-shrink-0 h-[380px] pt-4">
-                @if (!_showCreateForm)
-                {
-                <button class="w-full h-[350px] border-2 border-dashed border-indigo-200 rounded-2xl flex flex-col items-center justify-center gap-4 text-indigo-400 hover:bg-indigo-50/50 hover:border-indigo-400 hover:text-indigo-600 transition duration-300 group"
-                        @onclick="HandleOpenForm">
-                    <div class="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                    </div>
-                    <span class="font-semibold text-lg">Create new</span>
-                </button>
-                }
-                else
-                {
-                <CardCollectionForm Model="@_model" Submit="@HandleSubmit" Cancel="@HandleCancel" Class="h-[350px] w-full shadow-xl" />
-                }
-            </div>
-        </div>
         }
     </div>
 
@@ -122,42 +120,42 @@
 
         @if (CardCollectionsAll.Count != 0)
         {
-        <div class="relative group/carousel">
-            <button class="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-emerald-50 hover:text-emerald-600 transition opacity-0 group-hover/carousel:opacity-100"
-                    @onclick="() => ScrollLeft(_scrollContainerAll)">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-            </button>
+            <div class="relative group/carousel">
+                <button class="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-emerald-50 hover:text-emerald-600 transition opacity-0 group-hover/carousel:opacity-100"
+                        @onclick="() => ScrollLeft(_scrollContainerAll)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
 
-            <div class="overflow-hidden rounded-2xl py-2 px-1">
-                <div class="flex gap-4 w-full h-[380px] overflow-x-auto scroll-smooth hide-scrollbar p-2" @ref="_scrollContainerAll">
-                    @if (FilteredAllCollections.Any())
-                    {
-                    @foreach (var collection in FilteredAllCollections)
-                    {
-                    <div class="flex-shrink-0 w-[340px] h-full">
-                        <CardCollectionCard Class="h-full w-full" Collection="collection" IsOwner="false" IsActive="@IsCollectionActive(collection)"
-                                            onPlay="@(() => HandlePlayCollection(collection))"/>
+                <div class="overflow-hidden rounded-2xl py-2 px-1">
+                    <div class="flex gap-4 w-full h-[380px] overflow-x-auto scroll-smooth hide-scrollbar p-2" @ref="_scrollContainerAll">
+                        @if (CardCollectionsAll.Any())
+                        {
+                            @foreach (var collection in CardCollectionsAll)
+                            {
+                            <div class="flex-shrink-0 w-[340px] h-full">
+                                <CardCollectionCard Class="h-full w-full" Collection="collection" IsOwner="false" IsActive="@IsCollectionActive(collection)"
+                                                    onPlay="@(() => HandlePlayCollection(collection))"/>
+                            </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="flex flex-col items-center justify-center w-full h-[350px] text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                No collections match your filter.
+                            </div>
+                        }
                     </div>
-                    }
-                    }
-                    else
-                    {
-                    <div class="flex flex-col items-center justify-center w-full h-[350px] text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                        No collections match your filter.
-                    </div>
-                    }
                 </div>
-            </div>
 
-            <button class="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-emerald-50 hover:text-emerald-600 transition opacity-0 group-hover/carousel:opacity-100"
-                    @onclick="() => ScrollRight(_scrollContainerAll)">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-            </button>
-        </div>
+                <button class="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur border border-slate-200 text-slate-700 p-2 rounded-full z-20 shadow-lg hover:bg-emerald-50 hover:text-emerald-600 transition opacity-0 group-hover/carousel:opacity-100"
+                        @onclick="() => ScrollRight(_scrollContainerAll)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            </div>
         }
     </div>
 </div>
