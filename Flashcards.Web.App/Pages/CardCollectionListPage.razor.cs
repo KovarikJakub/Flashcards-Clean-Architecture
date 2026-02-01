@@ -8,6 +8,7 @@ namespace Flashcards.Web.App.Pages
 {
     public partial class CardCollectionListPage : PageBase
     {
+        // Injections
         [Inject]
         private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
         [Inject]
@@ -16,21 +17,39 @@ namespace Flashcards.Web.App.Pages
         private NavigationManager NavigationManager { get; set; } = null!;
         [Inject]
         private IJSRuntime Js { get; set; } = null!; 
-        
         [Inject]
         private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
         
-        private ICollection<CardCollectionListModel> CardCollectionsAll { get; set; } = new List<CardCollectionListModel>();
-        private ICollection<CardCollectionListModel> CardCollectionsMine { get; set; } = new List<CardCollectionListModel>();
-        private string FilterMy { get; set; } = string.Empty;
-        private string FilterAll { get; set; } = string.Empty;
-        
+        // variables and properties
         private bool _showCreateForm = false;
         private ElementReference _scrollContainerMy;
         private ElementReference _scrollContainerAll;
         private IJSObjectReference? _module;
         private string? _userId;
+        private ICollection<CardCollectionListModel> CardCollectionsAll { get; set; } = new List<CardCollectionListModel>();
+        private ICollection<CardCollectionListModel> CardCollectionsMine { get; set; } = new List<CardCollectionListModel>();
+        private string _filterMy = string.Empty;
+        private string FilterMy
+        {
+            get => _filterMy;
+            set
+            {
+                _filterMy = value;
+                _ = OnFilterChanged();
+            }
+        }
+        private string _filterAll = string.Empty;
 
+        private string FilterAll
+        {
+            get => _filterAll;
+            set
+            {
+                _filterAll = value;
+                _ = OnFilterChanged();
+            }
+        } 
+        
         private CardCollectionDetailModel _model = new CardCollectionDetailModel
         {
             Id = Guid.NewGuid(),
@@ -39,22 +58,12 @@ namespace Flashcards.Web.App.Pages
             AnswerEnd = DateTime.Now.AddDays(1),
             Cards = new List<CardDetailModel>()
         };
-
-        private List<CardCollectionListModel> FilteredMyCollections =>
-            string.IsNullOrWhiteSpace(FilterMy)
-                ? CardCollectionsMine.ToList()
-                : CardCollectionsMine.Where(c => c.Title?.Contains(FilterMy.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
-
-        private List<CardCollectionListModel> FilteredAllCollections =>
-            string.IsNullOrWhiteSpace(FilterAll)
-                ? CardCollectionsAll.ToList()
-                : CardCollectionsAll.Where(c => c.Title?.Contains(FilterAll.Trim(), StringComparison.OrdinalIgnoreCase) == true).ToList();
-
+        
         protected override async Task OnInitializedAsync()
         {
-            Console.WriteLine("OnInitializedAsync()!");
             try
             {
+                // get current user identity
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                 var user = authState.User;
                 if (user.Identity?.IsAuthenticated == true)
@@ -73,9 +82,6 @@ namespace Flashcards.Web.App.Pages
 
         private async Task LoadData()
         {
-            // TODO: Do NOT use GetAll! Use Query endpoint instead !!!
-            CardCollectionsAll = await CardCollectionFacade.GetAllAsync();
-
             if (string.IsNullOrEmpty(_userId))
             {
                 // No user logged in, show empty collection
@@ -83,25 +89,41 @@ namespace Flashcards.Web.App.Pages
                 return;
             }
 
-            // get currently signed user:
+            // get currently signed user
             var currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
-            // create query to obtain his card collections:
+            
+            // create query to obtain his card collections
             var queryJustMine = new CardCollectionQueryModel
             {
-                OwnerId = currentUser.Id
+                OwnerId = currentUser.Id,
+                SearchString = FilterMy                             // by card collection title
             };
-
-            // QUERY endpoints now return PagedResult<TEntity> and not IList<TEntity>
             var cardCollectionsOfCurrentUser = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
             CardCollectionsMine = cardCollectionsOfCurrentUser.Items;
+            
+            // create query to obtain all other card collections
+            var queryExcludeMine = new CardCollectionQueryModel
+            {
+                ExcludeOwnerId = currentUser.Id,             
+                SearchString = FilterAll                                // by card collection title
+            };
+            var cardCollectionsExcludingCurrentUser = await CardCollectionFacade.GetByQueryAsync(queryExcludeMine);
+            CardCollectionsAll = cardCollectionsExcludingCurrentUser.Items;
         }
-
+        
+        // navigation handlers
         private Task OnEditCollection(CardCollectionListModel collection)
         {
             NavigationManager.NavigateTo($"collections/edit/{collection.Id}");
             return Task.CompletedTask;
         }
+        
+        private void HandlePlayCollection(CardCollectionListModel collection)
+        {
+            NavigationManager.NavigateTo($"/play/{collection.Id}");
+        }
 
+        // action handlers
         private async Task OnDeleteCollection(CardCollectionListModel collection)
         {
             try
@@ -113,11 +135,6 @@ namespace Flashcards.Web.App.Pages
             {
                 Console.WriteLine($"Failed to delete collection: {ex.Message}");
             }
-        }
-        
-        private void HandlePlayCollection(CardCollectionListModel collection)
-        {
-            NavigationManager.NavigateTo($"/play/{collection.Id}");
         }
         
         private async Task HandleSubmit(CardCollectionDetailModel model)
@@ -143,6 +160,12 @@ namespace Flashcards.Web.App.Pages
             }
         }
         
+        private async Task OnFilterChanged()
+        {
+            await LoadData();
+            StateHasChanged();
+        }
+        
         private void  HandleCancel()
         {
             _showCreateForm = false;
@@ -153,7 +176,8 @@ namespace Flashcards.Web.App.Pages
             _showCreateForm = true;
         } 
 
-        private bool IsCollectionActive(CardCollectionListModel collection)
+        // checks if current date is within answer period
+        private static bool IsCollectionActive(CardCollectionListModel collection)            
         {
             var now = DateTime.Now;
             var startUtc = collection.AnswerStart;
@@ -161,16 +185,14 @@ namespace Flashcards.Web.App.Pages
             return now >= startUtc && now <= endUtc;
         }
         
+        // JS for scrolling
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
                 try
                 {
-                    Console.WriteLine("Attempting to load JS module...");
-                    _module = await Js.InvokeAsync<IJSObjectReference>(
-                        "import", "/js/Scroll.js");
-                    Console.WriteLine("JS module loaded successfully.");
+                    _module = await Js.InvokeAsync<IJSObjectReference>("import", "/js/Scroll.js");
                 }
                 catch (Exception ex)
                 {
@@ -181,29 +203,17 @@ namespace Flashcards.Web.App.Pages
 
         private async Task ScrollLeft(ElementReference container)
         {
-            Console.WriteLine("ScrollLeft called.");
             if (_module is not null)
             {
-                Console.WriteLine("Invoking scrollLeft JS function...");
                 await _module.InvokeVoidAsync("scrollLeft", container, 450);
-            }
-            else
-            {
-                Console.WriteLine("_module is null. JS function not invoked.");
             }
         }
 
         private async Task ScrollRight(ElementReference container)
         {
-            Console.WriteLine("ScrollRight called.");
             if (_module is not null)
             {
-                Console.WriteLine("Invoking scrollRight JS function...");
                 await _module.InvokeVoidAsync("scrollRight", container, 450);
-            }
-            else
-            {
-                Console.WriteLine("_module is null. JS function not invoked.");
             }
         }
     }
