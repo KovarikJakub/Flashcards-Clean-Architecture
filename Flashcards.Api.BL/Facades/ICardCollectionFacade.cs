@@ -8,9 +8,9 @@ namespace Flashcards.Api.BL.Facades
         List<CardCollectionListModel> GetAll();
         PagedResponse<CardCollectionListModel> GetByQuery(CardCollectionQueryModel query);
         CardCollectionDetailModel? GetById(Guid id);
-        Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string requestorId);
-        Guid Create(CardCollectionCreateModel model, IList<string> userRoles, string requestorId);
-        Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string requestorId);
-        void Delete(Guid id, IList<string> userRoles, string requestorId);
+        Guid CreateOrUpdate(CardCollectionDetailModel model);
+        Guid Create(CardCollectionCreateModel model);
+        Guid? Update(CardCollectionDetailModel model);
+        void Delete(Guid id);
     }
 }

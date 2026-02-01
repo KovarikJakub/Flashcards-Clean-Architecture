@@ -43,26 +43,18 @@ public class CardEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
         }
 
         cardModifyingEndpoints.MapPost("", 
-            (CardCreateModel card, ICardFacade cardFacade, IHttpContextAccessor httpContextAccessor) =>
+            (CardCreateModel card, ICardFacade cardFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
-                var id = cardFacade.Create(card, userRoles, userId!);
+                var id = cardFacade.Create(card);
                 return TypedResults.Ok(id);
             });
 
         cardModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult> 
-            (CardDetailModel card, ICardFacade cardFacade, IHttpContextAccessor httpContextAccessor) =>
+            (CardDetailModel card, ICardFacade cardFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
                 try
                 {
-                    return TypedResults.Ok(cardFacade.Update(card, userRoles, userId!));
+                    return TypedResults.Ok(cardFacade.Update(card));
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -71,26 +63,18 @@ public class CardEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             });
 
         cardModifyingEndpoints.MapPost("upsert",
-            (CardDetailModel card, ICardFacade cardFacade, IHttpContextAccessor httpContextAccessor) =>
+            (CardDetailModel card, ICardFacade cardFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
-                var id = cardFacade.CreateOrUpdate(card, userRoles, userId!);
+                var id = cardFacade.CreateOrUpdate(card);
                 return TypedResults.Ok(id);
             });
 
         cardModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
-            (Guid id, ICardFacade cardFacade, IHttpContextAccessor httpContextAccessor) =>
+            (Guid id, ICardFacade cardFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
                 try
                 {
-                    cardFacade.Delete(id, userRoles, userId!);
+                    cardFacade.Delete(id);
                     return TypedResults.Ok();
                 }
                 catch (UnauthorizedAccessException)

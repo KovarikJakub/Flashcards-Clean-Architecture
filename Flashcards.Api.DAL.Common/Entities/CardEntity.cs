@@ -1,8 +1,9 @@
-﻿using Flashcards.Common.Enums;
+﻿using Flashcards.Api.DAL.Common.Entities.Interfaces;
+using Flashcards.Common.Enums;
 
 namespace Flashcards.Api.DAL.Common.Entities
 {
-    public record CardEntity : EntityBase
+    public record CardEntity : EntityBase, IOwnedEntity
     {
         public required ContentType QuestionType { get; set; }
         public required ContentType AnswerType { get; set; }

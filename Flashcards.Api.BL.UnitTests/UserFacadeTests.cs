@@ -1,6 +1,6 @@
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
-using Flashcards.Api.BL.Services;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;

@@ -136,7 +136,7 @@ namespace Flashcards.Api.BL.UnitTests
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<LessonEntity>(lesson =>
-                lesson.CardCollectionId == createModel.CardCollectionId && lesson.UserId == _ownerEntity.Id));
+                lesson.CardCollectionId == createModel.CardCollectionId && lesson.OwnerId == _ownerEntity.Id));
         }
 
         [Fact]

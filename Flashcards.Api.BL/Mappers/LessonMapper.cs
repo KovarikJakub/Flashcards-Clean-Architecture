@@ -10,7 +10,7 @@ namespace Flashcards.Api.BL.Mappers
             return new LessonEntity
             {
                 Id = model.Id,
-                UserId = owner.Id,
+                OwnerId = owner.Id,
                 User = owner,
                 CardCollectionId = model.CardCollection.Id,
                 CardCollection = collectionMapper.ToEntity(model.CardCollection, owner),
@@ -26,7 +26,7 @@ namespace Flashcards.Api.BL.Mappers
             return new LessonEntity
             {
                 Id = Guid.NewGuid(),
-                UserId = owner.Id,
+                OwnerId = owner.Id,
                 User = owner,
                 CardCollectionId = model.CardCollectionId,
                 CardCollection = collection,

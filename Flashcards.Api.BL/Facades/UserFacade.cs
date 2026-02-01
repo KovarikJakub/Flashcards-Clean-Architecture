@@ -1,5 +1,5 @@
 using Flashcards.Api.BL.Mappers;
-using Flashcards.Api.BL.Services;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
@@ -9,6 +9,8 @@ namespace Flashcards.Api.BL.Facades
 {
     public class UserFacade(
         IUserRepository userRepository,
+        ILessonRepository lessonRepository,
+        ISecurityService securityService,
         IIdentityService identityService,
         UserMapper mapper) : IUserFacade
     {
@@ -53,40 +55,66 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public Guid Create(UserCreateModel model, IList<string> userRoles, string requestorId)
+        public Guid Create(UserCreateModel model)
         {
-            if (string.IsNullOrWhiteSpace(requestorId))
-                throw new ArgumentException("ownerId is required to create user.", nameof(requestorId));
+            securityService.ThrowIfNotAdmin();
 
             var role = model.Role == RoleType.Admin ? "Admin" : "User";
             var subId = identityService.CreateIdentityAsync(model.IdentityName, model.Password, role).Result;
-            if (string.IsNullOrWhiteSpace(requestorId))
+            if (string.IsNullOrWhiteSpace(subId))
                 throw new InvalidOperationException("Failed to create identity for the user.");
 
             var entity = mapper.ToEntity(model, subId);
-            userRepository.Insert(entity);
-            return entity.Id;
+            return userRepository.Insert(entity);
         }
 
-        public Guid? Update(UserDetailModel model, IList<string> userRoles, string requestorId)
+        public Guid? Update(UserDetailModel model)
         {
+            securityService.ThrowIfUnauthorizedUserUpdate(model.Id);
+
             var existing = userRepository.GetById(model.Id);
             if (existing == null)
                 return null;
 
-            var entity = mapper.ToEntity(model, requestorId);
+            var updated = new UserEntity()
+            {
+                Id = model.Id,
+                IdentityOwnerId = existing.IdentityOwnerId, // keep
+                Name = model.Name,
+                Role = existing.Role, // keep
+                PhotoUrl = model.PhotoUrl,
+            };
 
-            return userRepository.Update(entity);
+            return userRepository.Update(updated);
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string requestorId)
+        public void Delete(Guid id)
         {
+            securityService.ThrowIfNotAdmin();
+
             var deletedUserEntity = userRepository.GetById(id);
             if (deletedUserEntity is null)
                 return;
-
+            
+            // Delete users Identity
             identityService.DeleteIdentityAsync(deletedUserEntity.IdentityOwnerId);
-            userRepository.Remove(id);
+
+            // Mark user as deleted by removing IdentityOwnerId
+            var userWithDeletedIdentity = new UserEntity()
+            {
+                Id = deletedUserEntity.Id,
+                Name = deletedUserEntity.Name,
+                Role = deletedUserEntity.Role,
+                IdentityOwnerId = string.Empty
+            };
+            userRepository.Update(userWithDeletedIdentity);
+
+            // Delete users lessons:
+            var lessonsOfDeletedUser = lessonRepository.Where(lesson => lesson.OwnerId == lesson.CardCollectionId);
+            foreach(var lesson in lessonsOfDeletedUser)
+            {
+                lessonRepository.Remove(lesson.Id);
+            }
         }
     }
 }

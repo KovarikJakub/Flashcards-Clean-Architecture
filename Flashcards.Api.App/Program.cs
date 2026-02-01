@@ -11,6 +11,7 @@ using Flashcards.Common.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Flashcards.Common;
+using Flashcards.Api.BL.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

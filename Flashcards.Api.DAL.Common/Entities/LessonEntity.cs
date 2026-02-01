@@ -1,8 +1,10 @@
-﻿namespace Flashcards.Api.DAL.Common.Entities
+﻿using Flashcards.Api.DAL.Common.Entities.Interfaces;
+
+namespace Flashcards.Api.DAL.Common.Entities
 {
-    public record LessonEntity : EntityBase
+    public record LessonEntity : EntityBase, IOwnedEntity
     {
-        public Guid UserId { get; set; }
+        public Guid OwnerId { get; set; }
         public required UserEntity User { get; set; }
         public Guid CardCollectionId { get; set; }
         public required CardCollectionEntity CardCollection { get; set; }

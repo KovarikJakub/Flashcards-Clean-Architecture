@@ -1,6 +1,8 @@
-﻿namespace Flashcards.Api.DAL.Common.Entities
+﻿using Flashcards.Api.DAL.Common.Entities.Interfaces;
+
+namespace Flashcards.Api.DAL.Common.Entities
 {
-    public record CardCollectionEntity : EntityBase
+    public record CardCollectionEntity : EntityBase, IOwnedEntity
     {
         public required string Title { get; set; }
         public ICollection<CardEntity> Cards { get; set; } = new List<CardEntity>();

@@ -49,26 +49,18 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
         }
 
         userModifyingEndpoints.MapPost("",
-            (UserCreateModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
+            (UserCreateModel user, IUserFacade userFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
-                var id = userFacade.Create(user, userRoles, userId!);
+                var id = userFacade.Create(user);
                 return TypedResults.Ok(id);
             });
 
         userModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult>
-            (UserDetailModel user, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
+            (UserDetailModel user, IUserFacade userFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
                 try
                 {
-                    return TypedResults.Ok(userFacade.Update(user, userRoles, userId!));
+                    return TypedResults.Ok(userFacade.Update(user));
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -77,15 +69,11 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             });
 
         userModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
-            (Guid id, IUserFacade userFacade, IHttpContextAccessor httpContextAccessor) =>
+            (Guid id, IUserFacade userFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
                 try
                 {
-                    userFacade.Delete(id, userRoles, userId!);
+                    userFacade.Delete(id);
                     return TypedResults.Ok();
                 }
                 catch (UnauthorizedAccessException)
