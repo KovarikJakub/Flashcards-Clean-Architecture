@@ -2,7 +2,7 @@ using Flashcards.Common.Models;
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 
-namespace Flashcards.Web.App.Pages
+namespace Flashcards.Web.App.Pages.Play
 {
     public partial class Play : PageBase
     {
@@ -28,6 +28,7 @@ namespace Flashcards.Web.App.Pages
         private Guid _createdLessonId;
         // to track answers for each card
         private enum AnswerState { None, Correct, Wrong }
+
         private readonly Dictionary<Guid, AnswerState> _answers = new();
         
         protected override async Task OnInitializedAsync()

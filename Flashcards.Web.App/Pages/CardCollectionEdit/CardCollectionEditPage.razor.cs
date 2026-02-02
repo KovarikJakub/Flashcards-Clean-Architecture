@@ -3,7 +3,7 @@ using Flashcards.Common.Enums;
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 
-namespace Flashcards.Web.App.Pages
+namespace Flashcards.Web.App.Pages.CardCollectionEdit
 {
     public partial class CardCollectionEditPage : PageBase
     {

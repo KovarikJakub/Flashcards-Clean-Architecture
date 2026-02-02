@@ -3,7 +3,7 @@ using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Flashcards.Web.App.Pages
+namespace Flashcards.Web.App.Pages.Statistics
 {
     public partial class StatisticsPage : PageBase
     {

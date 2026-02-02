@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Flashcards.Web.App.Pages
+namespace Flashcards.Web.App.Pages.CardCollectionList
 {
     public partial class CardCollectionListPage : PageBase
     {
