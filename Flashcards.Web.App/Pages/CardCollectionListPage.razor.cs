@@ -21,7 +21,7 @@ namespace Flashcards.Web.App.Pages
         private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
         
         // variables and properties
-        private bool _showCreateForm = false;
+        private bool _showCreateForm;
         private ElementReference _scrollContainerMy;
         private ElementReference _scrollContainerAll;
         private IJSObjectReference? _module;
