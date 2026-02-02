@@ -8,7 +8,6 @@ namespace Flashcards.Api.BL.Facades
 {
     public class CardCollectionFacade(
         ICardCollectionRepository cardCollectionRepository,
-        IUserRepository userRepository,
         ISecurityService securityService,
         ICurrentUserProvider currentUser,
         CardCollectionMapper mapper)
@@ -83,7 +82,7 @@ namespace Flashcards.Api.BL.Facades
             
             securityService.ThrowIfNotOwnerAndAdmin(existing);
 
-            var ownerEntity = userRepository.GetById(existing.OwnerId);
+            var ownerEntity = currentUser.GetCurrentUser();
             var entity = mapper.ToEntity(model, ownerEntity!);
 
             return cardCollectionRepository.Update(entity);

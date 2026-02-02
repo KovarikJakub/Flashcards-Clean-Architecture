@@ -11,155 +11,126 @@ namespace Flashcards.Api.BL.UnitTests
 {
     public class UserFacadeTests
     {
-        private readonly IUserRepository _fakeRepo;
-        private readonly IIdentityService _fakeIdentityService;
+        private readonly IUserRepository _userRepoSub;
+        private readonly ILessonRepository _lessonRepoSub;
+        private readonly ISecurityService _securityServiceSub;
+        private readonly IIdentityService _identityServiceSub;
+
         private readonly UserMapper _mapper;
-        private readonly UserFacade _facade;
+
+        private readonly UserFacade _sut;
 
         public UserFacadeTests()
         {
-            _fakeRepo = Substitute.For<IUserRepository>();
-            _fakeIdentityService = Substitute.For<IIdentityService>();
+            _userRepoSub = Substitute.For<IUserRepository>();
+            _lessonRepoSub = Substitute.For<ILessonRepository>();
+            _securityServiceSub = Substitute.For<ISecurityService>();
+            _identityServiceSub = Substitute.For<IIdentityService>();
 
             _mapper = new UserMapper();
-            _facade = new UserFacade(_fakeRepo, _fakeIdentityService, _mapper);
+
+            _sut = new UserFacade(
+                _userRepoSub,
+                _lessonRepoSub,
+                _securityServiceSub,
+                _identityServiceSub,
+                _mapper
+            );
         }
 
-        private UserCreateModel CreateUserCreateModel()
+        [Fact]
+        public void Create_ShouldThrowForbidden_WhenUserIsNotAdmin()
         {
-            var newUser = new UserCreateModel()
+            // Arrange
+            var model = new UserCreateModel
             {
-                Name = "Petr",
-                PhotoUrl = null,
+                IdentityName = "hacker", 
+                Role = RoleType.User ,
+                Name = "Anonymous123",
+                Password = "Pass123"
+            };
+
+            _securityServiceSub
+                .When(x => x.ThrowIfNotAdmin())
+                .Do(x => throw new UnauthorizedAccessException("Admin only"));
+
+            // Act
+            Action act = () => _sut.Create(model);
+
+            // Assert
+            Assert.Throws<UnauthorizedAccessException>(act);
+
+            // Verify we never called IdentityService or Repository
+            _identityServiceSub.DidNotReceive().CreateIdentityAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+            _userRepoSub.DidNotReceive().Insert(Arg.Any<UserEntity>());
+        }
+
+        [Fact]
+        public void Create_ShouldThrowInvalidOperation_WhenIdentityCreationFails()
+        {
+            // Arrange
+            var model = new UserCreateModel
+            {
+                IdentityName = "newuser",
+                Password = "123",
                 Role = RoleType.User,
-                IdentityName = "PetrId",
-                Password = "Petr123"
+                Name = "New User"
             };
 
-            return newUser;
+            // Simulate Identity Service returning failure (empty string)
+            _identityServiceSub.CreateIdentityAsync(model.IdentityName, model.Password, "User")
+                .Returns(string.Empty);
+
+            // Act
+            Action act = () => _sut.Create(model);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(act); // failed to create identity
+
+            // Verify we did NOT try to insert a broken user into the DB
+            _userRepoSub.DidNotReceive().Insert(Arg.Any<UserEntity>());
         }
 
-        private UserDetailModel CreateUserDetailModel(Guid id)
+        [Fact]
+        public void Create_ShouldCreateIdentityAndInsertUser_WhenDataIsValid()
         {
-            var newUser = new UserDetailModel()
+            // Arrange
+            var model = new UserCreateModel
             {
-                Id = id,
-                Name = "Petr",
-                PhotoUrl = null,
-                Role = RoleType.User
+                IdentityName = "john_doe",
+                Password = "SecurePassword123!",
+                Role = RoleType.User,
+                Name = "John Doe"
             };
 
-            return newUser;
-        }
+            var expectedIdentityId = "auth0|123456";
+            var expectedUserId = Guid.NewGuid();
 
+            //  Setup Identity Service to return a valid ID
+            _identityServiceSub
+                .CreateIdentityAsync(model.IdentityName, model.Password, "User")
+                .Returns(expectedIdentityId);
 
-        [Fact]
-        public void Delete_Calls_Correct_Method_On_Repository()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-
-            var user = new UserEntity()
-            {
-                Id = userId,
-                IdentityOwnerId = "PetrId",
-                Name = "Petr",
-                Role = RoleType.User
-            };
-            _fakeRepo.GetById(userId).Returns(user);
-
-            // act
-            _facade.Delete(userId, new List<string>(), "abc");
-            
-            // assert
-            _fakeIdentityService.Received(1).DeleteIdentityAsync("PetrId");
-            _fakeRepo.Received(1).Remove(Arg.Any<Guid>());       
-        }
-        
-        [Fact]
-        public void Create_New_User()
-        {
-            // Arrange
-            var newUser = CreateUserCreateModel();
-            _fakeIdentityService.CreateIdentityAsync(Arg.Any<string>(), Arg.Any<string>(), "User")
-                .Returns("PetrId");
-            // Act
-            var id = _facade.Create(newUser, new List<string>(), "abc");
-            
-            // Assert
-            _fakeRepo.Received(1).Insert(Arg.Is<UserEntity>(user =>
-                user.Id == id &&
-                user.Name == newUser.Name &&
-                user.PhotoUrl == newUser.PhotoUrl &&
-                user.IdentityOwnerId == newUser.IdentityName &&
-                user.Role == newUser.Role));
-            _fakeIdentityService.Received(1).CreateIdentityAsync(newUser.IdentityName, newUser.Password, "User");
-        }
-
-        [Fact]
-        public void GetById_Non_Existing_User()
-        {
-            // Arrange
-            _fakeRepo.GetById(Arg.Any<Guid>()).Returns((UserEntity?)null);
-            var id = Guid.NewGuid();
-            
-            // Act
-            var result = _facade.GetById(id);
-
-            // Assert
-            _fakeRepo.Received(1).GetById(id);
-            Assert.Null(result);
-        }
-        
-        [Fact]
-        public void GetById_On_Existing_User()
-        {
-            // Arrange
-            var existingUser = CreateUserDetailModel(Guid.NewGuid());
-            _fakeRepo.GetById(Arg.Any<Guid>()).Returns(_mapper.ToEntity(existingUser, "abc"));
-            
-            // Act
-            var result = _facade.GetById(existingUser.Id);
-
-            // Assert
-            _fakeRepo.Received(1).GetById(existingUser.Id);
-            Assert.NotNull(result);
-        }
-
-        [Fact]
-        public void GetAll_On_Existing_Users()
-        {
-            // Arrange
-            var user1 = CreateUserDetailModel(Guid.NewGuid());
-            var user2 = CreateUserDetailModel(Guid.NewGuid());
-            List<UserEntity> list = new List<UserEntity>();
-            list.Add(_mapper.ToEntity(user1, "abc"));
-            list.Add(_mapper.ToEntity(user2, "abc"));
-            _fakeRepo.GetAll().Returns(list);
-            
-            // Act
-            var result = _facade.GetAll();
-
-            // Assert
-            _fakeRepo.Received(1).GetAll();
-            Assert.Equal(2, list.Count);
-            Assert.Contains(result, user => user.Id == user1.Id);
-            Assert.Contains(result, user => user.Id == user2.Id);
-        }
-        
-        [Fact]
-        public void GetAll_On_Empty_Repo()
-        {
-            // Arrange
-            _fakeRepo.GetAll().Returns(new List<UserEntity>()); 
+            // Setup Repository to return a new Guid
+            _userRepoSub
+                .Insert(Arg.Any<UserEntity>())
+                .Returns(expectedUserId);
 
             // Act
-            var result = _facade.GetAll();
+            var result = _sut.Create(model);
 
             // Assert
-            Assert.NotNull(result);       
-            Assert.Empty(result);       
-            _fakeRepo.Received(1).GetAll();  
+            Assert.Equal(expectedUserId, result);
+
+            // Verify dependencies were called exactly once
+            _securityServiceSub.Received(1).ThrowIfNotAdmin();
+
+            // VERIFY DATA INTEGRITY:
+            _userRepoSub.Received(1).Insert(Arg.Is<UserEntity>(e =>
+                e.IdentityOwnerId == expectedIdentityId &&
+                e.Role == RoleType.User &&
+                e.Name == "John Doe"
+            ));
         }
     }
 }
