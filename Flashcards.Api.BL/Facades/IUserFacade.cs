@@ -10,7 +10,7 @@ namespace Flashcards.Api.BL.Facades
         UserDetailModel? GetById(Guid id);
         UserDetailModel? GetByIdentityId(string identityId);
         Guid Create(UserCreateModel user);
-        Guid? Update(UserDetailModel user);
+        Guid? Update(UserUpdateModel user);
         void Delete(Guid id);
     }
 }

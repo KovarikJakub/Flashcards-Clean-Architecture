@@ -18,6 +18,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
+builder.Services.AddScoped<ISecurityService, SecurityService>();
+
 builder.Services.AddSingleton<IStorage, Storage>();
 
 builder.Services.AddSingleton<CardMapper>();
@@ -48,8 +54,6 @@ builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>(client =
 {
     client.BaseAddress = new Uri(identityOptions.Authority);
 });
-
-builder.Services.AddHttpContextAccessor();
 
 ConfigureOptions(builder.Services);
 ConfigureCors(builder.Services);
@@ -98,6 +102,8 @@ void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguratio
 void ConfigureOptions(IServiceCollection serviceCollection)
 {
     serviceCollection.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
+
+    serviceCollection.Configure<IdentityServerOptions>(builder.Configuration.GetSection(nameof(IdentityServerOptions)));
 }
 
 void ConfigureCors(IServiceCollection serviceCollection)

@@ -56,7 +56,7 @@ public class UserEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoint
             });
 
         userModifyingEndpoints.MapPut("", Results<Ok<Guid?>, ForbidHttpResult>
-            (UserDetailModel user, IUserFacade userFacade) =>
+            (UserUpdateModel user, IUserFacade userFacade) =>
             {
                 try
                 {

@@ -65,6 +65,8 @@ namespace Flashcards.Api.DAL.Memory.Repositories
             existingUser.Name = user.Name;
             existingUser.Role = user.Role;
             existingUser.PhotoUrl = user.PhotoUrl;
+            existingUser.IsDeleted = user.IsDeleted;
+            existingUser.IdentityOwnerId = user.IdentityOwnerId;
             return existingUser.Id;
         }
 

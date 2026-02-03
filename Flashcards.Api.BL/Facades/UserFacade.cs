@@ -68,7 +68,7 @@ namespace Flashcards.Api.BL.Facades
             return userRepository.Insert(entity);
         }
 
-        public Guid? Update(UserDetailModel model)
+        public Guid? Update(UserUpdateModel model)
         {
             securityService.ThrowIfUnauthorizedUserUpdate(model.Id);
 
@@ -80,6 +80,7 @@ namespace Flashcards.Api.BL.Facades
             {
                 Id = model.Id,
                 IdentityOwnerId = existing.IdentityOwnerId, // keep
+                IsDeleted = existing.IsDeleted, // keep
                 Name = model.Name,
                 Role = existing.Role, // keep
                 PhotoUrl = model.PhotoUrl,
@@ -93,7 +94,7 @@ namespace Flashcards.Api.BL.Facades
             securityService.ThrowIfNotAdmin();
 
             var deletedUserEntity = userRepository.GetById(id);
-            if (deletedUserEntity is null)
+            if (deletedUserEntity is null || deletedUserEntity.IsDeleted)
                 return;
             
             // Delete users Identity
@@ -105,12 +106,13 @@ namespace Flashcards.Api.BL.Facades
                 Id = deletedUserEntity.Id,
                 Name = deletedUserEntity.Name,
                 Role = deletedUserEntity.Role,
+                IsDeleted = true,
                 IdentityOwnerId = string.Empty
             };
             userRepository.Update(userWithDeletedIdentity);
 
             // Delete users lessons:
-            var lessonsOfDeletedUser = lessonRepository.Where(lesson => lesson.OwnerId == lesson.CardCollectionId);
+            var lessonsOfDeletedUser = lessonRepository.Where(lesson => lesson.OwnerId == deletedUserEntity.Id);
             foreach(var lesson in lessonsOfDeletedUser)
             {
                 lessonRepository.Remove(lesson.Id);

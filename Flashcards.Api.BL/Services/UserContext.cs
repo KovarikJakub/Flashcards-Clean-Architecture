@@ -12,6 +12,6 @@ namespace Flashcards.Api.BL.Services
             ?? throw new UnauthorizedAccessException("User is not authenticated");
 
         public bool IsAdmin =>
-            httpContext.HttpContext?.User.IsInRole("admin") ?? false;
+            httpContext.HttpContext?.User.IsInRole(nameof(RoleType.Admin)) ?? false;
     }
 }

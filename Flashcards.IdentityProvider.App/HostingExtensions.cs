@@ -52,6 +52,9 @@ namespace Flashcards.IdentityProvider.App
                     policy.WithOrigins("https://localhost:44355")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
+                    policy.WithOrigins("https://localhost:5001")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
             });
 

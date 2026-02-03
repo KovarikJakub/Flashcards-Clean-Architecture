@@ -19,7 +19,7 @@ public static class UserEndpoints
                 => await appUserFacade.SearchAsync(searchString));
 
         userEndpoints.MapPost("",
-            async Task<Results<Created<Guid>, BadRequest, BadRequest<string>>> (
+            async Task<Results<Created<string>, BadRequest, BadRequest<string>>> (
                     IAppUserFacade appUserFacade,
                     [FromBody] AppUserCreateModel appUser)
                 =>
@@ -29,7 +29,7 @@ public static class UserEndpoints
                     var userId = await appUserFacade.CreateAppUserAsync(appUser);
                     if (userId is not null)
                     {
-                        return TypedResults.Created($"/user/{userId.Value}", userId.Value);
+                        return TypedResults.Created($"/user/{userId}", userId);
                     }
 
                     return TypedResults.BadRequest();
@@ -44,10 +44,10 @@ public static class UserEndpoints
                 }
             });
 
-        userEndpoints.MapDelete("{id:guid}",
+        userEndpoints.MapDelete("{id}",
             async Task<Results<Ok, NotFound, BadRequest<string>>> (
                     IAppUserFacade appUserFacade,
-                    Guid id)
+                    string id)
                 =>
             {
                 try

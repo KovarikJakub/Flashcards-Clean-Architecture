@@ -5,18 +5,6 @@ namespace Flashcards.Api.BL.Mappers
 {
     public class UserMapper
     {
-        public UserEntity ToEntity(UserDetailModel model, string ownerId)
-        {
-            return new UserEntity
-            {
-                Id = model.Id,
-                Name = model.Name,
-                PhotoUrl = model.PhotoUrl,
-                Role = model.Role,
-                IdentityOwnerId = ownerId
-            };
-        }
-
         public UserEntity ToEntity(UserCreateModel model, string ownerId)
         {
             return new UserEntity
@@ -36,6 +24,7 @@ namespace Flashcards.Api.BL.Mappers
                 Id = model.Id,
                 Name = model.Name,
                 PhotoUrl = model.PhotoUrl,
+                IsDeleted = model.IsDeleted,
                 Role = model.Role
             };
         }
@@ -51,6 +40,7 @@ namespace Flashcards.Api.BL.Mappers
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                IsDeleted = entity.IsDeleted,
                 Role = entity.Role
             };
         }
