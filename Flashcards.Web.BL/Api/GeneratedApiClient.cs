@@ -830,11 +830,11 @@ namespace Flashcards.Web.BL.Api
         System.Threading.Tasks.Task<System.Guid> UserPostAsync(UserCreateModel user, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserDetailModel user);
+        System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserUpdateModel user);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserDetailModel user, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserUpdateModel user, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<PagedResponseOfUserListModel> QueryAsync(UserQueryModel query);
@@ -1058,14 +1058,14 @@ namespace Flashcards.Web.BL.Api
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserDetailModel user)
+        public virtual System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserUpdateModel user)
         {
             return UserPutAsync(user, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserDetailModel user, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<System.Guid?> UserPutAsync(UserUpdateModel user, System.Threading.CancellationToken cancellationToken)
         {
             if (user == null)
                 throw new System.ArgumentNullException("user");
