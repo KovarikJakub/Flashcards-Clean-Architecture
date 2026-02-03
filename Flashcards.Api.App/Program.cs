@@ -62,6 +62,7 @@ ConfigureAuthentication(builder.Services, builder.Configuration);
 var app = builder.Build();
 
 UseSecurityFeatures(app);
+UseRouting(app);
 UseAuthenticationAndAuthorization(app);
 UseEndpoints(app);
 UseOpenApi(app);
@@ -128,6 +129,12 @@ void UseAuthenticationAndAuthorization(IApplicationBuilder application)
     application.UseAuthentication();
     application.UseAuthorization();
 }
+
+void UseRouting(IApplicationBuilder application)
+{
+    application.UseRouting();
+}
+
 void UseOpenApi(IApplicationBuilder application)
 {
     application.UseOpenApi();
