@@ -1,7 +1,6 @@
 ﻿using Flashcards.Common.Models;
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Flashcards.Web.App.Pages.CardCollectionList
@@ -16,39 +15,46 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
         [Inject]
         private NavigationManager NavigationManager { get; set; } = null!;
         [Inject]
-        private IJSRuntime Js { get; set; } = null!; 
-        [Inject]
         private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+        
+        // enum
+        private enum ViewMode
+        {
+            MyCollections,
+            AllCollections
+        }
         
         // variables and properties
         private bool _showCreateForm;
-        private ElementReference _scrollContainerMy;
-        private ElementReference _scrollContainerAll;
-        private IJSObjectReference? _module;
+        private bool _onlyAvailable;
+        private int _currentPage = 1;
+        private  readonly int _pageSize = 5; 
+        private ViewMode _currentView = ViewMode.MyCollections;
+        private int TotalPages { get; set; } 
         private string? _userId;
+        private bool IsLoading { get; set; } = false;
+        private string _sortBy = "default";
         private ICollection<CardCollectionListModel> CardCollectionsAll { get; set; } = new List<CardCollectionListModel>();
         private ICollection<CardCollectionListModel> CardCollectionsMine { get; set; } = new List<CardCollectionListModel>();
-        private string _filterMy = string.Empty;
-        private string FilterMy
+        private string _filterByTitle = string.Empty;
+        private string FilterByTitle
         {
-            get => _filterMy;
+            get => _filterByTitle;
             set
             {
-                _filterMy = value;
+                _filterByTitle = value;
                 _ = OnFilterChanged();
             }
         }
-        private string _filterAll = string.Empty;
-
-        private string FilterAll
+        private bool OnlyAvailable
         {
-            get => _filterAll;
+            get => _onlyAvailable;
             set
             {
-                _filterAll = value;
+                _onlyAvailable = value;
                 _ = OnFilterChanged();
             }
-        } 
+        }
         
         private CardCollectionDetailModel _model = new CardCollectionDetailModel
         {
@@ -92,23 +98,52 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             // get currently signed user
             var currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
             
-            // create query to obtain his card collections
-            var queryJustMine = new CardCollectionQueryModel
+            // create query model 
+            var query = new CardCollectionQueryModel
             {
-                OwnerId = currentUser.Id,
-                SearchString = FilterMy                             // by card collection title
+                SearchString = FilterByTitle, // by title
+                ShowCurrentlyAvailableOnly = OnlyAvailable // only active collections
             };
-            var cardCollectionsOfCurrentUser = await CardCollectionFacade.GetByQueryAsync(queryJustMine);
-            CardCollectionsMine = cardCollectionsOfCurrentUser.Items;
             
-            // create query to obtain all other card collections
-            var queryExcludeMine = new CardCollectionQueryModel
+            // set pagination parameters
+            query.PageSize = _pageSize;             // how many items per page
+            query.Page = _currentPage;
+            
+            // sorting
+            if (_sortBy == "ascending")
             {
-                ExcludeOwnerId = currentUser.Id,             
-                SearchString = FilterAll                                // by card collection title
-            };
-            var cardCollectionsExcludingCurrentUser = await CardCollectionFacade.GetByQueryAsync(queryExcludeMine);
-            CardCollectionsAll = cardCollectionsExcludingCurrentUser.Items;
+                query.SortAsc = true;
+                query.SortBy = "Title";
+            }
+            
+            if(_currentView == ViewMode.MyCollections)
+            {
+                query.OwnerId = currentUser.Id;                         // only collections of current user
+                var cardCollectionsOfCurrentUser = await CardCollectionFacade.GetByQueryAsync(query);
+                CardCollectionsMine = cardCollectionsOfCurrentUser.Items;
+                if(cardCollectionsOfCurrentUser.TotalCount > 0)
+                {
+                    TotalPages = (int)Math.Ceiling((double)cardCollectionsOfCurrentUser.TotalCount / _pageSize);
+                }
+                else
+                {
+                    TotalPages = 1;
+                }
+            }
+            else
+            {
+                query.ExcludeOwnerId = currentUser.Id; // all collections except those of current user
+                var cardCollectionsExcludingCurrentUser = await CardCollectionFacade.GetByQueryAsync(query);
+                CardCollectionsAll = cardCollectionsExcludingCurrentUser.Items;
+                if (cardCollectionsExcludingCurrentUser.TotalCount > 0)
+                {
+                    TotalPages = (int)Math.Ceiling((double)cardCollectionsExcludingCurrentUser.TotalCount / _pageSize);
+                }
+                else
+                {
+                    TotalPages = 1;
+                }
+            }
         }
         
         // navigation handlers
@@ -185,36 +220,26 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             return now >= startUtc && now <= endUtc;
         }
         
-        // JS for scrolling
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+        private async Task SwitchView(ViewMode mode)
         {
-            if (firstRender)
-            {
-                try
-                {
-                    _module = await Js.InvokeAsync<IJSObjectReference>("import", "/js/Scroll.js");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to load JS module: {ex.Message}");
-                }
-            }
+            if (_currentView == mode) return;
+            _currentView = mode;
+            _currentPage = 1;                                       // Reset to page 1 on view change 
+            _showCreateForm = false;                        // Reset creating form
+            await LoadData();
         }
 
-        private async Task ScrollLeft(ElementReference container)
+        private async Task HandleFilterChange()
         {
-            if (_module is not null)
-            {
-                await _module.InvokeVoidAsync("scrollLeft", container, 450);
-            }
+            _currentPage = 1; 
+            await LoadData();
         }
 
-        private async Task ScrollRight(ElementReference container)
+        private  async Task  ChangePage(int newPage)
         {
-            if (_module is not null)
-            {
-                await _module.InvokeVoidAsync("scrollRight", container, 450);
-            }
+            if (newPage < 1 || newPage > TotalPages) return;
+            _currentPage = newPage;
+            await LoadData();
         }
     }
 }
