@@ -7,8 +7,8 @@ namespace Flashcards.IdentityProvider.BL.Facades;
 
 public interface IAppUserFacade : IFacade
 {
-    Task<Guid?> CreateAppUserAsync(AppUserCreateModel appUserModel);
-    Task<bool> DeleteAppUserAsync(Guid userId);
+    Task<string?> CreateAppUserAsync(AppUserCreateModel appUserModel);
+    Task<bool> DeleteAppUserAsync(string subId);
     Task<Guid?> CreateAppUserWithRoleAsync(AppUserCreateModel appUserModel, string role);
     Task<bool> ValidateCredentialsAsync(string userName, string password);
     Task<Guid> GetUserIdByUserNameAsync(string userName);

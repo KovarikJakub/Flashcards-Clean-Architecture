@@ -1,5 +1,6 @@
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Enums;
@@ -13,7 +14,7 @@ namespace Flashcards.Api.BL.UnitTests
     public class LessonFacadeTests
     {
         private readonly ILessonRepository _fakeRepo;
-        private readonly IUserRepository _userRepo;
+        private readonly ICurrentUserProvider _userProvider;
         private readonly ICardCollectionRepository _cardCollectionRepo;
         private readonly LessonMapper _mapper;
         private readonly CardCollectionMapper _collectionMapper;
@@ -25,7 +26,7 @@ namespace Flashcards.Api.BL.UnitTests
         public LessonFacadeTests()
         {
             _fakeRepo = Substitute.For<ILessonRepository>();
-            _userRepo = Substitute.For<IUserRepository>();
+            _userProvider = Substitute.For<ICurrentUserProvider>();
             _cardCollectionRepo = Substitute.For<ICardCollectionRepository>();
 
             var userMapper = new UserMapper();
@@ -52,10 +53,9 @@ namespace Flashcards.Api.BL.UnitTests
 
             _collectionEntity = _collectionMapper.ToEntity(_collectionDetail, _ownerEntity);
 
-            _userRepo.GetByIdentityId(Arg.Any<string>()).Returns(_ownerEntity);
-            _cardCollectionRepo.GetById(Arg.Any<Guid>()).Returns(_collectionEntity);
+            _userProvider.GetCurrentUser().Returns(_ownerEntity);
 
-            _facade = new LessonFacade(_mapper, _fakeRepo, _userRepo, _cardCollectionRepo);
+            _facade = new LessonFacade(_mapper, _fakeRepo, _userProvider, _cardCollectionRepo);
         }
         
         private LessonDetailModel CreateNewLessonDetailModel()
@@ -122,6 +122,8 @@ namespace Flashcards.Api.BL.UnitTests
             // Arrange
             var newLesson = CreateNewLessonDetailModel();
             
+            _cardCollectionRepo.GetById(Arg.Any<Guid>()).Returns(_collectionEntity);
+
             // Act
             var createModel = new LessonCreateModel
             {
@@ -132,11 +134,11 @@ namespace Flashcards.Api.BL.UnitTests
                 Wrong = newLesson.Wrong
             };
 
-            _facade.Create(createModel, [], _ownerEntity.IdentityOwnerId);
+            _facade.Create(createModel);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<LessonEntity>(lesson =>
-                lesson.CardCollectionId == createModel.CardCollectionId && lesson.UserId == _ownerEntity.Id));
+                lesson.CardCollectionId == createModel.CardCollectionId && lesson.OwnerId == _ownerEntity.Id));
         }
 
         [Fact]
@@ -178,7 +180,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newLesson = CreateNewLessonDetailModel();
             
             // Act
-            _facade.Delete(newLesson.Id, [], "abc");
+            _facade.Delete(newLesson.Id);
             
             // Assert
             _fakeRepo.Received(1).Remove(newLesson.Id);
@@ -191,7 +193,7 @@ namespace Flashcards.Api.BL.UnitTests
             var nonExistingId = Guid.NewGuid();
             
             // Act
-            _facade.Delete(nonExistingId, [], "abc");
+            _facade.Delete(nonExistingId);
             
             // Assert
             _fakeRepo.Received(1).Remove(nonExistingId);
@@ -244,7 +246,7 @@ namespace Flashcards.Api.BL.UnitTests
             // Assert
             _fakeRepo.Received(1).GetAll();
             Assert.NotNull(result);
-            Assert.Single(result);
+            Assert.Single(result.Items);
         }
         
         /*

@@ -1,18 +1,17 @@
 ﻿using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
-using Flashcards.Common.Enums;
 using Flashcards.Common.Models;
-using System;
 
 namespace Flashcards.Api.BL.Facades
 {
     public class CardCollectionFacade(
         ICardCollectionRepository cardCollectionRepository,
-        IUserRepository userRepository,
+        ISecurityService securityService,
+        ICurrentUserProvider currentUser,
         CardCollectionMapper mapper)
-        : FacadeBase<ICardCollectionRepository, CardCollectionEntity>(cardCollectionRepository, userRepository),
-        ICardCollectionFacade
+        : ICardCollectionFacade
     {
         public List<CardCollectionListModel> GetAll()
         {
@@ -60,35 +59,43 @@ namespace Flashcards.Api.BL.Facades
             return entity == null ? null : mapper.ToDetailModel(entity);
         }
 
-        public Guid CreateOrUpdate(CardCollectionDetailModel model, IList<string> userRoles, string requestorId)
+        public Guid CreateOrUpdate(CardCollectionDetailModel model)
         {
             return cardCollectionRepository.Exists(model.Id)
-                ? Update(model, userRoles, requestorId)!.Value
-                : Create(mapper.ToCreateModel(model), userRoles, requestorId);
+                ? Update(model)!.Value
+                : Create(mapper.ToCreateModel(model));
         }
 
-        public Guid Create(CardCollectionCreateModel model, IList<string> userRoles, string requestorId)
+        public Guid Create(CardCollectionCreateModel model)
         {
-            var requestorUserEntity = userRepository.GetByIdentityId(requestorId);
+            var requestorUserEntity = currentUser.GetCurrentUser();
 
             var entity = mapper.ToEntity(model, requestorUserEntity);
-            cardCollectionRepository.Insert(entity);
-            return entity.Id;
+            return cardCollectionRepository.Insert(entity);
         }
 
-        public Guid? Update(CardCollectionDetailModel model, IList<string> userRoles, string requestorId)
+        public Guid? Update(CardCollectionDetailModel model)
         {
             var existing = cardCollectionRepository.GetById(model.Id);
-            if (existing == null)
+            if (existing is null)
                 return null;
-            var ownerEntity = userRepository.GetById(existing.OwnerId);
+            
+            securityService.ThrowIfNotOwnerAndAdmin(existing);
+
+            var ownerEntity = currentUser.GetCurrentUser();
             var entity = mapper.ToEntity(model, ownerEntity!);
-            entity.OwnerId = existing.OwnerId;
+
             return cardCollectionRepository.Update(entity);
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string requestorId)
+        public void Delete(Guid id)
         {
+            var collectionToDelete = cardCollectionRepository.GetById(id);
+            if (collectionToDelete is null)
+                return;
+
+            securityService.ThrowIfNotOwnerAndAdmin(collectionToDelete);
+
             cardCollectionRepository.Remove(id);
         }
     }

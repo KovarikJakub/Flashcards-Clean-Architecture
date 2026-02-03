@@ -19,6 +19,17 @@ namespace Flashcards.Web.BL.Facades
             }
         }
 
+        public async Task<Guid> Create(UserCreateModel user)
+        {
+            var newUserId = await apiClient.UserPostAsync(user);
+            return newUserId;
+        }
+
+        public async Task Delete(Guid id)
+        {
+            await apiClient.UserDeleteAsync(id);
+        }
+
         public async Task<List<UserListModel>> GetAllAsync()
         {
             var users = await apiClient.UserGetAsync();
@@ -30,7 +41,7 @@ namespace Flashcards.Web.BL.Facades
             return await apiClient.IdentityAsync(id);
         }
 
-        public async Task<Guid?> Update(UserDetailModel user)
+        public async Task<Guid?> Update(UserUpdateModel user)
         {
             return await apiClient.UserPutAsync(user);
         }

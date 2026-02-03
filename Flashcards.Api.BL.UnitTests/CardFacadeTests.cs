@@ -1,5 +1,6 @@
 ﻿using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Models;
@@ -11,7 +12,8 @@ namespace Flashcards.Api.BL.UnitTests
     public class CardFacadeTests
     {
         private readonly ICardRepository _cardRepo;
-        private readonly IUserRepository _userRepo;
+        private readonly ICurrentUserProvider _userProvider;
+        private readonly ISecurityService _securityService;
         private readonly CardFacade _facade;
         private readonly CardMapper _cardMapper;
         private readonly UserMapper _userMapper;
@@ -21,10 +23,12 @@ namespace Flashcards.Api.BL.UnitTests
             _userMapper = new UserMapper();
             _cardMapper = new CardMapper(_userMapper);
             _cardRepo = Substitute.For<ICardRepository>();
-            _userRepo = Substitute.For<IUserRepository>();
-            _userRepo.GetByIdentityId(Arg.Any<string>()).Returns(_ownerEntity);
+            _userProvider = Substitute.For<ICurrentUserProvider>();
+            _securityService = Substitute.For<ISecurityService>();
 
-            _facade = new CardFacade(_cardRepo, _userRepo, _cardMapper);
+            _userProvider.GetCurrentUser().Returns(_ownerEntity);
+
+            _facade = new CardFacade(_cardRepo, _userProvider, _securityService, _cardMapper);
         }
         private CardCreateModel CreateCardCreateModel()
         {
@@ -66,9 +70,10 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var cardGuid = Guid.NewGuid();
+            _cardRepo.GetById(cardGuid).Returns()
 
             // Act
-            _facade.Delete(cardGuid, [], "abc");
+            _facade.Delete(cardGuid);
 
             // Assert
             _cardRepo.Received().Remove(cardGuid);
@@ -81,7 +86,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCard = CreateCardCreateModel();
 
             // Act
-            var result = _facade.Create(newCard, new List<string>(), _ownerEntity.IdentityOwnerId);
+            var result = _facade.Create(newCard);
 
             // Assert
             _cardRepo.Received(1).Insert(Arg.Is<CardEntity>(card => 
@@ -98,7 +103,7 @@ namespace Flashcards.Api.BL.UnitTests
             var newCard = CreateCardDetailModel();
 
             // Act
-            var result = _facade.CreateOrUpdate(newCard, new List<string>(), _ownerEntity.IdentityOwnerId);
+            var result = _facade.CreateOrUpdate(newCard);
 
             // Assert
             _cardRepo.Received(1).Insert(Arg.Is<CardEntity>(card => card.Id == result));
@@ -116,7 +121,7 @@ namespace Flashcards.Api.BL.UnitTests
             _cardRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
 
             // Act
-            var result = _facade.CreateOrUpdate(existingCard, new List<string>(), _ownerEntity.IdentityOwnerId);
+            var result = _facade.CreateOrUpdate(existingCard);
             
             // Assert
             _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
@@ -192,21 +197,25 @@ namespace Flashcards.Api.BL.UnitTests
         public void Update_Existing_Card()
         {
             // Arrange
-            var existingCard = CreateCardDetailModel();
-            _cardRepo.Exists(existingCard.Id).Returns(true);
-            existingCard.Description = "updated value";
-            var expectedEntity = _cardMapper.ToEntity(existingCard, _ownerEntity);
-            _cardRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
+            var updatedCard = CreateCardDetailModel();
+
+            var existingCardEntity = _cardMapper.ToEntity(updatedCard, _ownerEntity);
+            _cardRepo.GetById(updatedCard.Id).Returns(existingCardEntity);
+
+            // change something in the updated card
+            updatedCard.Description = "updated value";
+
+            _cardRepo.Update(Arg.Any<CardEntity>()).Returns(updatedCard.Id);
 
             // Act
-            var result = _facade.Update(existingCard, new List<string>(), _ownerEntity.IdentityOwnerId);
+            var result = _facade.Update(updatedCard);
             
             // Assert
             _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
             _cardRepo.Received(1).Update(Arg.Is<CardEntity>(
-                card => card.Id == existingCard.Id && card.Description == "updated value"));
+                card => card.Id == updatedCard.Id && card.Description == "updated value"));
             
-            Assert.Equal(existingCard.Id, result);
+            Assert.Equal(updatedCard.Id, result);
         }
         
         [Fact]
@@ -217,7 +226,7 @@ namespace Flashcards.Api.BL.UnitTests
             _cardRepo.Exists(Arg.Any<Guid>()).Returns(false);
 
             // Act
-            var result = _facade.Update(card, new List<string>(), _ownerEntity.IdentityOwnerId);
+            var result = _facade.Update(card);
             
             // Assert
             _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
@@ -268,7 +277,7 @@ namespace Flashcards.Api.BL.UnitTests
             var filtered = _facade.GetByQuery(query);
 
             Assert.NotNull(filtered);
-            Assert.Equal(2, filtered.Count());
+            Assert.Equal(2, filtered.Items.Count);
         }
 
         [Fact]
@@ -314,10 +323,10 @@ namespace Flashcards.Api.BL.UnitTests
             var filtered = _facade.GetByQuery(query);
 
             Assert.NotNull(filtered);
-            Assert.Equal(2, filtered.Count());
+            Assert.Equal(2, filtered.Items.Count());
             // Assert Questions 2 and 3 are in the result:
-            Assert.Contains(filtered, card => card.QuestionContent == "Question2FINDME");
-            Assert.Contains(filtered, card => card.QuestionContent == "Question3");
+            Assert.Contains(filtered.Items, card => card.QuestionContent == "Question2FINDME");
+            Assert.Contains(filtered.Items, card => card.QuestionContent == "Question3");
         }
     }
 }

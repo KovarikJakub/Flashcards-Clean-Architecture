@@ -41,26 +41,18 @@ public class LessonEndpoints(IOptions<IdentityOptions> identityOptions) : Endpoi
         }
 
         lessonModifyingEndpoints.MapPost("", 
-            (LessonCreateModel lesson, ILessonFacade lessonFacade, IHttpContextAccessor httpContextAccessor) =>
+            (LessonCreateModel lesson, ILessonFacade lessonFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
-                var id = lessonFacade.Create(lesson, userRoles, userId!);
+                var id = lessonFacade.Create(lesson);
                 return TypedResults.Ok(id);
             });
 
         lessonModifyingEndpoints.MapDelete("{id:guid}", Results<Ok, ForbidHttpResult> 
-            (Guid id, ILessonFacade lessonFacade, IHttpContextAccessor httpContextAccessor) =>
+            (Guid id, ILessonFacade lessonFacade) =>
             {
-                var userId = GetUserId(httpContextAccessor);
-                var userRoles = GetUserRoles(httpContextAccessor);
-                ThrowIfUserIdIsNull(userId);
-
                 try
                 {
-                    lessonFacade.Delete(id, userRoles, userId!);
+                    lessonFacade.Delete(id);
                     return TypedResults.Ok();
                 }
                 catch (UnauthorizedAccessException)

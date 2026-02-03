@@ -1,21 +1,24 @@
 ﻿using Flashcards.Api.BL.Mappers;
-using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class LessonFacade(LessonMapper mapper, ILessonRepository lessonRepository, IUserRepository userRepository, ICardCollectionRepository cardCollectionRepository) 
-        : FacadeBase<ILessonRepository, LessonEntity>(lessonRepository, userRepository),
+    public class LessonFacade(
+        LessonMapper mapper, 
+        ILessonRepository lessonRepository, 
+        ICurrentUserProvider currentUser, 
+        ICardCollectionRepository cardCollectionRepository) :
         ILessonFacade
     {
-        public Guid Create(LessonCreateModel model, IList<string> userRoles, string requestorId)
+        public Guid Create(LessonCreateModel model)
         {
+            var requestorUserEntity = currentUser.GetCurrentUser();
+
             var collection = cardCollectionRepository.GetById(model.CardCollectionId);
             if(collection is null)
                 throw new ArgumentException("Existing collection ID is required to create a lesson.");
-
-            var requestorUserEntity = userRepository.GetByIdentityId(requestorId);
 
             var entity = mapper.ToEntity(model, requestorUserEntity, collection);
             return lessonRepository.Insert(entity);
@@ -34,7 +37,7 @@ namespace Flashcards.Api.BL.Facades
             return mapper.ToListModel(entities);
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string requestorId)
+        public void Delete(Guid id)
         {
             lessonRepository.Remove(id);
         }

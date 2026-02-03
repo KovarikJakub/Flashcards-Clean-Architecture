@@ -5,6 +5,7 @@ using Flashcards.IdentityProvider.BL.Models;
 using Flashcards.IdentityProvider.DAL.Entities;
 using Flashcards.IdentityProvider.DAL.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flashcards.IdentityProvider.BL.Facades;
 
@@ -13,7 +14,7 @@ public class AppUserFacade(
     IAppUserRepository appUserRepository,
     AppUserMapper appUserMapper) : IAppUserFacade
 {
-    public async Task<Guid?> CreateAppUserAsync(AppUserCreateModel appUserModel)
+    public async Task<string?> CreateAppUserAsync(AppUserCreateModel appUserModel)
     {
         if (await userManager.FindByNameAsync(appUserModel.UserName) is not null)
         {
@@ -40,17 +41,19 @@ public class AppUserFacade(
             }
         }
 
-        return createdUser?.Id;
+        return createdUser?.Subject;
     }
 
-    public async Task<bool> DeleteAppUserAsync(Guid userId)
+    public async Task<bool> DeleteAppUserAsync(string subId)
     {
-        var user = await userManager.FindByIdAsync(userId.ToString());
+        // Find user by given Subject
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.Subject == subId);
         if (user is null)
         {
             return false;
         }
 
+        // Delete found users identity
         var result = await userManager.DeleteAsync(user);
         return result.Succeeded;
     }

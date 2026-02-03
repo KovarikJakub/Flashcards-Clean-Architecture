@@ -11,11 +11,18 @@ using Flashcards.Common.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Flashcards.Common;
+using Flashcards.Api.BL.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
+builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 builder.Services.AddSingleton<IStorage, Storage>();
 
@@ -48,8 +55,6 @@ builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>(client =
     client.BaseAddress = new Uri(identityOptions.Authority);
 });
 
-builder.Services.AddHttpContextAccessor();
-
 ConfigureOptions(builder.Services);
 ConfigureCors(builder.Services);
 ConfigureAuthentication(builder.Services, builder.Configuration);
@@ -57,6 +62,7 @@ ConfigureAuthentication(builder.Services, builder.Configuration);
 var app = builder.Build();
 
 UseSecurityFeatures(app);
+UseRouting(app);
 UseAuthenticationAndAuthorization(app);
 UseEndpoints(app);
 UseOpenApi(app);
@@ -97,6 +103,8 @@ void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguratio
 void ConfigureOptions(IServiceCollection serviceCollection)
 {
     serviceCollection.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
+
+    serviceCollection.Configure<IdentityServerOptions>(builder.Configuration.GetSection(nameof(IdentityServerOptions)));
 }
 
 void ConfigureCors(IServiceCollection serviceCollection)
@@ -121,6 +129,12 @@ void UseAuthenticationAndAuthorization(IApplicationBuilder application)
     application.UseAuthentication();
     application.UseAuthorization();
 }
+
+void UseRouting(IApplicationBuilder application)
+{
+    application.UseRouting();
+}
+
 void UseOpenApi(IApplicationBuilder application)
 {
     application.UseOpenApi();

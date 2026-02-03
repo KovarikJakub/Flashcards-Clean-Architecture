@@ -1,34 +1,40 @@
 ﻿using Flashcards.Api.BL.Mappers;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Entities;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common.Models;
 
 namespace Flashcards.Api.BL.Facades
 {
-    public class CardFacade(ICardRepository cardRepository, IUserRepository userRepository, CardMapper mapper)
-        : FacadeBase<ICardRepository, CardEntity>(cardRepository, userRepository),
-        ICardFacade
+    public class CardFacade(ICardRepository cardRepository, ICurrentUserProvider currentUser, ISecurityService securityService, CardMapper mapper)
+       : ICardFacade
     {
-        private readonly ICardRepository cardRepository = cardRepository;
-
-        public Guid Create(CardCreateModel card, IList<string> userRoles, string requestorId)
+        public Guid Create(CardCreateModel card)
         {
-            var requestorUserEntity = userRepository.GetByIdentityId(requestorId);
+            var requestorUserEntity = currentUser.GetCurrentUser();
 
             var cardEntity = mapper.ToEntity(card, requestorUserEntity);
             cardRepository.Insert(cardEntity);
             return cardEntity.Id;
         }
 
-        public Guid CreateOrUpdate(CardDetailModel card, IList<string> userRoles, string requestorId)
+        public Guid CreateOrUpdate(CardDetailModel card)
         {
             return cardRepository.Exists(card.Id)
-                ? Update(card, userRoles, requestorId)!.Value
-                : Create(mapper.ToCreateModel(card), userRoles, requestorId);
+                ? Update(card)!.Value
+                : Create(mapper.ToCreateModel(card));
         }
 
-        public void Delete(Guid id, IList<string> userRoles, string requestorId)
+        public void Delete(Guid id)
         {
+            var cardToDelete = cardRepository.GetById(id);
+            if (cardToDelete is null)
+            {
+                return;
+            }
+
+            securityService.ThrowIfNotOwnerAndAdmin(cardToDelete);
+
             cardRepository.Remove(id);
         }
 
@@ -82,10 +88,15 @@ namespace Flashcards.Api.BL.Facades
                 : mapper.ToDetailModel(cardEntity);
         }
 
-        public Guid? Update(CardDetailModel card, IList<string> userRoles, string requestorId)
+        public Guid? Update(CardDetailModel card)
         {
-            // existingCard.Owner == null && isAdmin(requestedId)  => allow update
-            // existingCard.Owner != null && isAdminOrOwner(requestedId, cardOwnerId) => allow update
+            var cardToUpdate = cardRepository.GetById(card.Id);
+            if (cardToUpdate is null)
+            {
+                return null;
+            }
+
+            securityService.ThrowIfNotOwnerAndAdmin(cardToUpdate);
 
             var cardEntity = new CardEntity()
             {
@@ -95,7 +106,9 @@ namespace Flashcards.Api.BL.Facades
                 QuestionContent = card.QuestionContent,
                 AnswerContent = card.AnswerContent,
                 Created = card.DateCreated,
-                Description = card.Description
+                Description = card.Description,
+                Owner = cardToUpdate.Owner,
+                OwnerId = cardToUpdate.OwnerId
             };
             return cardRepository.Update(cardEntity);
         }

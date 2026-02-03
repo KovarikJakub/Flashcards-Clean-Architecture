@@ -1,5 +1,4 @@
-﻿
-namespace Flashcards.Api.BL.Services
+﻿namespace Flashcards.Api.BL.Services.Interfaces
 {
     public interface IIdentityService
     {

@@ -67,6 +67,16 @@ namespace Flashcards.IdentityProvider.App
                 },
                 AlwaysIncludeUserClaimsInIdToken = true,
             },
+            new Client
+            {
+                ClientId = "flashcardsbackend",
+                
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+
+                ClientSecrets = { new Secret("FlashcardsApiSecret".Sha256()) },
+
+                AllowedScopes = { "user_management" }
+            }
         };
     }
 }
