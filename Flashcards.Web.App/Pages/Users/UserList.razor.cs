@@ -8,69 +8,38 @@ namespace Flashcards.Web.App.Pages.Users;
 public partial class UserList : PageBase
 {
     [Inject]
-    private UserFacade UserFacadeService { get; set; } = null!;
-
-    private List<UserListModel>? Users { get; set; }
-
-    private Dictionary<Guid, string?> UserPhotos { get; set; } = new();
-
+    private UserFacade UserFacade { get; set; } = null!;
+    private List<UserListModel> Users { get; set; } = Enumerable.Empty<UserListModel>().ToList();
     private bool IsCreating { get; set; }
     private bool IsSubmitting { get; set; }
     private string? ErrorMessage { get; set; }
-    private NewUserModel NewUser { get; set; } = new();
+
+    private NewUserInputs Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        await Load();
         await base.OnInitializedAsync();
+        await Load();
     }
 
     private async Task Load()
     {
-        Users = (await UserFacadeService.GetAllAsync()).ToList();
-        _ = LoadUserPhotosAsync();
-    }
-
-    private async Task LoadUserPhotosAsync()
-    {
-        if (Users == null) return;
-
-        foreach (var user in Users)
-        {
-            if (UserPhotos.ContainsKey(user.Id)) continue;
-
-            try
-            {
-                var detail = await UserFacadeService.GetByIdAsync(user.Id);
-
-                if (detail != null)
-                {
-                    UserPhotos[user.Id] = detail.PhotoUrl;
-                    StateHasChanged();
-                }
-            }
-            catch
-            {
-                
-            }
-        }
+        Users = await UserFacade.GetAllAsync();
     }
 
     private void ShowCreateForm()
     {
         IsCreating = true;
         ErrorMessage = null;
-        NewUser = new NewUserModel
-        {
-            Role = RoleType.User
-        };
+
+        Input = new NewUserInputs();
     }
 
     private void CancelCreate()
     {
         IsCreating = false;
         ErrorMessage = null;
-        NewUser = new NewUserModel();
+        Input = null!;
     }
 
     private async Task CreateUser()
@@ -78,26 +47,34 @@ public partial class UserList : PageBase
         ErrorMessage = null;
         IsSubmitting = true;
 
+        if (string.IsNullOrWhiteSpace(Input.DisplayName) ||
+            string.IsNullOrWhiteSpace(Input.Password) ||
+            string.IsNullOrWhiteSpace(Input.IdentityName))
+        {
+            ErrorMessage = "Please fill in all required fields.";
+            return;
+        }
+
         try
         {
-            if (string.IsNullOrWhiteSpace(NewUser.UserName) ||
-                string.IsNullOrWhiteSpace(NewUser.Password) ||
-                string.IsNullOrWhiteSpace(NewUser.Email) ||
-                string.IsNullOrWhiteSpace(NewUser.FullName))
+            var userCreateModel = new UserCreateModel()
             {
-                ErrorMessage = "Please fill in all required fields.";
-                return;
-            }
+                IdentityName = Input.IdentityName,
+                Name = Input.DisplayName,
+                Password = Input.Password,
+                PhotoUrl = string.IsNullOrWhiteSpace(Input.ProfilePictureUrl) ? null : Input.ProfilePictureUrl,
+                Role = RoleType.User
+            };
 
-            // TODO: create user with identity
+            await UserFacade.Create(userCreateModel);
 
             IsCreating = false;
-            NewUser = new NewUserModel();
+            Input = null!;
             await Load();
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error creating user: {ex.Message}";
+            ErrorMessage = $"Error while creating user: {ex.Message}";
         }
         finally
         {
@@ -107,62 +84,25 @@ public partial class UserList : PageBase
 
     private async Task DeleteUser(UserListModel user)
     {
-        if (user.Role == RoleType.Admin) return;
-
-        if (user.Id != Guid.Empty)
-        {
-            try
-            {
-                // TODO: Delete user
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Error deleting user: {ex.Message}";
-                return;
-            }
-        }
-        Users?.Remove(user);
-
-        if (UserPhotos.ContainsKey(user.Id))
-            UserPhotos.Remove(user.Id);
-    }
-
-    private async Task SaveAll()
-    {
-        if (Users == null) return;
-        ErrorMessage = null;
-
         try
         {
-            foreach (var u in Users)
-            {
-                string? currentPhoto = UserPhotos.ContainsKey(u.Id) ? UserPhotos[u.Id] : null;
-
-                var detail = new UserDetailModel
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    PhotoUrl = currentPhoto,
-                    Role = u.Role
-                };
-
-                await UserFacadeService.Update(detail);
-            }
+            await UserFacade.Delete(user.Id);
+            // Remove from the Users list immediately to reflect the change in the UI
+            Users.Remove(user);
             await Load();
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error saving users: {ex.Message}";
+            ErrorMessage = $"Error deleting user: {ex.Message}";
         }
     }
 
-    private class NewUserModel
+    private record NewUserInputs
     {
-        public string? FullName { get; set; }
-        public string? UserName { get; set; }
-        public string? Password { get; set; }
-        public string? Email { get; set; }
-        public string? ProfilePicUrl { get; set; }
-        public RoleType Role { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+        public string IdentityName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string ProfilePictureUrl { get; set; } = string. Empty;
+        public RoleType Role { get; set; } = RoleType.User;
     }
 }
