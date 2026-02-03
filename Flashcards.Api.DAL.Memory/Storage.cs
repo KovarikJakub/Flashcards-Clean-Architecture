@@ -19,15 +19,6 @@ namespace Flashcards.Api.DAL.Memory
             }
         }
 
-        public void Seed()
-        {
-            Clear();          
-            SeedUsers();
-            SeedCards();
-            SeedCollections();
-            SeedLessons();
-        }
-
         public void Clear()
         {
             Cards.Clear();
@@ -35,181 +26,175 @@ namespace Flashcards.Api.DAL.Memory
             Collections.Clear();
             Lessons.Clear();
         }
-        private void SeedCards()
+
+        public void Seed()
         {
-            // --- General Knowledge ---
-            Cards.Add(new CardEntity
-            {
-                Id = new("7f251cd6-3ac4-49be-b3e7-d1f9f7cfdd3a"),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "What is the capital of France?",
-                AnswerContent = "Paris",
-                Created = DateTime.UtcNow,
-                Description = "A geography question."
-            });
+            Clear();
 
-            Cards.Add(new CardEntity
-            {
-                Id = new("23b3902d-7d4f-4213-9cf0-112348f56238"),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "What is 2 + 2?",
-                AnswerContent = "4",
-                Created = DateTime.UtcNow,
-                Description = "A simple math question."
-            });
+            // Create Users 
+            var adminJakub = AddUser("Jakub Kovařík", "Jakub", RoleType.Admin, "fb4049db-148d-44c2-9be4-5abeffe971a2");
+            var userFilip =  AddUser("Filip Matějka", "User", RoleType.Admin, "253837c3-cc2e-4e03-80d4-95aaf7be98c2"); 
+            var userTomas =  AddUser("Tomáš Vrba",    "Tomas", RoleType.User); 
+            var userDavid =  AddUser("David Kolařík", "David", RoleType.User);
+            var userPetr =   AddUser("Petr Novák",    "Petr",  RoleType.User);
 
-            Cards.Add(new CardEntity
-            {
-                Id = new("df935095-8709-4040-a2bb-b6f97cb416dc"),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "Who wrote 'Hamlet'?",
-                AnswerContent = "William Shakespeare",
-                Created = DateTime.UtcNow,
-                Description = "A literature question."
-            });
+            // --- 1: World Capitals (Geography) ---
+            var cGeo1 = AddCard("Capital of France?", "Paris", "Geography");
+            var cGeo2 = AddCard("Capital of Germany?", "Berlin", "Geography");
+            var cGeo3 = AddCard("Capital of Japan?", "Tokyo", "Geography");
+            var cGeo4 = AddCard("Capital of Italy?", "Rome", "Geography");
+            var cGeo5 = AddCard("Capital of Spain?", "Madrid", "Geography");
+            var cGeo6 = AddCard("Capital of UK?", "London", "Geography");
+            var cGeo7 = AddCard("Capital of USA?", "Washington D.C.", "Geography");
+            var capitalsDeck =
+                AddCollection("World Capitals", adminJakub, null, null, cGeo1, cGeo2, cGeo3, cGeo4, cGeo5, cGeo6, cGeo7);
 
-            // --- Programming (C#) ---
-            Cards.Add(new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "What keyword is used to inherit from a class in C#?",
-                AnswerContent = ": (colon)",
-                Created = DateTime.UtcNow,
-                Description = "C# Syntax"
-            });
+            // --- 2: Basic Math (Math) ---
+            var cMath1 = AddCard("5 + 5 =", "10", "Math");
+            var cMath2 = AddCard("10 - 3 =", "7", "Math");
+            var cMath3 = AddCard("6 * 6 =", "36", "Math");
+            var cMath4 = AddCard("20 / 4 =", "5", "Math");
+            var cMath5 = AddCard("Square root of 81?", "9", "Math");
+            var cMath6 = AddCard("2 + 2 * 2 =", "6", "Math"); // Order of operations check
+            var mathDeck =
+                AddCollection("Quick Math", adminJakub, null, null, cMath1, cMath2, cMath3, cMath4, cMath5, cMath6);
 
-            Cards.Add(new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "What is the default access modifier for class members in C#?",
-                AnswerContent = "Private",
-                Created = DateTime.UtcNow,
-                Description = "C# Basics"
-            });
+            // --- 3: Tech Trivia (Coding) ---
+            var cCode1 = AddCard("HTML stands for?", "HyperText Markup Language", "IT");
+            var cCode2 = AddCard("C# creator?", "Microsoft", "IT");
+            var cCode3 = AddCard("Standard port for HTTP?", "80", "IT");
+            var cCode4 = AddCard("Type for True/False?", "Boolean", "IT");
+            var cCode5 = AddCard("Loop that runs at least once?", "Do-While", "IT");
+            var cCode6 = AddCard("SQL command to fetch data?", "SELECT", "IT");
+            var cCode7 = AddCard("First index of array?", "0", "IT");
+            var cCode8 = AddCard("Language of the web?", "JavaScript", "IT");
+            AddCollection("Tech Trivia", userFilip, null, null, cCode1, cCode2, cCode3, cCode4, cCode5, cCode6, cCode7, cCode8);
 
-            // --- Biology ---
-            Cards.Add(new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "What is the powerhouse of the cell?",
-                AnswerContent = "Mitochondria",
-                Created = DateTime.UtcNow,
-                Description = "Cell biology"
-            });
+            // --- 4: Simple Science (Science) ---
+            var cSci1 = AddCard("H2O is?", "Water", "Chemistry");
+            var cSci2 = AddCard("Planet we live on?", "Earth", "Astronomy");
+            var cSci3 = AddCard("Freezing point of water (C)?", "0", "Physics");
+            var cSci4 = AddCard("Center of atom?", "Nucleus", "Physics");
+            var cSci5 = AddCard("Speed of light?", "299,792,458 m/s", "Physics");
+            AddCollection("Science 101", userTomas, null, null, cSci1, cSci2, cSci3, cSci4, cSci5);
 
-            Cards.Add(new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "How many bones are in the adult human body?",
-                AnswerContent = "206",
-                Created = DateTime.UtcNow,
-                Description = "Anatomy"
-            });
+            // --- 5. Spanish Basics (Language) ---
+            var cSpa1 = AddCard("Hello", "Hola", "Spanish");
+            var cSpa2 = AddCard("Thank you", "Gracias", "Spanish");
+            var cSpa3 = AddCard("Please", "Por favor", "Spanish");
+            var cSpa4 = AddCard("Good morning", "Buenos días", "Spanish");
+            var cSpa5 = AddCard("Friend", "Amigo", "Spanish");
+            var cSpa6 = AddCard("Beer", "Cerveza", "Spanish");
+            var cSpa7 = AddCard("One, Two, Three", "Uno, Dos, Tres", "Spanish");
+            var colSpanish = AddCollection("Spanish Basics", userTomas, null, null, cSpa1, cSpa2, cSpa3, cSpa4, cSpa5, cSpa6, cSpa7);
+
+            // --- 6. Animal Kingdom (Nature) ---
+            var cAni1 = AddCard("Fastest land animal?", "Cheetah", "Nature");
+            var cAni2 = AddCard("Largest mammal?", "Blue Whale", "Nature");
+            var cAni3 = AddCard("King of the jungle?", "Lion", "Nature");
+            var cAni4 = AddCard("Bird that can't fly?", "Penguin", "Nature");
+            var cAni5 = AddCard("How many legs does a spider have?", "8", "Nature");
+            var cAni6 = AddCard("Only flying mammal?", "Bat", "Nature");
+            var colAnimals = AddCollection("Animal Kingdom", userDavid, null, null, cAni1, cAni2, cAni3, cAni4, cAni5, cAni6);
+
+            // --- 7. Movie Quotes (Pop Culture) ---
+            var cMov1 = AddCard("I'll be back", "Terminator", "Movies");
+            var cMov2 = AddCard("May the Force be with you", "Star Wars", "Movies");
+            var cMov3 = AddCard("Here's Johnny!", "The Shining", "Movies");
+            var cMov4 = AddCard("I'm going to make him an offer...", "The Godfather", "Movies");
+            var cMov5 = AddCard("You shall not pass!", "Lord of the Rings", "Movies");
+            var cMov6 = AddCard("Houston, we have a problem", "Apollo 13", "Movies");
+            var colMovies = AddCollection(
+                "Famous Movie Quotes", 
+                userDavid,
+                DateTime.Parse("2027-10-01"),
+                DateTime.Parse("2027-10-31"),
+                cMov1, cMov2, cMov3, cMov4, cMov5, cMov6);
+
+            // --- 8. Music Theory (Arts) ---
+            var cMus1 = AddCard("Number of lines in a staff?", "5", "Music");
+            var cMus2 = AddCard("Symbol for silence?", "Rest", "Music");
+            var cMus3 = AddCard("Do Re Mi Fa ...", "Sol", "Music");
+            var cMus4 = AddCard("Lowest male voice?", "Bass", "Music");
+            var cMus5 = AddCard("Highest female voice?", "Soprano", "Music");
+            var colMusic = AddCollection(
+                "Music Theory", 
+                userDavid, 
+                DateTime.Parse("2025-10-01"), 
+                DateTime.Parse("2025-10-31"), 
+                cMus1, cMus2, cMus3, cMus4, cMus5);
+            
+            // Create Lessons
+            AddLesson(adminJakub, capitalsDeck, seen: 3, correct: 2, wrong: 1);
+            AddLesson(adminJakub, capitalsDeck, seen: 6, correct: 5, wrong: 1);
+            AddLesson(adminJakub, capitalsDeck, seen: 7, correct: 7, wrong: 0);
+            AddLesson(adminJakub, mathDeck,     seen: 6, correct: 5, wrong: 1);
+            AddLesson(adminJakub, mathDeck,     seen: 6, correct: 6, wrong: 0);
+
+            AddLesson(userFilip, mathDeck, seen: 6, correct: 1, wrong: 5);
+            AddLesson(userFilip, mathDeck, seen: 5, correct: 2, wrong: 3);
+            AddLesson(userFilip, mathDeck, seen: 6, correct: 5, wrong: 1);
         }
 
-        private void SeedUsers()
+        private UserEntity AddUser(string displayName, string identityName, RoleType role, string? specificId = null)
         {
-            Users.Add(new UserEntity
+            var user = new UserEntity
             {
-                Id = new Guid("fb4049db-148d-44c2-9be4-5abeffe971a2"),
-                Name = "Jakub",
-                PhotoUrl = "https://i.pravatar.cc/150?u=fb4049db-148d-44c2-9be4-5abeffe971a2",
-                Role = RoleType.Admin,
-                IdentityOwnerId = "Jakub"
-            });
-
-            Users.Add(new UserEntity
-            {
-                Id = new Guid("7e664a56-e7b8-4301-84ad-ec08446465f2"),
-                Name = "User",
-                PhotoUrl = String.Empty,
-                Role = RoleType.User,
-                IdentityOwnerId = "User"
-            });
+                Id = specificId != null ? Guid.Parse(specificId) : Guid.NewGuid(),
+                Name = displayName,
+                IdentityOwnerId = identityName,
+                Role = role,
+                PhotoUrl = $"https://i.pravatar.cc/150?u={displayName}"
+            };
+            Users.Add(user);
+            return user;
         }
 
-        private void SeedCollections()
+        private CardEntity AddCard(string question, string answer, string description)
         {
-            // Collection 1: General Mix (Admin Owned)
-            var mixCards = Cards.Where(c =>
-                c.Id == new Guid("7f251cd6-3ac4-49be-b3e7-d1f9f7cfdd3a") ||
-                c.Id == new Guid("23b3902d-7d4f-4213-9cf0-112348f56238") ||
-                c.Id == new Guid("df935095-8709-4040-a2bb-b6f97cb416dc")
-            ).ToList();
-
-            Collections.Add(new CardCollectionEntity
-            {
-                Id = new("b72b54c4-9f35-4e3f-96a8-3fdcbbbc09ee"),
-                Title = "General Knowledge Mix",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddMinutes(10),
-                OwnerId = Users[0].Id,
-                Cards = mixCards
-            });
-
-            // Collection 2: C# Programming (User Owned)
-            var csharpCards = Cards.Where(c => c.Description != null && c.Description.Contains("C#")).ToList();
-
-            Collections.Add(new CardCollectionEntity
+            var card = new CardEntity
             {
                 Id = Guid.NewGuid(),
-                Title = "C# Interview Prep",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddDays(1),
-                OwnerId = Users[0].Id,
-                Cards = csharpCards
-            });
-
-            // Collection 3: Biology 101 (User Owned)
-            var bioCards = Cards.Where(c => c.Description == "Cell biology" || c.Description == "Anatomy").ToList();
-
-            Collections.Add(new CardCollectionEntity
-            {
-                Id = Guid.NewGuid(),
-                Title = "Biology 101",
-                AnswerStart = DateTime.UtcNow,
-                AnswerEnd = DateTime.UtcNow.AddHours(2),
-                OwnerId = Users[1].Id,
-                Cards = bioCards
-            });
+                QuestionType = ContentType.Text,
+                AnswerType = ContentType.Text,
+                QuestionContent = question,
+                AnswerContent = answer,
+                Description = description,
+                Created = DateTime.UtcNow
+            };
+            Cards.Add(card);
+            return card;
         }
 
-        private void SeedLessons()
+        private CardCollectionEntity AddCollection(string title, UserEntity owner, DateTime? start = null, DateTime? end = null, params CardEntity[] cards)
         {
-            if (!Users.Any() || !Collections.Any()) return;
-            Lessons.Add(new LessonEntity
+            var collection = new CardCollectionEntity
             {
-                User = Users[0],
-                CardCollection = Collections[0],
-                Id = new("536adfc4-8284-404d-a00e-b4a007413a44"),
+                Id = Guid.NewGuid(),
+                Title = title,
+                OwnerId = owner.Id, // Linking ID automatically
+                AnswerStart = start ?? DateTime.UtcNow.AddDays(-60),
+                AnswerEnd = end ?? DateTime.UtcNow.AddDays(60),
+                Cards = cards.ToList() // Linking Objects automatically
+            };
+            Collections.Add(collection);
+            return collection;
+        }
+
+        private LessonEntity AddLesson(UserEntity user, CardCollectionEntity collection, uint seen, uint correct, uint wrong)
+        {
+            var lesson = new LessonEntity
+            {
+                Id = Guid.NewGuid(),
+                User = user,
+                CardCollection = collection,
                 Start = DateTime.UtcNow,
-                Seen = 3,
-                Correct = 2,
-                Wrong = 1
-            });
-
-            if (Collections.Count < 1) return;
-            Lessons.Add(new LessonEntity
-            {
-                User = Users[1],
-                CardCollection = Collections[1],
-                Id = Guid.NewGuid(),
-                Start = DateTime.UtcNow.AddHours(-1),
-                Seen = 2,
-                Correct = 2,
-                Wrong = 0
-            });
+                Seen = seen,
+                Correct = correct,
+                Wrong = wrong
+            };
+            Lessons.Add(lesson);
+            return lesson;
         }
     }
 }
