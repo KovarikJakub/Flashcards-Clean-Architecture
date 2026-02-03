@@ -23,7 +23,7 @@ namespace Flashcards.Web.App.Pages
         private string ActiveTab { get; set; } = "my";
 
         private ContentType? SelectedTypeFilter { get; set; } = null;
-        private string SelectedSort { get; set; } = "az";
+        private string SelectedSort { get; set; } = "default";
 
         private string? _userId;
         private string? _userName;
@@ -74,14 +74,23 @@ namespace Flashcards.Web.App.Pages
 
                 Guid? ownerIdFilter = ActiveTab == "my" ? _internalUserId : null;
 
-                string sortBy = "QuestionContent";
-                bool sortAsc = true;
+                string? sortBy = null;
+                bool sortAsc = false;
 
                 switch (SelectedSort)
                 {
-                    case "za": sortBy = "QuestionContent"; sortAsc = false; break;
                     case "az":
-                    default: sortBy = "QuestionContent"; sortAsc = true; break;
+                        sortBy = "QuestionContent";
+                        sortAsc = true;
+                        break;
+                    case "za":
+                        sortBy = "QuestionContent";
+                        sortAsc = false;
+                        break;
+                    default:
+                        sortBy = "DateCreated";
+                        sortAsc = false;
+                        break;
                 }
 
                 var query = new CardQueryModel
