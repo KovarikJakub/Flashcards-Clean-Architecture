@@ -67,14 +67,14 @@ namespace Flashcards.Web.App.Pages.Play
         // action handlers
         private async Task HandleMarkCorrectAsync(Guid cardId)
         {
-            await HandleClickNext();
             await HandleAnswerAsync(cardId, AnswerState.Correct);
+            await HandleClickNext();
         }
 
         private async Task HandleMarkWrongAsync(Guid cardId)
         {
-            await HandleClickNext();
             await HandleAnswerAsync(cardId, AnswerState.Wrong);
+            await HandleClickNext();
         }
 
         private Task HandleAnswerAsync(Guid cardId, AnswerState state)
