@@ -26,10 +26,8 @@ namespace Flashcards.Web.App.Pages
         {
             try
             {
-                // Načteme detail karty podle ID
                 _card = await CardFacade.GetByIdAsync(Id);
 
-                // Pokud karta neexistuje (např. špatné ID), můžeme přesměrovat zpět
                 if (_card == null)
                 {
                     NavigationManager.NavigateTo("/cards");
@@ -38,7 +36,6 @@ namespace Flashcards.Web.App.Pages
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading card: {ex.Message}");
-                // V reálu zde můžete zobrazit notifikaci o chybě
             }
         }
 
@@ -54,7 +51,6 @@ namespace Flashcards.Web.App.Pages
             catch (Exception exception)
             {
                 Console.WriteLine($"Error saving card: {exception.Message}");
-                // Zde ideálně zobrazit toast notification "Failed to save"
             }
         }
     }
