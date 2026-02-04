@@ -7,13 +7,13 @@ namespace Flashcards.Web.App.Pages.Users;
 
 public partial class UserList : PageBase
 {
-    [Inject]
-    private UserFacade UserFacade { get; set; } = null!;
+    [Inject] private UserFacade UserFacade { get; set; } = null!;
     private List<UserListModel> Users { get; set; } = Enumerable.Empty<UserListModel>().ToList();
     private bool IsCreating { get; set; }
     private bool IsSubmitting { get; set; }
     private string? ErrorMessage { get; set; }
 
+    private UserDetailModel? _selectedUser;
     private NewUserInputs Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
@@ -104,5 +104,29 @@ public partial class UserList : PageBase
         public string Password { get; set; } = string.Empty;
         public string ProfilePictureUrl { get; set; } = string. Empty;
         public RoleType Role { get; set; } = RoleType.User;
+    }
+    
+    // Modal view methods
+    private async Task OpenUserDetails(UserListModel user)
+    {
+        try
+        {
+            _selectedUser = await UserFacade.GetByIdAsync(user.Id);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error loading user details: {ex.Message}";
+        }
+    }
+    
+    private void CloseUserDetails()
+    {
+        _selectedUser = null;
+    }
+    
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        return name.Trim().Substring(0, 1).ToUpper();
     }
 }
