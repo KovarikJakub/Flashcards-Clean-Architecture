@@ -28,7 +28,7 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
         private bool _showCreateForm;
         private bool _onlyAvailable;
         private int _currentPage = 1;
-        private  readonly int _pageSize = 5; 
+        private  readonly int _pageSize = 9; 
         private ViewMode _currentView = ViewMode.MyCollections;
         private int TotalPages { get; set; } 
         private string? _userId;
@@ -113,6 +113,11 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             if (_sortBy == "ascending")
             {
                 query.SortAsc = true;
+                query.SortBy = "Title";
+            }
+            else if(_sortBy == "descending")
+            {
+                query.SortAsc = false;
                 query.SortBy = "Title";
             }
             
