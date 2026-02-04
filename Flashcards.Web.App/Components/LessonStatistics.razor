@@ -87,14 +87,9 @@
 </div>
 
 @code {
-    [Parameter]
-    public LessonDetailModel? Lesson { get; set; }
-    
-    [Parameter]
-    public EventCallback OnPlayAgain { get; set; }
-    
-    [Parameter]
-    public EventCallback OnTryDifferent { get; set; }
+    [Parameter] public LessonDetailModel Lesson { get; set; } = null!;
+    [Parameter] public EventCallback OnPlayAgain { get; set; }
+    [Parameter] public EventCallback OnTryDifferent { get; set; }
 
     private void HandlePlayAgain()
     {
