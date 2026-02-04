@@ -34,7 +34,6 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
         private ICollection<CardCollectionListModel> CardCollectionsMine { get; set; } = new List<CardCollectionListModel>();
         private CardCollectionDetailModel? _selectedCollection;
         private CardCollectionListModel? _selectedCollectionListModel;
-        private UserDetailModel? _collectionOwner;
         private string _filterByTitle = string.Empty;
 
         private string FilterByTitle
@@ -255,21 +254,17 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             {
                 _selectedCollectionListModel = collection;
                 _selectedCollection = await  CardCollectionFacade.GetByIdAsync(collection.Id);
-                if(_selectedCollection == null) return;
-                _collectionOwner = await UserFacade.GetByIdAsync(_selectedCollection.Id); 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 _selectedCollection = null;
-                _collectionOwner = null;
             }
         }
 
         private void CloseDetailsModal()
         {
             _selectedCollection = null;
-            _collectionOwner = null;
         }
     }
 }
