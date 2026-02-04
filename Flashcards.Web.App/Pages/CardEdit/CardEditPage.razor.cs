@@ -2,7 +2,7 @@
 using Flashcards.Web.BL.Facades;
 using Microsoft.AspNetCore.Components;
 
-namespace Flashcards.Web.App.Pages
+namespace Flashcards.Web.App.Pages.CardEdit
 {
     public partial class CardEditPage : PageBase
     {
