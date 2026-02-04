@@ -9,16 +9,18 @@
         <p class="text-sm text-gray-500 mt-1">Manage access and profile details.</p>
     </div>
     <div class="flex gap-3">
+        @if (!IsCreating && !IsEditing)
+        {
         <button class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center" @onclick="ShowCreateForm">
             <span class="mr-2 text-lg leading-none">+</span> Add User
         </button>
+        }
     </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-
         <div class="relative w-full sm:max-w-xs">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,6 +105,56 @@
     </div>
     }
 
+    @if (IsEditing)
+    {
+    <div class="bg-white p-6 rounded-xl shadow-lg border border-orange-100 mb-8 animation-fade-in">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+            <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Edit User
+            </h4>
+            <button class="text-gray-400 hover:text-gray-600" @onclick="CancelEdit">✕</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Display Name</label>
+                    <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
+                           placeholder="e.g. John Doe" @bind="EditInput.Name" />
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        Profile Picture URL <span class="text-gray-400 font-normal normal-case">(Optional)</span>
+                    </label>
+                    <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
+                           placeholder="https://..." @bind="EditInput.PhotoUrl" />
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+        <div class="mt-4 bg-red-50 text-red-700 px-4 py-3 rounded-lg border border-red-200 text-sm">
+            @ErrorMessage
+        </div>
+        }
+
+        <div class="mt-6 flex gap-3 justify-end">
+            <button class="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition" @onclick="CancelEdit">Cancel</button>
+            <button class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold shadow-md transition flex items-center gap-2"
+                    @onclick="UpdateUser" disabled="@IsSubmitting">
+                @if (IsSubmitting) { <span>Saving...</span> } else { <span>Save Changes</span> }
+            </button>
+        </div>
+    </div>
+    }
+
     <div class="flex flex-col">
         <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -121,12 +173,13 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                         @foreach (var u in Users)
                         {
-                        <tr class="hover:bg-blue-50 transition group cursor-pointer" @onclick="() => OpenUserDetails(u)">
+                        <tr class="transition group cursor-pointer @(IsEditing && EditInput.Id == u.Id ? "bg-orange-50" : "hover:bg-blue-50")"
+                            @onclick="() => OpenUserDetails(u)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="ml-4 w-full max-w-xs">
                                         <input type="text" class="text-sm font-semibold text-gray-900 border-none focus:ring-0 p-0 bg-transparent w-full cursor-pointer hover:text-indigo-600 transition"
-                                               @bind="u.Name" placeholder="Enter name..." @onclick:stopPropagation="true" />
+                                               @bind="u.Name" placeholder="Enter name..." @onclick:stopPropagation="true" readonly />
                                     </div>
                                 </div>
                             </td>
@@ -152,25 +205,41 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 @if (u.Role != RoleType.Admin)
                                 {
-                                if (!u.IsDeleted)
-                                {
-                                <button class="text-gray-400 hover:text-red-600 transition p-2 rounded-full hover:bg-red-50"
-                                        @onclick="() => DeleteUser(u)"
-                                        @onclick:stopPropagation="true"
-                                        title="Delete User">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                                }
-                                else
-                                {
-                                <button class="text-gray-300 cursor-not-allowed p-2 rounded-full bg-gray-50" disabled title="Already inactive" @onclick:stopPropagation="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                                }
+                                <div class="flex justify-end gap-2">
+                                    @if (!u.IsDeleted)
+                                    {
+                                    <button class="text-gray-400 hover:text-orange-500 transition p-2 rounded-full hover:bg-orange-50"
+                                            @onclick="() => ShowEditForm(u)"
+                                            @onclick:stopPropagation="true"
+                                            title="Edit User">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+
+                                    <button class="text-gray-400 hover:text-red-600 transition p-2 rounded-full hover:bg-red-50"
+                                            @onclick="() => DeleteUser(u)"
+                                            @onclick:stopPropagation="true"
+                                            title="Delete User">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    }
+                                    else
+                                    {
+                                    <button class="text-gray-300 cursor-not-allowed p-2 rounded-full" disabled>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-gray-300 cursor-not-allowed p-2 rounded-full" disabled>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    }
+                                </div>
                                 }
                                 else
                                 {

@@ -15,7 +15,9 @@ public partial class UserList : PageBase
     private bool IsCreating { get; set; }
     private bool IsSubmitting { get; set; }
     private string? ErrorMessage { get; set; }
+    private bool IsEditing { get; set; }
     private NewUserInputs Input { get; set; } = new();
+    private UserUpdateModel EditInput { get; set; }
     private int TotalPages { get; set; }
     private string _filter = String.Empty;
     private string Filter
@@ -194,7 +196,7 @@ public partial class UserList : PageBase
         await LoadData();
     }
     
-    // Paging methods
+    // paging methods
     private async Task NextPage()
     {
         if (_currentPage < TotalPages)
@@ -211,5 +213,65 @@ public partial class UserList : PageBase
             _currentPage--;
             await LoadData();
         }
+    }
+    
+    // edit methods
+    private async Task UpdateUser()
+    {
+        ErrorMessage = null;
+        IsSubmitting = true;
+
+        if (string.IsNullOrWhiteSpace(EditInput.Name))
+        {
+            ErrorMessage = "Name is required.";
+            IsSubmitting = false;
+            return;
+        }
+
+        try
+        {
+            await UserFacade.Update(EditInput);
+
+            IsEditing = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error updating user: {ex.Message}";
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+    
+    private async Task  ShowEditForm(UserListModel user)
+    {
+        IsCreating = false;
+        ErrorMessage = null;
+        
+        try
+        {
+            var userDetail = await UserFacade.GetByIdAsync(user.Id);
+            if (userDetail == null) return;
+            EditInput = new UserUpdateModel
+            {
+                Id = userDetail.Id,
+                Name = userDetail.Name,
+                PhotoUrl = userDetail.PhotoUrl 
+            };
+            
+            IsEditing = true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not load user data for editing: {ex.Message}";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        IsEditing = false;
+        ErrorMessage = null;
     }
 }
