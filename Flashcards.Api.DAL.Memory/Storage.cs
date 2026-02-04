@@ -173,6 +173,7 @@ namespace Flashcards.Api.DAL.Memory
                 Id = Guid.NewGuid(),
                 Title = title,
                 OwnerId = owner.Id, // Linking ID automatically
+                Owner = owner,
                 AnswerStart = start ?? DateTime.UtcNow.AddDays(-60),
                 AnswerEnd = end ?? DateTime.UtcNow.AddDays(60),
                 Cards = cards.ToList() // Linking Objects automatically
@@ -187,6 +188,7 @@ namespace Flashcards.Api.DAL.Memory
             {
                 Id = Guid.NewGuid(),
                 User = user,
+                CardCollectionId = collection.Id,
                 CardCollection = collection,
                 Start = DateTime.UtcNow,
                 Seen = seen,

@@ -71,7 +71,8 @@ public class CardMapper(UserMapper userMapper)
             QuestionContent = e.QuestionContent,
             Description = e.Description,
             QuestionType = e.QuestionType,
-            AnswerType = e.AnswerType
+            AnswerType = e.AnswerType,
+            OwnerName = e.Owner?.Name,
         }).ToList();
     }
 }
