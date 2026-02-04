@@ -39,16 +39,14 @@ namespace Flashcards.Web.App.Pages.Statistics
             }
         }
         private long TotalCardsSeen => _lessons?.Sum(l => l.Seen) ?? 0;
-        private double GlobalAccuracy
+        
+        private double GlobalAccuracy()
         {
-            get
-            {
-                if (_lessons == null || !_lessons.Any()) return 0;
-                var totalCorrect = _lessons.Sum(l => (double)l.Correct);
-                var totalWrong = _lessons.Sum(l => (double)l.Wrong);
-                var totalAnswers = totalCorrect + totalWrong;
-                return totalAnswers == 0 ? 0 : (totalCorrect / totalAnswers) * 100;
-            }
+            if (_lessons == null || !_lessons.Any()) return 0;
+            var totalCorrect = _lessons.Sum(l => (double)l.Correct);
+            var totalWrong = _lessons.Sum(l => (double)l.Wrong);
+            var totalAnswers = totalCorrect + totalWrong;
+            return totalAnswers == 0 ? 0 : (totalCorrect / totalAnswers) * 100;
         }
     
         protected override async Task OnInitializedAsync()

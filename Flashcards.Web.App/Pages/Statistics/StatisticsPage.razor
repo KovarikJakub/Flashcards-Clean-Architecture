@@ -79,8 +79,8 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between transition hover:shadow-md">
                 <div>
                     <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Average Accuracy</p>
-                    <p class="text-3xl font-bold @GetAccuracyColor(GlobalAccuracy) mt-1">
-                        @GlobalAccuracy.ToString("F1")%
+                    <p class="text-3xl font-bold @(GetAccuracyColor(GlobalAccuracy())) mt-1">
+                        @GlobalAccuracy().ToString("F1")%
                     </p>
                 </div>
                 <div class="text-4xl opacity-80 bg-green-50 p-3 rounded-full">🎯</div>
