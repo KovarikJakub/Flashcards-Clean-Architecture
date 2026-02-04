@@ -16,12 +16,25 @@ namespace Flashcards.Web.App.Pages.Statistics
         private LessonFacade LessonFacade { get; set; } = null!;
         
         // variables and properties
-         private List<LessonListModel>? _lessons;
-         private UserDetailModel? _user; 
-         private bool _isLoading = true;
-         private string? _userId;
-        
-        // computed properties
+        private List<LessonListModel>? _lessons;
+        private UserDetailModel? _user; 
+        private bool _isLoading = true;
+        private string? _userId;
+        private int _pageNumber = 1;
+        private readonly  int _pageSize = 6;
+        private int _totalPages = 1;
+        private long _totalItems;
+        private string _sortOrder = "descending"; 
+        public string SortOrder
+        {
+            get => _sortOrder;
+            set
+            {
+                _sortOrder = value;
+                _pageNumber = 1; 
+                _ = LoadData(); 
+            }
+        }
         private long TotalCardsSeen => _lessons?.Sum(l => l.Seen) ?? 0;
         private double GlobalAccuracy
         {
@@ -47,7 +60,7 @@ namespace Flashcards.Web.App.Pages.Statistics
                     _userId = user.FindFirst("sub")?.Value;
                 }
                 
-                await LoadData();                               // load lessons from logged user
+                await LoadData();
                 await base.OnInitializedAsync();
             }
             catch (Exception ex)
@@ -64,25 +77,74 @@ namespace Flashcards.Web.App.Pages.Statistics
         {
             if (string.IsNullOrEmpty(_userId))
             {
-                // No user is  logged in
                 _lessons = new List<LessonListModel>();
-                Console.WriteLine("No user found");
+                return;
             }
-            else
+
+            _isLoading = true;
+            StateHasChanged();
+
+            try 
             {
-                // get current user
-                _user = await UserFacade.GetByIdentityIdAsync(_userId);
-                // get lessons for current user
+                // get current user details
+                if (_user == null) 
+                {
+                    _user = await UserFacade.GetByIdentityIdAsync(_userId);
+                }
+
+                // prepare query
                 var query = new LessonQueryModel
                 {
-                    UserId = _user.Id
+                    UserId = _user.Id,
+                    Page = _pageNumber,
+                    PageSize = _pageSize,
                 };
+
+                // sorting
+                if (_sortOrder == "ascending")
+                {
+                    query.SortAsc = true;
+                    query.SortBy = "Start"; 
+                }
+                else if (_sortOrder == "descending")
+                {
+                    query.SortAsc = false;
+                    query.SortBy = "Start";
+                }
+                
+                //  get lessons and pages info
                 var lessonsPagedResult = await LessonFacade.GetByQueryAsync(query);
                 _lessons = lessonsPagedResult.Items.ToList();
+                _totalItems = lessonsPagedResult.TotalCount;
+                _totalPages = (int)Math.Ceiling((double)_totalItems / _pageSize);
+                if (_totalPages < 1) _totalPages = 1;
+            }
+            finally 
+            {
+                _isLoading = false;
+                StateHasChanged();
             }
         }
         
-        // helper methods
+        // Helpers methods
+        private async Task NextPage()
+        {
+            if (_pageNumber < _totalPages)
+            {
+                _pageNumber++;
+                await LoadData();
+            }
+        }
+
+        private async Task PreviousPage()
+        {
+            if (_pageNumber > 1)
+            {
+                _pageNumber--;
+                await LoadData();
+            }
+        }
+        
         private static double CalculateAccuracy(double correct, double wrong)
         {
             var total = correct + wrong;
@@ -103,5 +165,4 @@ namespace Flashcards.Web.App.Pages.Statistics
             return name.Trim().Substring(0, 1).ToUpper();
         }
     }
-};
-
+}
