@@ -1,5 +1,8 @@
-﻿using Flashcards.Api.DAL.Common.Interfaces;
+﻿using Flashcards.Api.App.EndpointTests.Tests;
+using Flashcards.Api.BL.Services.Interfaces;
+using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Memory;
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +24,10 @@ namespace Flashcards.Api.App.EndpointTests
 
                 // Add a test one
                 services.AddSingleton<IStorage, TestStorage>(s => new TestStorage(false));
+
+                services.AddSingleton<IPolicyEvaluator, FakePolicyEvaluator>();
+
+                services.AddScoped<ICurrentUserProvider, FakeCurrentUserProvider>();
             });
 
             return base.CreateHost(builder);

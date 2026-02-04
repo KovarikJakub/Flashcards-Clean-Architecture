@@ -5,22 +5,21 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Flashcards.Api.App.EndpointTests.Tests
 {
-    public class LessonEndpointsTests : BaseEndpointTests<LessonEntity, LessonDetailModel, LessonListModel>, IClassFixture<WebApplicationFactory<Program>>
+    public class LessonEndpointsTests : BaseEndpointTests<LessonEntity, LessonCreateModel, LessonDetailModel, LessonListModel>, IClassFixture<WebApplicationFactory<Program>>
     {
         private static readonly UserMapper UserMapper = new();
-        private static readonly CardCollectionMapper CollectionMapper = new();
-        private static readonly LessonMapper LessonMapper = new(UserMapper, CollectionMapper);
+        private static readonly CardMapper CardMapper = new(UserMapper);
+        private static readonly CardCollectionMapper CollectionMapper = new(CardMapper, UserMapper);
+        private static readonly LessonMapper LessonMapper = new(CollectionMapper);
 
         protected override string EndpointBase => "/api/lesson";
-        protected override string EndpointGetAll => "/api/lesson/all";
+        protected override string EndpointGetAll => "/api/lesson";
         protected override Guid GetEntityId(LessonEntity entity) => entity.Id;
         protected override Guid GetModelId(LessonDetailModel model) => model.Id;
         protected override IList<LessonEntity> GetCollection() => _storage.Lessons;
-        protected override LessonDetailModel CreateNewModel() => new() // new model for testing insert
+        protected override LessonCreateModel CreateNewModel() => new() // new model for testing insert
         {
-            User = UserMapper.ToDetailModel(_storage.Users.First()),
-            CardCollection = CollectionMapper.ToDetailModel(_storage.Collections.First()),
-            Id = new("baaa6f8c-bb86-4066-8696-896c2f14e1ca"),
+            CardCollectionId = Guid.Parse("b72b54c4-9f35-4e3f-96a8-3fdcbbbc09ee"),
             Start = DateTime.UtcNow,
             Seen = 3,
             Correct = 2,

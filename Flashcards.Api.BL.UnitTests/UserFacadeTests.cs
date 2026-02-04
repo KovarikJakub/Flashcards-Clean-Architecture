@@ -132,6 +132,29 @@ namespace Flashcards.Api.BL.UnitTests
                 e.Name == "John Doe"
             ));
         }
+
+        [Fact]
+        void Delete_ShouldDoNothing_WhenAlreadyDeletedUserIsDeleted()
+        {
+            // Arrange
+            var targetGuid = Guid.NewGuid();
+            var deletedUser = new UserEntity()
+            {
+                Id = targetGuid,
+                IdentityOwnerId = string.Empty,
+                IsDeleted = true,
+                Name = "I was deleted",
+                Role = RoleType.User
+            };
+            _userRepoSub.GetById(targetGuid).Returns(deletedUser);
+
+            // Act
+            _sut.Delete(targetGuid);
+
+            // Assert
+            _userRepoSub.DidNotReceiveWithAnyArgs().Remove(targetGuid);
+            _identityServiceSub.DidNotReceiveWithAnyArgs().DeleteIdentityAsync(deletedUser.IdentityOwnerId);
+        }
     }
 }
 

@@ -1,14 +1,67 @@
-﻿using Flashcards.Api.DAL.Common.Interfaces;
+﻿using Flashcards.Api.BL.Services.Interfaces;
+using Flashcards.Api.DAL.Common.Entities;
+using Flashcards.Api.DAL.Common.Interfaces;
+using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Common;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 
 namespace Flashcards.Api.App.EndpointTests.Tests
 {
-    public abstract class BaseEndpointTests<TEntity, TDetailModel, TListModel>
+    public class FakePolicyEvaluator : IPolicyEvaluator
+    {
+        public virtual async Task<AuthenticateResult> AuthenticateAsync(AuthorizationPolicy policy, HttpContext context)
+        {
+            var principal = new ClaimsPrincipal();
+
+            // ensures logic checking for "CurrentUser.Id" works correctly
+            principal.AddIdentity(new ClaimsIdentity(new[] {
+                new Claim(ClaimTypes.NameIdentifier, "Jakub"), // Matches seeded IdentityOwnerId
+                new Claim(ClaimTypes.Name, "Jakub"),
+                new Claim(ClaimTypes.Role, "Admin"),           // Grants Admin Policy access
+                new Claim("sub", "Jakub")                      // Duende standard subject
+            }, "FakeScheme"));
+
+            return await Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal,
+                new AuthenticationProperties(), "FakeScheme")));
+        }
+
+        public virtual async Task<PolicyAuthorizationResult> AuthorizeAsync(AuthorizationPolicy policy,
+            AuthenticateResult authenticationResult, HttpContext context, object? resource)
+        {
+            // Always say "Success" regardless of the policy requirements
+            return await Task.FromResult(PolicyAuthorizationResult.Success());
+        }
+    }
+
+    public class FakeCurrentUserProvider(IUserRepository userRepository) : ICurrentUserProvider
+    {
+        public UserEntity GetCurrentUser()
+        {
+            // We return the user that we KNOW exists because we seeded it.
+            // In Storage.Seed(), the identity ID is "Jakub"
+            var user = userRepository.GetByIdentityId("Jakub");
+
+            if (user is null)
+            {
+                throw new InvalidOperationException("Test Failure: The seeded user 'Jakub' was not found in the repository.");
+            }
+
+            return user;
+        }
+
+    }
+
+    public abstract class BaseEndpointTests<TEntity, TCreateModel, TDetailModel, TListModel>
         where TEntity : class, IWithGuid
+        where TCreateModel : class
         where TDetailModel : class, IWithGuid
         where TListModel : class, IWithGuid
     {
@@ -28,12 +81,12 @@ namespace Flashcards.Api.App.EndpointTests.Tests
         protected abstract IList<TEntity> GetCollection();
         protected abstract Guid GetEntityId(TEntity entity);
         protected abstract Guid GetModelId(TDetailModel model);
-        protected abstract TDetailModel CreateNewModel(); // Should return new DM for testing Insert of new entry
+        protected abstract TCreateModel CreateNewModel(); // Should return new DM for testing Insert of new entry
         protected abstract TDetailModel GetUpdatedModel(TEntity entity);
         protected abstract bool VerifyUpdated(TDetailModel updatedModel);
 
         [Fact]
-        public async Task Delete_ExistingEntity_RemovesEntity()
+        public virtual async Task Delete_ExistingEntity_RemovesEntity()
         {
             // Arrange
             _storage.Seed();
@@ -81,11 +134,12 @@ namespace Flashcards.Api.App.EndpointTests.Tests
         }
 
         [Fact]
-        public async Task Post_NewEntity_AddsEntity()
+        public virtual async Task Post_NewEntity_AddsEntity()
         {
             // Arrange
             _storage.Seed();
             var newModel = CreateNewModel();
+            var originalCollectionCount = GetCollection().Count; 
 
             var json = JsonSerializer.Serialize(newModel);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -95,8 +149,7 @@ namespace Flashcards.Api.App.EndpointTests.Tests
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var newId = GetModelId(newModel);
-            Assert.Contains(GetCollection(), e => GetEntityId(e) == newId);
+            Assert.Equal(GetCollection().Count, originalCollectionCount + 1);
         }
 
         [Fact]
