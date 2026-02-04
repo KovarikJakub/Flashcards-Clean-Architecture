@@ -14,10 +14,13 @@ namespace Flashcards.Web.App.Pages.Statistics
         private UserFacade UserFacade { get; set; } = null!;
         [Inject]
         private LessonFacade LessonFacade { get; set; } = null!;
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = null!;
         
         // variables and properties
         private List<LessonListModel>? _lessons;
         private UserDetailModel? _user; 
+        private LessonListModel? _selectedLesson;
         private bool _isLoading = true;
         private string? _userId;
         private int _pageNumber = 1;
@@ -25,7 +28,7 @@ namespace Flashcards.Web.App.Pages.Statistics
         private int _totalPages = 1;
         private long _totalItems;
         private string _sortOrder = "descending"; 
-        public string SortOrder
+        private string SortOrder
         {
             get => _sortOrder;
             set
@@ -163,6 +166,25 @@ namespace Flashcards.Web.App.Pages.Statistics
         {
             if (string.IsNullOrWhiteSpace(name)) return "?";
             return name.Trim().Substring(0, 1).ToUpper();
+        }
+        
+        // helper function for modal window
+        private void OpenLessonDetails(LessonListModel lesson)
+        {
+            _selectedLesson = lesson;
+        }
+        
+        private void CloseLessonDetails()
+        {
+            _selectedLesson = null;
+        }
+
+        private void HandlePlayAgain()
+        {
+            if (_selectedLesson != null)
+            {
+                NavigationManager.NavigateTo($"/play/{_selectedLesson.CardCollectionId}");
+            }
         }
     }
 }
