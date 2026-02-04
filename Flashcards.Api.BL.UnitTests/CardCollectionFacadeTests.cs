@@ -62,6 +62,9 @@ namespace Flashcards.Api.BL.UnitTests
             // Arrange
             var collectionId = Guid.NewGuid();
 
+            var entity = _mapper.ToEntity(CreateCardCollectionDetailModel(collectionId), _ownerEntity);
+            _fakeRepo.GetById(collectionId).Returns(entity);
+
             // Act
             _facade.Delete(collectionId);
 
@@ -83,15 +86,13 @@ namespace Flashcards.Api.BL.UnitTests
             };
 
             // Act
-            var id = _facade.Create(createModel);
+            _facade.Create(createModel);
 
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
                 c.Title == newCollection.Title &&
                 c.AnswerStart == newCollection.AnswerStart &&
                 c.AnswerEnd == newCollection.AnswerEnd));
-
-            Assert.NotEqual(Guid.Empty, id);
         }
 
         [Fact]
@@ -106,8 +107,6 @@ namespace Flashcards.Api.BL.UnitTests
             // Assert
             _fakeRepo.Received(1).Insert(Arg.Is<CardCollectionEntity>(c =>
                 c.Title == newCollection.Title));
-
-            Assert.NotEqual(Guid.Empty, id);
         }
 
         [Fact]
