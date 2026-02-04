@@ -179,6 +179,11 @@ namespace Flashcards.Api.DAL.Memory
                 Cards = cards.ToList() // Linking Objects automatically
             };
             Collections.Add(collection);
+            foreach (var card in cards)
+            {
+                card.Owner = owner;
+                card.OwnerId = owner.Id;
+            }
             return collection;
         }
 
