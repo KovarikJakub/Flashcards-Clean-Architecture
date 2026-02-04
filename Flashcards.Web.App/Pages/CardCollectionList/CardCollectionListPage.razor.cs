@@ -8,35 +8,35 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
     public partial class CardCollectionListPage : PageBase
     {
         // Injections
-        [Inject]
-        private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
-        [Inject]
-        private UserFacade UserFacade { get; set; } = null!;
-        [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
-        [Inject]
-        private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
-        
+        [Inject] private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
+        [Inject] private UserFacade UserFacade { get; set; } = null!;
+        [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+        [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+
         // enum
         private enum ViewMode
         {
             MyCollections,
             AllCollections
         }
-        
+
         // variables and properties
         private bool _showCreateForm;
         private bool _onlyAvailable;
         private int _currentPage = 1;
-        private  readonly int _pageSize = 9; 
+        private readonly int _pageSize = 9;
         private ViewMode _currentView = ViewMode.MyCollections;
-        private int TotalPages { get; set; } 
+        private int TotalPages { get; set; }
         private string? _userId;
         private bool IsLoading { get; set; } = false;
         private string _sortBy = "default";
         private ICollection<CardCollectionListModel> CardCollectionsAll { get; set; } = new List<CardCollectionListModel>();
         private ICollection<CardCollectionListModel> CardCollectionsMine { get; set; } = new List<CardCollectionListModel>();
+        private CardCollectionDetailModel? _selectedCollection;
+        private CardCollectionListModel? _selectedCollectionListModel;
+        private UserDetailModel? _collectionOwner;
         private string _filterByTitle = string.Empty;
+
         private string FilterByTitle
         {
             get => _filterByTitle;
@@ -46,6 +46,7 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                 _ = OnFilterChanged();
             }
         }
+
         private bool OnlyAvailable
         {
             get => _onlyAvailable;
@@ -55,7 +56,7 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                 _ = OnFilterChanged();
             }
         }
-        
+
         private CardCollectionDetailModel _model = new CardCollectionDetailModel
         {
             Id = Guid.NewGuid(),
@@ -64,26 +65,25 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             AnswerEnd = DateTime.Now.AddDays(1),
             Cards = new List<CardDetailModel>()
         };
-        
+
         protected override async Task OnInitializedAsync()
         {
             try
             {
+                await base.OnInitializedAsync();
                 // get current user identity
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                 var user = authState.User;
                 if (user.Identity?.IsAuthenticated == true)
                 {
-                     _userId = user.FindFirst("sub")?.Value;
+                    _userId = user.FindFirst("sub")?.Value;
                 }
+                await LoadData();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to retrieve auth state: {ex.Message}");
             }
-
-            await LoadData();
-            await base.OnInitializedAsync();
         }
 
         private async Task LoadData()
@@ -97,18 +97,18 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
 
             // get currently signed user
             var currentUser = await UserFacade.GetByIdentityIdAsync(_userId);
-            
+
             // create query model 
             var query = new CardCollectionQueryModel
             {
                 SearchString = FilterByTitle, // by title
                 ShowCurrentlyAvailableOnly = OnlyAvailable // only active collections
             };
-            
+
             // set pagination parameters
-            query.PageSize = _pageSize;             // how many items per page
+            query.PageSize = _pageSize; // how many items per page
             query.Page = _currentPage;
-            
+
             // sorting
             if (_sortBy == "ascending")
             {
@@ -116,18 +116,18 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                 query.SortBy = "Title";
                 query.SortBy = nameof(CardCollectionDetailModel.Title);
             }
-            else if(_sortBy == "descending")
+            else if (_sortBy == "descending")
             {
                 query.SortAsc = false;
                 query.SortBy = nameof(CardCollectionDetailModel.Title);
             }
-            
-            if(_currentView == ViewMode.MyCollections)
+
+            if (_currentView == ViewMode.MyCollections)
             {
-                query.OwnerId = currentUser.Id;                         // only collections of current user
+                query.OwnerId = currentUser.Id;     // only collections of current user
                 var cardCollectionsOfCurrentUser = await CardCollectionFacade.GetByQueryAsync(query);
                 CardCollectionsMine = cardCollectionsOfCurrentUser.Items;
-                if(cardCollectionsOfCurrentUser.TotalCount > 0)
+                if (cardCollectionsOfCurrentUser.TotalCount > 0)
                 {
                     TotalPages = (int)Math.Ceiling((double)cardCollectionsOfCurrentUser.TotalCount / _pageSize);
                 }
@@ -138,7 +138,7 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             }
             else
             {
-                query.ExcludeOwnerId = currentUser.Id; // all collections except those of current user
+                query.ExcludeOwnerId = currentUser.Id;      // all collections except those of current user
                 var cardCollectionsExcludingCurrentUser = await CardCollectionFacade.GetByQueryAsync(query);
                 CardCollectionsAll = cardCollectionsExcludingCurrentUser.Items;
                 if (cardCollectionsExcludingCurrentUser.TotalCount > 0)
@@ -151,14 +151,14 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                 }
             }
         }
-        
+
         // navigation handlers
         private Task OnEditCollection(CardCollectionListModel collection)
         {
             NavigationManager.NavigateTo($"collections/edit/{collection.Id}");
             return Task.CompletedTask;
         }
-        
+
         private void HandlePlayCollection(CardCollectionListModel collection)
         {
             NavigationManager.NavigateTo($"/play/{collection.Id}");
@@ -177,10 +177,10 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                 Console.WriteLine($"Failed to delete collection: {ex.Message}");
             }
         }
-        
+
         private async Task HandleSubmit(CardCollectionDetailModel model)
         {
-            try 
+            try
             {
                 CardCollectionDetailModel newCollection = new CardCollectionDetailModel
                 {
@@ -190,8 +190,8 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                     AnswerEnd = model.AnswerEnd,
                     Cards = model.Cards
                 };
-                
-               _showCreateForm = false;
+
+                _showCreateForm = false;
                 await CardCollectionFacade.UpsertAsync(newCollection);
                 await LoadData();
             }
@@ -200,14 +200,14 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
                 Console.WriteLine($"Failed to create collection: {ex.Message}");
             }
         }
-        
+
         private async Task OnFilterChanged()
         {
             await LoadData();
             StateHasChanged();
         }
-        
-        private void  HandleCancel()
+
+        private void HandleCancel()
         {
             _showCreateForm = false;
         }
@@ -215,37 +215,61 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
         private void HandleOpenForm()
         {
             _showCreateForm = true;
-        } 
+        }
 
         // checks if current date is within answer period
-        private static bool IsCollectionActive(CardCollectionListModel collection)            
+        private static bool IsCollectionActive(CardCollectionListModel collection)
         {
             var now = DateTime.Now;
             var startUtc = collection.AnswerStart;
             var endUtc = collection.AnswerEnd;
             return now >= startUtc && now <= endUtc;
         }
-        
+
         private async Task SwitchView(ViewMode mode)
         {
             if (_currentView == mode) return;
             _currentView = mode;
-            _currentPage = 1;                                       // Reset to page 1 on view change 
-            _showCreateForm = false;                        // Reset creating form
+            _currentPage = 1;                               // Reset to page 1 on view change 
+            _showCreateForm = false;                // Reset creating form
             await LoadData();
         }
 
         private async Task HandleFilterChange()
         {
-            _currentPage = 1; 
+            _currentPage = 1;
             await LoadData();
         }
 
-        private  async Task  ChangePage(int newPage)
+        private async Task ChangePage(int newPage)
         {
             if (newPage < 1 || newPage > TotalPages) return;
             _currentPage = newPage;
             await LoadData();
+        }
+
+        // modal window 
+        private async Task OpenDetailsModal(CardCollectionListModel collection)
+        {
+            try
+            {
+                _selectedCollectionListModel = collection;
+                _selectedCollection = await  CardCollectionFacade.GetByIdAsync(collection.Id);
+                if(_selectedCollection == null) return;
+                _collectionOwner = await UserFacade.GetByIdAsync(_selectedCollection.Id); 
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _selectedCollection = null;
+                _collectionOwner = null;
+            }
+        }
+
+        private void CloseDetailsModal()
+        {
+            _selectedCollection = null;
+            _collectionOwner = null;
         }
     }
 }
