@@ -25,7 +25,9 @@ steps:
   displayName: 'Build Solution'
   inputs:
     command: 'build'
-    projects: '**/*.sln'
+    projects: |
+      **/Flashcards.Api.App.csproj
+      **/*Tests.csproj
     arguments: '--configuration $(buildConfiguration) --no-restore'
 
 - task: DotNetCoreCLI@2
