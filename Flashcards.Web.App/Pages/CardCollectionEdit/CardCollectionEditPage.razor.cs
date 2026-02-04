@@ -8,16 +8,12 @@ namespace Flashcards.Web.App.Pages.CardCollectionEdit
     public partial class CardCollectionEditPage : PageBase
     {
         // input parameter
-        [Parameter]
-        public Guid Id { get; set; }
+        [Parameter] public Guid Id { get; set; }
         
         // injections
-        [Inject]
-        private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
-        [Inject]
-        private CardFacade CardFacade { get; set; } = null!;
-        [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
+        [Inject] private CardCollectionFacade CardCollectionFacade { get; set; } = null!;
+        [Inject] private CardFacade CardFacade { get; set; } = null!;
+        [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
         // variables and properties
         private CardCollectionDetailModel? CardCollection { get; set; }
