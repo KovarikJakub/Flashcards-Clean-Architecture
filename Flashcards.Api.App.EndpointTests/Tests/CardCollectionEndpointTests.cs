@@ -5,22 +5,22 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Flashcards.Api.App.EndpointTests.Tests
 {
-    public class CardCollectionEndpointsTests : BaseEndpointTests<CardCollectionEntity, CardCollectionDetailModel, CardCollectionListModel>, IClassFixture<WebApplicationFactory<Program>>
+    public class CardCollectionEndpointsTests : BaseEndpointTests<CardCollectionEntity, CardCollectionCreateModel, CardCollectionDetailModel, CardCollectionListModel>, IClassFixture<WebApplicationFactory<Program>>
     {
-        private static readonly CardCollectionMapper CollectionMapper = new ();
+        private static readonly UserMapper UserMapper = new();
+        private static readonly CardCollectionMapper CollectionMapper = new(new CardMapper(UserMapper), UserMapper);
 
         protected override string EndpointBase => "/api/cardCollection";
         protected override string EndpointGetAll => "/api/cardCollection";
         protected override Guid GetEntityId(CardCollectionEntity entity) => entity.Id;
         protected override Guid GetModelId(CardCollectionDetailModel model) => model.Id;
         protected override IList<CardCollectionEntity> GetCollection() => _storage.Collections;
-        protected override CardCollectionDetailModel CreateNewModel() => new() // new model for testing insert
+        protected override CardCollectionCreateModel CreateNewModel() => new() // new model for testing insert
         {
-            Id = Guid.NewGuid(),
             Title = "History Facts",
             AnswerStart = DateTime.UtcNow.AddMinutes(-10),
             AnswerEnd = DateTime.UtcNow.AddMinutes(10),
-            Cards = new List<CardDetailModel>()
+            Cards = new List<CardCreateModel>()
         };
         protected override CardCollectionDetailModel GetUpdatedModel(CardCollectionEntity entity)
         {
