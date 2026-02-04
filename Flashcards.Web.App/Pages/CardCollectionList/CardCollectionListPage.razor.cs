@@ -112,7 +112,6 @@ namespace Flashcards.Web.App.Pages.CardCollectionList
             if (_sortBy == "ascending")
             {
                 query.SortAsc = true;
-                query.SortBy = "Title";
                 query.SortBy = nameof(CardCollectionDetailModel.Title);
             }
             else if (_sortBy == "descending")

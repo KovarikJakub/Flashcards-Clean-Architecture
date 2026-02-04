@@ -51,5 +51,10 @@ namespace Flashcards.Web.BL.Facades
             await apiClient.UserDeleteAsync(id);
         }
 
+        public async Task<PagedResponse<UserListModel>> GetByQueryAsync(UserQueryModel query)
+        {
+            var users = await apiClient.QueryAsync(query);
+            return users;
+        }
     }
 }

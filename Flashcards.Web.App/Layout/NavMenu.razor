@@ -37,11 +37,13 @@
         </div>
 
         <div class="nav-item px-3" @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
-            <LoginDisplay />
+            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="users">
+                <span class="mr-2">👤</span> Users
+            </NavLink>
         </div>
-
+        
         <div class="nav-item px-3" @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
-            <AdminDisplay />
+            <LoginDisplay />
         </div>
     </nav>
 </div>
