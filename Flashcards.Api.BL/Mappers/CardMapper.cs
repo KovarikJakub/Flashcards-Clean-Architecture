@@ -57,6 +57,7 @@ public class CardMapper(UserMapper userMapper)
             QuestionContent = entity.QuestionContent,
             AnswerContent = entity.AnswerContent,
             DateCreated = entity.Created,
+            Description = entity.Description,
             Owner = entity.Owner is not null ? 
                 userMapper.ToListModelSingle(entity.Owner) : 
                 null

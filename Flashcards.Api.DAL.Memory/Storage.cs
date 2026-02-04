@@ -32,11 +32,11 @@ namespace Flashcards.Api.DAL.Memory
             Clear();
 
             // Create Users 
-            var adminJakub = AddUser("Jakub Kovařík", "Jakub", RoleType.Admin, "fb4049db-148d-44c2-9be4-5abeffe971a2");
-            var userFilip =  AddUser("Filip Matějka", "User", RoleType.Admin, "253837c3-cc2e-4e03-80d4-95aaf7be98c2"); 
+            var adminJakub=  AddUser("Jakub Kovařík", "Jakub", RoleType.Admin, false, "fb4049db-148d-44c2-9be4-5abeffe971a2");
+            var adminFilip=  AddUser("Filip Matějka", "User",  RoleType.Admin, false, "253837c3-cc2e-4e03-80d4-95aaf7be98c2"); 
             var userTomas =  AddUser("Tomáš Vrba",    "Tomas", RoleType.User); 
             var userDavid =  AddUser("David Kolařík", "David", RoleType.User);
-            var userPetr =   AddUser("Petr Novák",    "Petr",  RoleType.User);
+            var userPetr  =  AddUser("Petr Novák",    string.Empty,  RoleType.User, isDeleted: true); // deleted user
 
             // --- 1: World Capitals (Geography) ---
             var cGeo1 = AddCard("Capital of France?", "Paris", "Geography");
@@ -68,7 +68,7 @@ namespace Flashcards.Api.DAL.Memory
             var cCode6 = AddCard("SQL command to fetch data?", "SELECT", "IT");
             var cCode7 = AddCard("First index of array?", "0", "IT");
             var cCode8 = AddCard("Language of the web?", "JavaScript", "IT");
-            AddCollection("Tech Trivia", userFilip, null, null, cCode1, cCode2, cCode3, cCode4, cCode5, cCode6, cCode7, cCode8);
+            AddCollection("Tech Trivia", adminFilip, null, null, cCode1, cCode2, cCode3, cCode4, cCode5, cCode6, cCode7, cCode8);
 
             // --- 4: Simple Science (Science) ---
             var cSci1 = AddCard("H2O is?", "Water", "Chemistry");
@@ -86,7 +86,7 @@ namespace Flashcards.Api.DAL.Memory
             var cSpa5 = AddCard("Friend", "Amigo", "Spanish");
             var cSpa6 = AddCard("Beer", "Cerveza", "Spanish");
             var cSpa7 = AddCard("One, Two, Three", "Uno, Dos, Tres", "Spanish");
-            var colSpanish = AddCollection("Spanish Basics", userTomas, null, null, cSpa1, cSpa2, cSpa3, cSpa4, cSpa5, cSpa6, cSpa7);
+            var colSpanish = AddCollection("Spanish Basics", userPetr, null, null, cSpa1, cSpa2, cSpa3, cSpa4, cSpa5, cSpa6, cSpa7);
 
             // --- 6. Animal Kingdom (Nature) ---
             var cAni1 = AddCard("Fastest land animal?", "Cheetah", "Nature");
@@ -131,12 +131,12 @@ namespace Flashcards.Api.DAL.Memory
             AddLesson(adminJakub, mathDeck,     seen: 6, correct: 5, wrong: 1);
             AddLesson(adminJakub, mathDeck,     seen: 6, correct: 6, wrong: 0);
 
-            AddLesson(userFilip, mathDeck, seen: 6, correct: 1, wrong: 5);
-            AddLesson(userFilip, mathDeck, seen: 5, correct: 2, wrong: 3);
-            AddLesson(userFilip, mathDeck, seen: 6, correct: 5, wrong: 1);
+            AddLesson(adminFilip, mathDeck, seen: 6, correct: 1, wrong: 5);
+            AddLesson(adminFilip, mathDeck, seen: 5, correct: 2, wrong: 3);
+            AddLesson(adminFilip, mathDeck, seen: 6, correct: 5, wrong: 1);
         }
 
-        private UserEntity AddUser(string displayName, string identityName, RoleType role, string? specificId = null)
+        private UserEntity AddUser(string displayName, string identityName, RoleType role, bool isDeleted = false, string? specificId = null)
         {
             var user = new UserEntity
             {
@@ -144,6 +144,7 @@ namespace Flashcards.Api.DAL.Memory
                 Name = displayName,
                 IdentityOwnerId = identityName,
                 Role = role,
+                IsDeleted = isDeleted,
                 PhotoUrl = $"https://i.pravatar.cc/150?u={displayName}"
             };
             Users.Add(user);
@@ -179,6 +180,11 @@ namespace Flashcards.Api.DAL.Memory
                 Cards = cards.ToList() // Linking Objects automatically
             };
             Collections.Add(collection);
+            foreach (var card in cards)
+            {
+                card.Owner = owner;
+                card.OwnerId = owner.Id;
+            }
             return collection;
         }
 

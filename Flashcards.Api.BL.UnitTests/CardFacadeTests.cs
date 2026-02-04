@@ -53,9 +53,20 @@ namespace Flashcards.Api.BL.UnitTests
                 AnswerContent = "4",
                 DateCreated = DateTime.UtcNow,
                 Description = "A simple math question.",
-                Owner = new UserListModel { Id = _ownerEntity.Id, Name = _ownerEntity.Name, Role = _ownerEntity.Role }
+                Owner = new UserListModel { Id = _ownerEntity.Id, Name = _ownerEntity.Name, Role = _ownerEntity.Role, IsDeleted = false }
             };
         }
+
+        private CardEntity CardEntityWithGuid(Guid id) => new()
+        {
+            Id = id,
+            AnswerContent = "A",
+            AnswerType = ContentType.Text,
+            QuestionContent = "Q",
+            QuestionType = ContentType.Text,
+            Created = DateTime.MinValue,
+            OwnerId = Guid.Empty
+        };
 
         private readonly UserEntity _ownerEntity = new UserEntity
         {
@@ -70,8 +81,9 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var cardGuid = Guid.NewGuid();
-            _cardRepo.GetById(cardGuid).Returns()
-
+            var entity = CardEntityWithGuid(cardGuid);
+            _cardRepo.GetById(cardGuid).Returns(entity);
+            
             // Act
             _facade.Delete(cardGuid);
 
@@ -116,16 +128,18 @@ namespace Flashcards.Api.BL.UnitTests
             // Arrange
             var existingCard = CreateCardDetailModel();
             _cardRepo.Exists(existingCard.Id).Returns(true);
+
+            var existingEntity = _cardMapper.ToEntity(existingCard, _ownerEntity);
+            _cardRepo.GetById(existingCard.Id).Returns(existingEntity);
+            _cardRepo.Update(Arg.Any<CardEntity>()).Returns(existingEntity.Id);
+            
             existingCard.Description = "updated value";
-            var expectedEntity = _cardMapper.ToEntity(existingCard, _ownerEntity);
-            _cardRepo.Update(Arg.Any<CardEntity>()).Returns(existingCard.Id);
 
             // Act
             var result = _facade.CreateOrUpdate(existingCard);
             
             // Assert
             _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
-            
             _cardRepo.Received(1).Update(Arg.Is<CardEntity>(
                 card => card.Id == existingCard.Id && card.Description == "updated value"));
             
@@ -223,14 +237,16 @@ namespace Flashcards.Api.BL.UnitTests
         {
             // Arrange
             var card = CreateCardDetailModel();
-            _cardRepo.Exists(Arg.Any<Guid>()).Returns(false);
+
+            CardEntity? nonExistingCardEntity = null;
+            _cardRepo.GetById(card.Id).Returns(nonExistingCardEntity);
 
             // Act
             var result = _facade.Update(card);
             
             // Assert
             _cardRepo.DidNotReceive().Insert(Arg.Any<CardEntity>());
-            _cardRepo.Received(1).Update(Arg.Any<CardEntity>());
+            _cardRepo.DidNotReceive().Update(Arg.Any<CardEntity>());
             Assert.Null(result);
         }
 
