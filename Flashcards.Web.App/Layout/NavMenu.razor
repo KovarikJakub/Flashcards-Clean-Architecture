@@ -19,6 +19,12 @@
         </div>
 
         <div @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
+            <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="cards">
+                <span class="mr-2">♣️</span> Cards
+            </NavLink>
+        </div>
+
+        <div @onclick="ToggleNavMenu" @onclick:stopPropagation="true">
             <NavLink class="block py-2 px-4 rounded hover:bg-gray-600" href="collections">
                 <span class="mr-2">📚</span> Card Collections
             </NavLink>
