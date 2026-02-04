@@ -104,12 +104,12 @@ namespace Flashcards.Web.App.Pages.Statistics
                 if (_sortOrder == "ascending")
                 {
                     query.SortAsc = true;
-                    query.SortBy = "Start"; 
+                    query.SortBy = nameof(LessonDetailModel.Start);
                 }
                 else if (_sortOrder == "descending")
                 {
                     query.SortAsc = false;
-                    query.SortBy = "Start";
+                    query.SortBy = nameof(LessonDetailModel.Start);
                 }
                 
                 //  get lessons and pages info
