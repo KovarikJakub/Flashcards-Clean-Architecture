@@ -3,23 +3,26 @@ using Flashcards.Api.App.Extensions;
 using Flashcards.Api.BL.Facades;
 using Flashcards.Api.BL.Mappers;
 using Flashcards.Api.BL.Services;
+using Flashcards.Api.BL.Services.Interfaces;
 using Flashcards.Api.DAL.Common.Interfaces;
 using Flashcards.Api.DAL.Common.Repositories;
 using Flashcards.Api.DAL.Memory;
 using Flashcards.Api.DAL.Memory.Repositories;
-using Flashcards.Common.Options;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Flashcards.Common;
-using Flashcards.Api.BL.Services.Interfaces;
+using Flashcards.Common.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<IdentityOptions>(
+    builder.Configuration.GetSection(nameof(IdentityOptions)));
+
 builder.Services.AddOpenApi();
 builder.Services.AddOpenApiDocument();
-
 builder.Services.AddHttpContextAccessor();
 
+// --- Services & Facades ---
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 builder.Services.AddScoped<ISecurityService, SecurityService>();
@@ -42,20 +45,12 @@ builder.Services.AddSingleton<LessonMapper>();
 builder.Services.AddTransient<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ILessonFacade, LessonFacade>();
 
-var identityOptionsSection = builder.Configuration.GetSection(nameof(IdentityOptions));
-ArgumentNullException.ThrowIfNull(identityOptionsSection);
-
-builder.Services.Configure<IdentityOptions>(identityOptionsSection);
-
-var identityOptions = identityOptionsSection.Get<IdentityOptions>();
-ArgumentNullException.ThrowIfNull(identityOptions);
-
-builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>(client =>
+builder.Services.AddHttpClient<IIdentityService, DuendeIdentityService>((sp, client) =>
 {
-    client.BaseAddress = new Uri(identityOptions.Authority);
+    var options = sp.GetRequiredService<IOptions<IdentityOptions>>().Value;
+    client.BaseAddress = new Uri(options.Authority);
 });
 
-ConfigureOptions(builder.Services);
 ConfigureCors(builder.Services);
 ConfigureAuthentication(builder.Services, builder.Configuration);
 
@@ -74,6 +69,7 @@ void UseEndpoints(WebApplication app)
     var endpointsBase = app.MapGroup("api")
         .WithOpenApi();
 
+    // Just resolve the IOptions here directly
     var identityOptions = app.Services.GetRequiredService<IOptions<IdentityOptions>>();
 
     endpointsBase.UseCardEndpoints(identityOptions);
@@ -87,7 +83,7 @@ void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguratio
     serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
-            options.Authority = identityOptions?.Authority;
+            options.Authority = configuration["IdentityOptions:Authority"];
             options.TokenValidationParameters.ValidateAudience = false;
         });
 
@@ -96,15 +92,6 @@ void ConfigureAuthentication(IServiceCollection serviceCollection, IConfiguratio
             policy.RequireAuthenticatedUser()
                 .RequireRole(UserRoles.Admin)
         );
-
-    serviceCollection.AddHttpContextAccessor();
-}
-
-void ConfigureOptions(IServiceCollection serviceCollection)
-{
-    serviceCollection.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
-
-    serviceCollection.Configure<IdentityServerOptions>(builder.Configuration.GetSection(nameof(IdentityServerOptions)));
 }
 
 void ConfigureCors(IServiceCollection serviceCollection)

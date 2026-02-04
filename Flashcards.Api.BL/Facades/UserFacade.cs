@@ -22,9 +22,7 @@ namespace Flashcards.Api.BL.Facades
 
         public PagedResponse<UserListModel> GetByQuery(UserQueryModel query)
         {
-            var rawUsers = userRepository.GetAll();
-            var collection = rawUsers.AsEnumerable();
-            var totalCount = rawUsers.Count;
+            var collection = userRepository.GetAll().AsEnumerable();
 
             if (query.Role is not null)
             {
@@ -37,6 +35,7 @@ namespace Flashcards.Api.BL.Facades
                     u.Name.Contains(query.SearchString, StringComparison.OrdinalIgnoreCase));
             }
 
+            var totalCount = collection.Count();
             collection = QueryHelper.PerformPagination(collection, query);
             var result = mapper.ToListModel(collection.ToList());
 

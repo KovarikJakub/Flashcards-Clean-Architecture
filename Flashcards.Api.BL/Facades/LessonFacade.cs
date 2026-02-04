@@ -44,9 +44,7 @@ namespace Flashcards.Api.BL.Facades
 
         public PagedResponse<LessonListModel> GetByQuery(LessonQueryModel query)
         {
-            var rawLessons = lessonRepository.GetAll();
-            var collection = rawLessons.AsEnumerable();
-            var totalCount = rawLessons.Count;
+            var collection = lessonRepository.GetAll().AsEnumerable();
 
             collection = collection.Where(lesson => lesson.User.Id == query.UserId);
 
@@ -55,6 +53,7 @@ namespace Flashcards.Api.BL.Facades
                 collection = collection.Where(lesson => lesson.CardCollection.Id == query.CardCollectionId);
             }
 
+            var totalCount = collection.Count();
             collection = QueryHelper.PerformPagination(collection, query);
             var result = mapper.ToListModel(collection.ToList());
 
