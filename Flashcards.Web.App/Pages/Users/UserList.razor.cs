@@ -7,24 +7,80 @@ namespace Flashcards.Web.App.Pages.Users;
 
 public partial class UserList : PageBase
 {
+    // Injections
     [Inject] private UserFacade UserFacade { get; set; } = null!;
+    
+    // Properties 
     private List<UserListModel> Users { get; set; } = Enumerable.Empty<UserListModel>().ToList();
     private bool IsCreating { get; set; }
     private bool IsSubmitting { get; set; }
     private string? ErrorMessage { get; set; }
-
-    private UserDetailModel? _selectedUser;
     private NewUserInputs Input { get; set; } = new();
+    private int TotalPages { get; set; }
+    private string _filter = String.Empty;
+    private string Filter
+    {
+        get => _filter;
+        set
+        {
+            _filter = value;
+            _ = OnFilterChanged();
+        }
+    }
+    
+    // variables
+    private UserDetailModel? _selectedUser;
+    private readonly int _pageSize = 8;
+    private int _currentPage = 1;
+    private string _sortBy = "default";
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await Load();
+        await LoadData();
     }
 
-    private async Task Load()
+    private async Task OnFilterChanged()
     {
-        Users = await UserFacade.GetAllAsync();
+        _currentPage = 1;
+        await LoadData();
+        StateHasChanged();
+    }
+    
+    private async Task LoadData()
+    {
+        // prepare query
+        var query = new UserQueryModel
+        {
+            SearchString = _filter                  // filter by name
+        };
+    
+        // paging
+        query.PageSize = _pageSize;
+        query.Page = _currentPage;
+
+        // sorting
+        if (_sortBy == "ascending")
+        {
+            query.SortAsc= true;
+            query.SortBy = nameof(UserDetailModel.Name);
+        }
+        else if (_sortBy == "descending")
+        {
+            query.SortAsc= false;
+            query.SortBy = nameof(UserDetailModel.Name);
+        }
+
+        var result = await UserFacade.GetByQueryAsync(query);
+        Users = result.Items.ToList();
+        if (result.TotalCount > 0)
+        {
+            TotalPages = (int)Math.Ceiling((double)result.TotalCount / _pageSize);
+        }
+        else
+        {
+            TotalPages = 1;
+        }
     }
 
     private void ShowCreateForm()
@@ -70,7 +126,7 @@ public partial class UserList : PageBase
 
             IsCreating = false;
             Input = null!;
-            await Load();
+            await LoadData();
         }
         catch (Exception ex)
         {
@@ -89,7 +145,7 @@ public partial class UserList : PageBase
             await UserFacade.Delete(user.Id);
             // Remove from the Users list immediately to reflect the change in the UI
             Users.Remove(user);
-            await Load();
+            await LoadData();
         }
         catch (Exception ex)
         {
@@ -128,5 +184,32 @@ public partial class UserList : PageBase
     {
         if (string.IsNullOrWhiteSpace(name)) return "?";
         return name.Trim().Substring(0, 1).ToUpper();
+    }
+    
+    // sorting method
+    private async Task HandleSortChange(ChangeEventArgs e)
+    {
+        _sortBy = e.Value?.ToString() ?? "default";
+        _currentPage = 1; 
+        await LoadData();
+    }
+    
+    // Paging methods
+    private async Task NextPage()
+    {
+        if (_currentPage < TotalPages)
+        {
+            _currentPage++;
+            await LoadData();
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_currentPage > 1)
+        {
+            _currentPage--;
+            await LoadData();
+        }
     }
 }
