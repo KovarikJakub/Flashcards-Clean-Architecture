@@ -21,9 +21,7 @@ namespace Flashcards.Api.BL.Facades
 
         public PagedResponse<CardCollectionListModel> GetByQuery(CardCollectionQueryModel query)
         {
-            var rawCollections = cardCollectionRepository.GetAll();
-            var collection = rawCollections.AsEnumerable();
-            var totalCount = rawCollections.Count;
+            var collection = cardCollectionRepository.GetAll().AsEnumerable();
 
             if (!string.IsNullOrEmpty(query.SearchString))
             {
@@ -47,6 +45,7 @@ namespace Flashcards.Api.BL.Facades
                 collection = collection.Where(c => c.AnswerStart <= now && now <= c.AnswerEnd);
             }
 
+            var totalCount = collection.Count();
             collection = QueryHelper.PerformPagination(collection, query);
             var result = mapper.ToListModel(collection.ToList());
 

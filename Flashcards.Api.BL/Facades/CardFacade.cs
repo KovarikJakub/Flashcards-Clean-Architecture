@@ -46,9 +46,7 @@ namespace Flashcards.Api.BL.Facades
 
         public PagedResponse<CardListModel> GetByQuery(CardQueryModel query)
         {
-            var rawCards = cardRepository.GetAll();
-            var collection = rawCards.AsEnumerable();
-            var totalCount = rawCards.Count;
+            var collection = cardRepository.GetAll().AsEnumerable();
 
             if (!string.IsNullOrEmpty(query.SearchString))
             {
@@ -74,6 +72,7 @@ namespace Flashcards.Api.BL.Facades
                 collection = collection.Where(c => c.Owner != null && c.Owner.Id == query.OwnerId);
             }
 
+            var totalCount = collection.Count();
             collection = QueryHelper.PerformPagination(collection, query);
             var result = mapper.ToListModel(collection.ToList());
 
