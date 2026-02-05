@@ -21,7 +21,7 @@ namespace Flashcards.Web.App.Pages
 
         private string SearchString { get; set; } = string.Empty;
         private string ActiveTab { get; set; } = "my";
-
+        
         private ContentType? SelectedTypeFilter { get; set; } = null;
         private string SelectedSort { get; set; } = "default";
 
@@ -29,20 +29,8 @@ namespace Flashcards.Web.App.Pages
         private string? _userName;
         private Guid _internalUserId;
 
-        private bool _showCreateForm;
         private bool _showDetailModal = false;
         private CardDetailModel? _selectedCardDetail = null;
-
-        private CardDetailModel _model = new CardDetailModel
-        {
-            Id = Guid.NewGuid(),
-            QuestionType = ContentType.Text,
-            AnswerType = ContentType.Text,
-            QuestionContent = "",
-            AnswerContent = "",
-            Description = "",
-            DateCreated = DateTime.UtcNow
-        };
 
         protected override async Task OnInitializedAsync()
         {
@@ -79,17 +67,17 @@ namespace Flashcards.Web.App.Pages
 
                 switch (SelectedSort)
                 {
-                    case "az":
-                        sortBy = "QuestionContent";
-                        sortAsc = true;
+                    case "az": 
+                        sortBy = "QuestionContent"; 
+                        sortAsc = true; 
                         break;
-                    case "za":
-                        sortBy = "QuestionContent";
-                        sortAsc = false;
+                    case "za": 
+                        sortBy = "QuestionContent"; 
+                        sortAsc = false; 
                         break;
-                    default:
-                        sortBy = "DateCreated";
-                        sortAsc = false;
+                    default: 
+                        sortBy = "DateCreated"; 
+                        sortAsc = false; 
                         break;
                 }
 
@@ -105,7 +93,7 @@ namespace Flashcards.Web.App.Pages
                 };
 
                 var result = await CardFacade.GetByQueryAsync(query);
-
+                
                 DisplayedCards = result.Items.ToList();
                 HasNextPage = DisplayedCards.Count == PageSize;
 
@@ -142,37 +130,5 @@ namespace Flashcards.Web.App.Pages
 
         private Task OnEditCard(CardListModel card) { NavigationManager.NavigateTo($"cards/edit/{card.Id}"); return Task.CompletedTask; }
         private async Task OnDeleteCard(CardListModel card) { await CardFacade.DeleteAsync(card.Id); await LoadData(); }
-
-        private async Task SubmitCreate()
-        {
-            var newCard = new CardDetailModel
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = _model.QuestionType,
-                AnswerType = _model.AnswerType,
-                QuestionContent = _model.QuestionContent,
-                AnswerContent = _model.AnswerContent,
-                Description = _model.Description,
-                DateCreated = DateTime.UtcNow
-            };
-
-            await CardFacade.UpsertAsync(newCard);
-            _showCreateForm = false;
-
-            _model = new CardDetailModel
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = ContentType.Text,
-                AnswerType = ContentType.Text,
-                QuestionContent = "",
-                AnswerContent = "",
-                Description = "",
-                DateCreated = DateTime.UtcNow
-            };
-
-            if (ActiveTab == "my") { CurrentPage = 1; await LoadData(); } else { await SetTab("my"); }
-        }
-        private void HandleCancel() => _showCreateForm = false;
-        private void HandleOpenForm() => _showCreateForm = true;
     }
 }
