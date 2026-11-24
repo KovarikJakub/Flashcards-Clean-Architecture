@@ -42,6 +42,12 @@ Per-user overview of study sessions, reviewed cards and accuracy, with a sortabl
 
 ![Statistics page](img/stats.png)
 
+### Cards
+Browse all your cards easily with paginated and filterable overview.
+
+![User management panel](img/cards.png)
+
+
 ### User management (admin)
 Admin panel for adding users to the system. Creating a user here also creates the matching login identity in IdentityServer.
 
@@ -63,16 +69,6 @@ Admin panel for adding users to the system. Creating a user here also creates th
 │  Minimal API         │
 └──────────────────────┘
 ```
-
-| Area | Projects |
-|---|---|
-| Frontend | `Flashcards.Web.App` (Blazor UI), `Flashcards.Web.BL` (facades, generated API client, auth message handler) |
-| API | `Flashcards.Api.App` (endpoints, auth), `Flashcards.Api.BL` (facades, mappers, security service), `Flashcards.Api.DAL.Common` (entities, repository interfaces), `Flashcards.Api.DAL.Memory` (in-memory implementation) |
-| Identity | `Flashcards.IdentityProvider.App` (IdentityServer host, login/registration pages), `.BL`, `.DAL` (EF Core context and migrations) |
-| Shared | `Flashcards.Common`, `Flashcards.Common.BL`, `Flashcards.Common.Models` (DTOs shared by API and client) |
-| Tests | `Flashcards.Api.BL.UnitTests`, `Flashcards.Api.DAL.IntegrationTests`, `Flashcards.Api.App.EndpointTests` |
-
----
 
 ## Running locally
 
