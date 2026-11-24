@@ -10,6 +10,7 @@ namespace Flashcards.Api.BL.Facades
         ICardCollectionRepository cardCollectionRepository,
         ISecurityService securityService,
         ICurrentUserProvider currentUser,
+        ICardRepository cardRepo,
         CardCollectionMapper mapper)
         : ICardCollectionFacade
     {
@@ -70,6 +71,12 @@ namespace Flashcards.Api.BL.Facades
             var requestorUserEntity = currentUser.GetCurrentUser();
 
             var entity = mapper.ToEntity(model, requestorUserEntity);
+
+            foreach (var card in entity.Cards)
+            {
+                cardRepo.Insert(card);
+            }
+
             return cardCollectionRepository.Insert(entity);
         }
 
@@ -83,7 +90,10 @@ namespace Flashcards.Api.BL.Facades
 
             var ownerEntity = currentUser.GetCurrentUser();
             var entity = mapper.ToEntity(model, ownerEntity!);
-
+            foreach (var card in entity.Cards)
+            {
+                cardRepo.Insert(card);
+            }
             return cardCollectionRepository.Update(entity);
         }
 
