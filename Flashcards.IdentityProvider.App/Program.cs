@@ -40,6 +40,8 @@ try
         .AllowAnonymous()
         .UseUserEndpoints();
 
+    await app.SeedIdentityAsync();
+
     app.Run();
 }
 catch (Exception ex) when (ex is not HostAbortedException)
